@@ -90,22 +90,22 @@ func TestSetValue(t *testing.T) {
 	assert.Equal(t, "test", p.Value)
 }
 
-func TestPaseKey(t *testing.T) {
+func TestParseKey(t *testing.T) {
 	p := prompt.DefaultPrompt(true)
 
-	key, char := p.ParseKey('\n', []byte{})
+	key, char := p.ParseKey('\n')
 	assert.Equal(t, "Enter", key)
 	assert.Equal(t, "\n", char)
 
-	key, char = p.ParseKey('a', []byte{})
+	key, char = p.ParseKey('a')
 	assert.Equal(t, "a", key)
 	assert.Equal(t, "a", char)
 
-	key, char = p.ParseKey(3, []byte{})
+	key, char = p.ParseKey(3)
 	assert.Equal(t, "Cancel", key)
 	assert.Equal(t, "", char)
 
-	key, char = p.ParseKey(27, []byte{'[', 'A'})
-	assert.Equal(t, "ArrowUp", key)
+	key, char = p.ParseKey(27)
+	assert.Equal(t, "Escape", key)
 	assert.Equal(t, "", char)
 }

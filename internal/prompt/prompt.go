@@ -106,11 +106,12 @@ func (p *Prompt) SetValue(value any) {
 	p.Value = value
 }
 
-func (p *Prompt) ParseKey(r rune, next []byte) (string, string) {
+func (p *Prompt) ParseKey(r rune) (string, string) {
 	switch r {
 	case '\r', '\n':
 		return "Enter", "\n"
 	case 27:
+		next, _ := p.rl.Peek(2)
 		if len(next) == 2 && next[0] == '[' {
 			switch next[1] {
 			case 'A':
@@ -240,8 +241,7 @@ func (p *Prompt) Prompt() (any, error) {
 				if size == 0 {
 					continue
 				}
-				nextKeyByte, _ := p.rl.Peek(2)
-				key, char := p.ParseKey(r, nextKeyByte)
+				key, char := p.ParseKey(r)
 				p.onKeypress(key, char)
 				p.render(&prevFrame)
 			}
