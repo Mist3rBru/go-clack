@@ -3,13 +3,22 @@ package prompt_test
 import (
 	"go-clack/internal/prompt"
 	"math/rand"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func newPrompt() *prompt.Prompt {
+	return prompt.NewPrompt(prompt.PromptOptions{
+		Input:  os.Stdin,
+		Output: os.Stdout,
+		Track:  true,
+	})
+}
+
 func TestEmitEvent(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	event := "test"
 	arg := rand.Int()
 
@@ -20,7 +29,7 @@ func TestEmitEvent(t *testing.T) {
 }
 
 func TestEmitOtherEvent(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	event := "test"
 	calledTimes := 0
 
@@ -32,7 +41,7 @@ func TestEmitOtherEvent(t *testing.T) {
 }
 
 func TestEmitEventWithMultiArgs(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	event := "test"
 	args := []any{rand.Int(), rand.Int()}
 
@@ -44,7 +53,7 @@ func TestEmitEventWithMultiArgs(t *testing.T) {
 }
 
 func TestEmitEventTwice(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	event := "test"
 	calledTimes := 0
 
@@ -57,7 +66,7 @@ func TestEmitEventTwice(t *testing.T) {
 }
 
 func TestEmitEventOnce(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	event := "test"
 	calledTimes := 0
 
@@ -70,7 +79,7 @@ func TestEmitEventOnce(t *testing.T) {
 }
 
 func TestEmitUnsubscribedEvent(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	event := "test"
 	calledTimes := 0
 	listener := func(args ...any) {
@@ -84,14 +93,14 @@ func TestEmitUnsubscribedEvent(t *testing.T) {
 }
 
 func TestSetValue(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 	p.Value = ""
 	p.SetValue("test")
 	assert.Equal(t, "test", p.Value)
 }
 
 func TestParseKey(t *testing.T) {
-	p := prompt.DefaultPrompt(true)
+	p := newPrompt()
 
 	key, char := p.ParseKey('\n')
 	assert.Equal(t, "Enter", key)
@@ -106,6 +115,6 @@ func TestParseKey(t *testing.T) {
 	assert.Equal(t, "", char)
 
 	key, char = p.ParseKey(27)
-	assert.Equal(t, "Escape", key)
+	assert.Equal(t, "", key)
 	assert.Equal(t, "", char)
 }

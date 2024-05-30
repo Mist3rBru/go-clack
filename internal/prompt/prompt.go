@@ -34,17 +34,17 @@ type Prompt struct {
 }
 
 type PromptOptions struct {
-	Input  *os.File
-	Output *os.File
-	Value  any
-	Track  bool
-	Render func(p *Prompt) string
+	Input       *os.File
+	Output      *os.File
+	Value       any
+	CursorIndex int
+	Track       bool
+	Render      func(p *Prompt) string
 }
 
 func NewPrompt(options PromptOptions) *Prompt {
-	cursorIndex := 0
 	if strValue, ok := options.Value.(string); ok {
-		cursorIndex = len(strValue)
+		options.CursorIndex = len(strValue)
 	}
 	return &Prompt{
 		mu:        sync.Mutex{},
@@ -56,19 +56,11 @@ func NewPrompt(options PromptOptions) *Prompt {
 
 		State:       "initial",
 		Value:       options.Value,
-		CursorIndex: cursorIndex,
+		CursorIndex: options.CursorIndex,
 		Track:       options.Track,
 
 		Render: options.Render,
 	}
-}
-
-func DefaultPrompt(track bool) *Prompt {
-	return NewPrompt(PromptOptions{
-		Input:  os.Stdin,
-		Output: os.Stdout,
-		Track:  track,
-	})
 }
 
 func (p *Prompt) On(event string, listener Listener) {

@@ -3,6 +3,7 @@ package prompt_test
 import (
 	"go-clack/internal/prompt"
 	"go-clack/internal/utils"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,12 +11,19 @@ import (
 
 var color = utils.CreateColors()
 
-func render(p *prompt.TextPrompt) string {
-	return p.Value
+func newTextPrompt() *prompt.TextPrompt {
+	return prompt.NewTextPrompt(prompt.TextPromptOptions{
+		Input:  os.Stdin,
+		Output: os.Stdout,
+		Value:  "",
+		Render: func(p *prompt.TextPrompt) string {
+			return p.Value
+		},
+	})
 }
 
 func TestValeuWithCursor(t *testing.T) {
-	p := prompt.DefaultTextPrompt(render)
+	p := newTextPrompt()
 	inverse := color["inverse"]
 	cursor := inverse(" ")
 

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type TextRender func(p *TextPrompt) string
+type TextPromptRender func(p *TextPrompt) string
 
 type TextPrompt struct {
 	Prompt
@@ -17,7 +17,7 @@ type TextPromptOptions struct {
 	Input  *os.File
 	Output *os.File
 	Value  string
-	Render TextRender
+	Render TextPromptRender
 }
 
 func NewTextPrompt(options TextPromptOptions) *TextPrompt {
@@ -41,14 +41,6 @@ func NewTextPrompt(options TextPromptOptions) *TextPrompt {
 		}
 	})
 	return p
-}
-
-func DefaultTextPrompt(render TextRender) *TextPrompt {
-	return NewTextPrompt(TextPromptOptions{
-		Input:  os.Stdin,
-		Output: os.Stdout,
-		Render: render,
-	})
 }
 
 func (p *TextPrompt) ValueWithCursor() string {
