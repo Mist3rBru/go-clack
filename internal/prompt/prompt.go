@@ -117,6 +117,8 @@ func (p *Prompt) ParseKey(r rune) (string, string) {
 		return "Enter", ""
 	case '\b', 127:
 		return "Backspace", ""
+	case ' ':
+		return "Space", ""
 	case 27:
 		next, err := p.rl.Peek(2)
 		if err == nil && len(next) == 2 && next[0] == '[' {
