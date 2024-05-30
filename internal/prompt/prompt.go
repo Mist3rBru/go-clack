@@ -139,14 +139,6 @@ func (p *Prompt) ParseKey(r rune) (string, string) {
 	}
 }
 
-func (p *Prompt) ParseValueWithCursor(value string) string {
-	inverse := color["inverse"]
-	if p.CursorIndex == len(value) {
-		return value + inverse(" ")
-	}
-	return value[0:p.CursorIndex] + inverse(string(value[p.CursorIndex])) + value[p.CursorIndex+1:]
-}
-
 func (p *Prompt) trackKeyValue(key, char, value string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -249,7 +241,7 @@ func (p *Prompt) render(prevFrame *string) {
 	*prevFrame = frame
 }
 
-func (p *Prompt) Prompt() (any, error) {
+func (p *Prompt) Run() (any, error) {
 	oldState, err := term.MakeRaw(int(p.input.Fd()))
 	if err != nil {
 		return nil, err
