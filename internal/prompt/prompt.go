@@ -263,8 +263,9 @@ func (p *Prompt) Run() (any, error) {
 	done := make(chan struct{})
 
 	closeCb := func(args ...any) {
-		p.write(utils.MoveCursor(-1, 999))
+		p.write(utils.MoveCursor(0, 999))
 		p.write(utils.ShowCursor())
+		p.write("\r\n")
 		close(done)
 	}
 	p.Once("submit", closeCb)
