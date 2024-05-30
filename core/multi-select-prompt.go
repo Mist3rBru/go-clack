@@ -9,14 +9,14 @@ import (
 type MultiSelectPrompt struct {
 	Prompt
 	Value   []any
-	Options []any
+	Options []SelectOption
 }
 
 type MultiSelectPromptOptions struct {
 	Input   *os.File
 	Output  *os.File
 	Value   []any
-	Options []any
+	Options []SelectOption
 	Render  func(p *MultiSelectPrompt) string
 }
 
@@ -27,7 +27,7 @@ func NewMultiSelectPrompt(options MultiSelectPromptOptions) *MultiSelectPrompt {
 			Input:       options.Input,
 			Output:      options.Output,
 			Value:       options.Value,
-			CursorIndex: utils.IndexOf(options.Value, options.Options),
+			CursorIndex: 0,
 			Track:       false,
 			Render: func(_p *Prompt) string {
 				return options.Render(p)
@@ -53,21 +53,24 @@ func NewMultiSelectPrompt(options MultiSelectPromptOptions) *MultiSelectPrompt {
 				p.Value = append(p.Value[0:i], p.Value[i+1:]...)
 				break
 			}
-			p.Value = append(p.Value, option)
+			p.Value = append(p.Value, option.Value)
 		case "a":
 			if len(p.Value) == len(p.Options) {
 				p.Value = []any{}
 				break
 			}
-			p.Value = append([]any{}, p.Options...)
+			p.Value = []any{}
+			for _, option := range p.Options {
+				p.Value = append(p.Value, option.Value)
+			}
 		}
 	})
 	return p
 }
 
-func (p *MultiSelectPrompt) IsSelected(option any) (int, bool) {
+func (p *MultiSelectPrompt) IsSelected(option SelectOption) (int, bool) {
 	for i, value := range p.Value {
-		if value == option {
+		if value == option.Value {
 			return i, true
 		}
 	}

@@ -6,27 +6,39 @@ import (
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
+type SelectOption struct {
+	Label string
+	Value any
+}
+
 type SelectPrompt struct {
 	Prompt
-	Options []any
+	Options []SelectOption
 }
 
 type SelectPromptOptions struct {
 	Input   *os.File
 	Output  *os.File
 	Value   any
-	Options []any
+	Options []SelectOption
 	Render  func(p *SelectPrompt) string
 }
 
 func NewSelectPrompt(options SelectPromptOptions) *SelectPrompt {
 	var p *SelectPrompt
+	startIndex := 0
+	for i, option := range options.Options {
+		if option.Value == option.Value {
+			startIndex = i
+			break
+		}
+	}
 	p = &SelectPrompt{
 		Prompt: *NewPrompt(PromptOptions{
 			Input:       options.Input,
 			Output:      options.Output,
 			Value:       options.Value,
-			CursorIndex: utils.IndexOf(options.Value, options.Options),
+			CursorIndex: startIndex,
 			Track:       false,
 			Render: func(_p *Prompt) string {
 				return options.Render(p)
