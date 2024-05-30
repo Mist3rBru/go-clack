@@ -114,7 +114,7 @@ func (p *Prompt) SetValue(value any) {
 func (p *Prompt) ParseKey(r rune) (string, string) {
 	switch r {
 	case '\r', '\n':
-		return "Enter", "\n"
+		return "Enter", ""
 	case '\b', 127:
 		return "Backspace", ""
 	case 27:
@@ -155,8 +155,6 @@ func (p *Prompt) trackKeyValue(key, char, value string) {
 	defer p.mu.Unlock()
 
 	switch key {
-	case "Enter", "Cancel":
-		break
 	case "Backspace":
 		if p.CursorIndex == 0 {
 			break
@@ -183,8 +181,10 @@ func (p *Prompt) trackKeyValue(key, char, value string) {
 		}
 		p.CursorIndex++
 	default:
-		p.Value = value[0:p.CursorIndex] + char + value[p.CursorIndex:]
-		p.CursorIndex++
+		if char != "" {
+			p.Value = value[0:p.CursorIndex] + char + value[p.CursorIndex:]
+			p.CursorIndex++
+		}
 	}
 }
 
@@ -215,6 +215,10 @@ func (p *Prompt) write(str string) {
 
 func (p *Prompt) render(prevFrame *string) {
 	frame := p.Render(p)
+
+	if lines := strings.Split(frame, "\r\n"); len(lines) == 1 {
+		frame = strings.Join(strings.Split(frame, "\n"), "\r\n")
+	}
 
 	if p.State == "initial" {
 		p.write(utils.HideCursor())
@@ -263,7 +267,6 @@ func (p *Prompt) Run() (any, error) {
 	done := make(chan struct{})
 
 	closeCb := func(args ...any) {
-		p.write(utils.MoveCursor(0, 999))
 		p.write(utils.ShowCursor())
 		p.write("\r\n")
 		close(done)

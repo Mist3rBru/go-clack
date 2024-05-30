@@ -9,6 +9,14 @@ var (
 	CSI = fmt.Sprintf("%s[", ESC)
 )
 
+func MoveCursorUp(row int) string {
+	return fmt.Sprintf("%s%dA", CSI, row)
+}
+
+func MoveCursorDown(row int) string {
+	return fmt.Sprintf("%s%dB", CSI, row)
+}
+
 func MoveCursor(row int, col int) string {
 	ret := ""
 
@@ -19,20 +27,12 @@ func MoveCursor(row int, col int) string {
 	}
 
 	if row < 0 {
-		ret += fmt.Sprintf("%s%dA", CSI, -row)
+		ret += MoveCursorUp(-row)
 	} else if row > 0 {
-		ret += fmt.Sprintf("%s%dB", CSI, row)
+		ret += MoveCursorDown(row)
 	}
 
 	return ret
-}
-
-func MoveCursorUp(row int) string {
-	return fmt.Sprintf("%s%dA", CSI, row)
-}
-
-func MoveCursorDown(row int) string {
-	return fmt.Sprintf("%s%dB", CSI, row)
 }
 
 func HideCursor() string {
