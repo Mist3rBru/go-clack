@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-type PasswordPromptRender func(p *PasswordPrompt) string
-
 type PasswordPrompt struct {
 	Prompt
 
@@ -18,22 +16,22 @@ type PasswordPromptOptions struct {
 	Input  *os.File
 	Output *os.File
 	Value  string
-	Render PasswordPromptRender
+	Render func(p *PasswordPrompt) string
 }
 
 func NewPasswordPrompt(options PasswordPromptOptions) *PasswordPrompt {
-	p := &PasswordPrompt{
+	var p *PasswordPrompt
+	p = &PasswordPrompt{
 		Prompt: *NewPrompt(PromptOptions{
 			Input:  options.Input,
 			Output: options.Output,
 			Value:  options.Value,
 			Track:  true,
+			Render: func(_p *Prompt) string {
+				return options.Render(p)
+			},
 		}),
 		Value: options.Value,
-	}
-	p.Prompt.Value = ""
-	p.Prompt.Render = func(_p *Prompt) string {
-		return options.Render(p)
 	}
 	p.Prompt.On("key", func(args ...any) {
 		value, ok := p.Prompt.Value.(string)

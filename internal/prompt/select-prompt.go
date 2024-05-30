@@ -5,13 +5,9 @@ import (
 	"os"
 )
 
-type SelectPromptRender func(p *SelectPrompt) string
-
 type SelectPrompt struct {
 	Prompt
-	Value   any
 	Options []any
-	Render  func(p *SelectPrompt) []any
 }
 
 type SelectPromptOptions struct {
@@ -19,24 +15,23 @@ type SelectPromptOptions struct {
 	Output  *os.File
 	Value   any
 	Options []any
-	Render  SelectPromptRender
+	Render  func(p *SelectPrompt) string
 }
 
 func NewSelectPrompt(options SelectPromptOptions) *SelectPrompt {
-	p := &SelectPrompt{
+	var p *SelectPrompt
+	p = &SelectPrompt{
 		Prompt: *NewPrompt(PromptOptions{
 			Input:       options.Input,
 			Output:      options.Output,
 			Value:       options.Value,
 			CursorIndex: utils.IndexOf(options.Value, options.Options),
 			Track:       false,
+			Render: func(_p *Prompt) string {
+				return options.Render(p)
+			},
 		}),
-		Value:   options.Value,
 		Options: options.Options,
-	}
-	p.Prompt.Value = []any{}
-	p.Prompt.Render = func(_p *Prompt) string {
-		return options.Render(p)
 	}
 	p.Prompt.On("key", func(args ...any) {
 		key := args[0].(string)

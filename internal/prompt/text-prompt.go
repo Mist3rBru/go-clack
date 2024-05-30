@@ -5,8 +5,6 @@ import (
 	"os"
 )
 
-type TextPromptRender func(p *TextPrompt) string
-
 type TextPrompt struct {
 	Prompt
 
@@ -17,22 +15,22 @@ type TextPromptOptions struct {
 	Input  *os.File
 	Output *os.File
 	Value  string
-	Render TextPromptRender
+	Render func(p *TextPrompt) string
 }
 
 func NewTextPrompt(options TextPromptOptions) *TextPrompt {
-	p := &TextPrompt{
+	var p *TextPrompt
+	p = &TextPrompt{
 		Prompt: *NewPrompt(PromptOptions{
 			Input:  options.Input,
 			Output: options.Output,
 			Value:  options.Value,
 			Track:  true,
+			Render: func(_p *Prompt) string {
+				return options.Render(p)
+			},
 		}),
 		Value: options.Value,
-	}
-	p.Prompt.Value = ""
-	p.Prompt.Render = func(_p *Prompt) string {
-		return options.Render(p)
 	}
 	p.Prompt.On("key", func(args ...any) {
 		value, ok := p.Prompt.Value.(string)
