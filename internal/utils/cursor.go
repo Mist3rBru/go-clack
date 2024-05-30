@@ -36,7 +36,7 @@ func MoveCursorDown(row int) string {
 }
 
 func HideCursor() string {
-	return fmt.Sprintf("%s?251", CSI)
+	return fmt.Sprintf("%s?25l", CSI)
 }
 
 func ShowCursor() string {
