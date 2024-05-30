@@ -13,14 +13,26 @@ type TextPrompt struct {
 	Value string
 }
 
-func NewTextPrompt(input *os.File, output *os.File, render TextRender) *TextPrompt {
+type TextPromptOptions struct {
+	Input  *os.File
+	Output *os.File
+	Value  string
+	Render TextRender
+}
+
+func NewTextPrompt(options TextPromptOptions) *TextPrompt {
 	p := &TextPrompt{
-		Prompt: *NewPrompt(input, output, true),
-		Value:  "",
+		Prompt: *NewPrompt(PromptOptions{
+			Input:  options.Input,
+			Output: options.Output,
+			Value:  options.Value,
+			Track:  true,
+		}),
+		Value: options.Value,
 	}
 	p.Prompt.Value = ""
 	p.Prompt.Render = func(_p *Prompt) string {
-		return render(p)
+		return options.Render(p)
 	}
 	p.Prompt.On("key", func(args ...any) {
 		value, ok := p.Prompt.Value.(string)
@@ -32,7 +44,11 @@ func NewTextPrompt(input *os.File, output *os.File, render TextRender) *TextProm
 }
 
 func DefaultTextPrompt(render TextRender) *TextPrompt {
-	return NewTextPrompt(os.Stdin, os.Stdout, render)
+	return NewTextPrompt(TextPromptOptions{
+		Input:  os.Stdin,
+		Output: os.Stdout,
+		Render: render,
+	})
 }
 
 func (p *TextPrompt) ValueWithCursor() string {

@@ -33,23 +33,42 @@ type Prompt struct {
 	Render func(p *Prompt) string
 }
 
-func NewPrompt(input *os.File, output *os.File, track bool) *Prompt {
+type PromptOptions struct {
+	Input  *os.File
+	Output *os.File
+	Value  any
+	Track  bool
+	Render func(p *Prompt) string
+}
+
+func NewPrompt(options PromptOptions) *Prompt {
+	cursorIndex := 0
+	if strValue, ok := options.Value.(string); ok {
+		cursorIndex = len(strValue)
+	}
 	return &Prompt{
 		mu:        sync.Mutex{},
 		listeners: make(map[string][]Listener),
 
-		input:  input,
-		output: output,
-		rl:     bufio.NewReader(input),
+		input:  options.Input,
+		output: options.Output,
+		rl:     bufio.NewReader(options.Input),
 
 		State:       "initial",
-		Track:       track,
-		CursorIndex: 0,
+		Value:       options.Value,
+		CursorIndex: cursorIndex,
+		Track:       options.Track,
+
+		Render: options.Render,
 	}
 }
 
 func DefaultPrompt(track bool) *Prompt {
-	return NewPrompt(os.Stdin, os.Stdout, track)
+	return NewPrompt(PromptOptions{
+		Input:  os.Stdin,
+		Output: os.Stdout,
+		Track:  track,
+	})
 }
 
 func (p *Prompt) On(event string, listener Listener) {
