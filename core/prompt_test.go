@@ -1,16 +1,16 @@
-package prompt_test
+package core_test
 
 import (
-	"go-clack/internal/prompt"
 	"math/rand"
 	"os"
 	"testing"
 
+	"github.com/Mist3rBru/go-clack/core"
 	"github.com/stretchr/testify/assert"
 )
 
-func newPrompt() *prompt.Prompt {
-	return prompt.NewPrompt(prompt.PromptOptions{
+func newPrompt() *core.Prompt {
+	return core.NewPrompt(core.PromptOptions{
 		Input:  os.Stdin,
 		Output: os.Stdout,
 		Track:  true,

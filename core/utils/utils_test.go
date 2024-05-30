@@ -1,8 +1,9 @@
 package utils_test
 
 import (
-	"go-clack/internal/utils"
 	"testing"
+
+	"github.com/Mist3rBru/go-clack/core/utils"
 
 	"github.com/stretchr/testify/assert"
 )

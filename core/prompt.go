@@ -1,12 +1,13 @@
-package prompt
+package core
 
 import (
 	"bufio"
 	"fmt"
-	"go-clack/internal/utils"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/Mist3rBru/go-clack/core/utils"
 
 	"golang.org/x/term"
 )

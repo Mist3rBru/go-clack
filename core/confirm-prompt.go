@@ -1,8 +1,9 @@
-package prompt
+package core
 
 import (
-	"go-clack/internal/utils"
 	"os"
+
+	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
 type ConfirmPrompt struct {

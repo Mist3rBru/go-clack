@@ -1,4 +1,4 @@
-module go-clack
+module github.com/Mist3rBru/go-clack
 
 go 1.22.1
 

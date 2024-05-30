@@ -1,22 +1,23 @@
-package prompt_test
+package core_test
 
 import (
-	"go-clack/internal/prompt"
-	"go-clack/internal/utils"
 	"os"
 	"testing"
+
+	"github.com/Mist3rBru/go-clack/core"
+	"github.com/Mist3rBru/go-clack/core/utils"
 
 	"github.com/stretchr/testify/assert"
 )
 
 var color = utils.CreateColors()
 
-func newTextPrompt() *prompt.TextPrompt {
-	return prompt.NewTextPrompt(prompt.TextPromptOptions{
+func newTextPrompt() *core.TextPrompt {
+	return core.NewTextPrompt(core.TextPromptOptions{
 		Input:  os.Stdin,
 		Output: os.Stdout,
 		Value:  "",
-		Render: func(p *prompt.TextPrompt) string {
+		Render: func(p *core.TextPrompt) string {
 			return p.Value
 		},
 	})
