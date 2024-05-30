@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"go-clack/internal/utils"
 	"os"
-	"os/signal"
 	"strings"
 	"sync"
-	"syscall"
 
 	"golang.org/x/term"
 )
@@ -154,7 +152,7 @@ func (p *Prompt) trackKeyValue(key, char, value string) {
 	defer p.mu.Unlock()
 
 	switch key {
-	case "Enter":
+	case "Enter", "Cancel":
 		break
 	case "Backspace":
 		if p.CursorIndex == 0 {
@@ -206,8 +204,6 @@ func (p *Prompt) onKeypress(key string, char string) {
 	if key == "Cancel" {
 		p.SetState("cancel")
 	}
-
-	p.Emit(p.State, p.Value)
 }
 
 func (p *Prompt) write(str string) {
@@ -262,21 +258,14 @@ func (p *Prompt) Prompt() (any, error) {
 
 	wg := sync.WaitGroup{}
 	done := make(chan struct{})
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
-	p.Once("submit", func(args ...any) {
-		p.write("\n")
+	closeCb := func(args ...any) {
+		p.write(utils.MoveCursor(-1, 999))
 		p.write(utils.ShowCursor())
 		close(done)
-	})
-
-	p.Once("cancel", func(args ...any) {
-		p.write("\n")
-		p.write(utils.ShowCursor())
-		p.SetValue(nil)
-		close(done)
-	})
+	}
+	p.Once("submit", closeCb)
+	p.Once("cancel", closeCb)
 
 	wg.Add(1)
 	go func() {
@@ -299,12 +288,12 @@ func (p *Prompt) Prompt() (any, error) {
 				key, char := p.ParseKey(r)
 				p.onKeypress(key, char)
 				p.render(&prevFrame)
+				p.Emit(p.State, p.Value)
 			}
 		}
 	}()
 
 	wg.Wait()
-	close(sig)
 
 	if p.Value == nil {
 		return nil, fmt.Errorf("Prompt canceled")

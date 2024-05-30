@@ -42,3 +42,7 @@ func HideCursor() string {
 func ShowCursor() string {
 	return fmt.Sprintf("%s?25h", CSI)
 }
+
+func Restore() string {
+	return fmt.Sprintf("%s8", CSI)
+}
