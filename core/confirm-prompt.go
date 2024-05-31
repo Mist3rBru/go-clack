@@ -41,11 +41,8 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
-		case "Up", "Left":
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, 1)
-			p.Value = !p.Value
-		case "Down", "Right":
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, 1)
+		case "Up", "Down", "Left", "Right":
+			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, 2)
 			p.Value = !p.Value
 		}
 	})

@@ -1,8 +1,10 @@
 package core_test
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -14,6 +16,7 @@ func newPrompt() *core.Prompt {
 		Input:  os.Stdin,
 		Output: os.Stdout,
 		Track:  true,
+		Value:  "",
 	})
 }
 
@@ -102,19 +105,140 @@ func TestSetValue(t *testing.T) {
 func TestParseKey(t *testing.T) {
 	p := newPrompt()
 
-	key := p.ParseKey('\n')
-	assert.Equal(t, "Enter", key)
-	assert.Equal(t, "", key.Char)
+	assert.Equal(t, core.Key{Name: "Enter"}, *p.ParseKey('\n'))
+	assert.Equal(t, core.Key{Name: "Enter"}, *p.ParseKey('\r'))
+	assert.Equal(t, core.Key{Name: "Space"}, *p.ParseKey(' '))
+	assert.Equal(t, core.Key{Name: "Backspace"}, *p.ParseKey('\b'))
+	assert.Equal(t, core.Key{Name: "Backspace"}, *p.ParseKey(127))
+	assert.Equal(t, core.Key{Name: "Tab"}, *p.ParseKey('\t'))
+	assert.Equal(t, core.Key{Name: "Cancel"}, *p.ParseKey(3))
+	assert.Equal(t, core.Key{Name: "a", Char: "a"}, *p.ParseKey('a'))
+}
 
-	key = p.ParseKey('a')
-	assert.Equal(t, "a", key)
-	assert.Equal(t, "a", key.Char)
+func TestTrackValue(t *testing.T) {
+	p := newPrompt()
 
-	key = p.ParseKey(3)
-	assert.Equal(t, "Cancel", key)
-	assert.Equal(t, "", key.Char)
+	assert.Equal(t, "", p.Value)
+	assert.Equal(t, 0, p.CursorIndex)
 
-	key = p.ParseKey(27)
-	assert.Equal(t, "", key)
-	assert.Equal(t, "", key.Char)
+	p.PressKey(&core.Key{Char: "a"})
+	assert.Equal(t, "a", p.Value)
+	assert.Equal(t, 1, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "b"})
+	assert.Equal(t, "ab", p.Value)
+	assert.Equal(t, 2, p.CursorIndex)
+
+	p.CursorIndex = 1
+	p.PressKey(&core.Key{Char: "c"})
+	assert.Equal(t, "acb", p.Value)
+	assert.Equal(t, 2, p.CursorIndex)
+}
+
+func TestTrackCursor(t *testing.T) {
+	p := newPrompt()
+
+	p.Value = "abc"
+	p.CursorIndex = 3
+	p.PressKey(&core.Key{Name: "Home"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 0
+	p.PressKey(&core.Key{Name: "End"})
+	assert.Equal(t, 3, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 3
+	p.PressKey(&core.Key{Name: "Left"})
+	assert.Equal(t, 2, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 0
+	p.PressKey(&core.Key{Name: "Left"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 2
+	p.PressKey(&core.Key{Name: "Right"})
+	assert.Equal(t, 3, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 3
+	p.PressKey(&core.Key{Name: "Right"})
+	assert.Equal(t, 3, p.CursorIndex)
+}
+
+func TestTrackBackspace(t *testing.T) {
+	p := newPrompt()
+
+	p.Value = "abc"
+	p.CursorIndex = 3
+	p.PressKey(&core.Key{Name: "Backspace"})
+	assert.Equal(t, "ab", p.Value)
+	assert.Equal(t, 2, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 2
+	p.PressKey(&core.Key{Name: "Backspace"})
+	assert.Equal(t, "ac", p.Value)
+	assert.Equal(t, 1, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 1
+	p.PressKey(&core.Key{Name: "Backspace"})
+	assert.Equal(t, "bc", p.Value)
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.Value = "abc"
+	p.CursorIndex = 0
+	p.PressKey(&core.Key{Name: "Backspace"})
+	assert.Equal(t, "abc", p.Value)
+	assert.Equal(t, 0, p.CursorIndex)
+}
+
+func TestTrackState(t *testing.T) {
+	p := newPrompt()
+
+	p.PressKey(&core.Key{Name: "Cancel"})
+	assert.Equal(t, "cancel", p.State)
+
+	p.PressKey(&core.Key{Name: "Enter"})
+	assert.Equal(t, "submit", p.State)
+}
+
+func TestLimitLines(t *testing.T) {
+	p := newPrompt()
+	lines := make([]string, 10)
+	for i := range lines {
+		lines[i] = fmt.Sprint(i)
+	}
+
+	frame := p.LimitLines(core.LimitLinesPamams{
+		CursorIndex: 0,
+		Lines:       lines,
+	})
+	startLines := lines[0:5]
+	startLines[len(startLines)-1] = "..."
+	expected := strings.Join(startLines, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	frame = p.LimitLines(core.LimitLinesPamams{
+		CursorIndex: 5,
+		Lines:       lines,
+	})
+	midLines := lines[3:8]
+	midLines[0] = "..."
+	midLines[len(midLines)-1] = "..."
+	expected = strings.Join(midLines, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	frame = p.LimitLines(core.LimitLinesPamams{
+		CursorIndex: 9,
+		Lines:       lines,
+	})
+	lasLines := lines[5:10]
+	lasLines[0] = "..."
+	expected = strings.Join(lasLines, "\r\n")
+	assert.Equal(t, expected, frame)
 }

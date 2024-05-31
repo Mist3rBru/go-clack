@@ -51,9 +51,9 @@ func NewMultiSelectPrompt(params MultiSelectPromptParams) *MultiSelectPrompt {
 			option := p.Options[p.CursorIndex]
 			if i, isSelected := p.IsSelected(option); isSelected {
 				p.Value = append(p.Value[0:i], p.Value[i+1:]...)
-				break
+			} else {
+				p.Value = append(p.Value, option.Value)
 			}
-			p.Value = append(p.Value, option.Value)
 		case "a":
 			if len(p.Value) == len(p.Options) {
 				p.Value = []any{}

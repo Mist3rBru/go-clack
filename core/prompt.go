@@ -181,14 +181,14 @@ func (p *Prompt) trackKeyValue(key *Key, value string) {
 		}
 		p.CursorIndex++
 	default:
-		if key.Char != "" {
+		if len(key.Char) == 1 {
 			p.Value = value[0:p.CursorIndex] + key.Char + value[p.CursorIndex:]
 			p.CursorIndex++
 		}
 	}
 }
 
-func (p *Prompt) onKeypress(key *Key) {
+func (p *Prompt) PressKey(key *Key) {
 	if p.State == "error" {
 		p.SetState("active")
 	}
@@ -210,7 +210,7 @@ func (p *Prompt) onKeypress(key *Key) {
 }
 
 func (p *Prompt) write(str string) {
-	p.output.Write([]byte(str))
+	p.output.WriteString(str)
 }
 
 type LimitLinesPamams struct {
@@ -219,7 +219,10 @@ type LimitLinesPamams struct {
 }
 
 func (p *Prompt) LimitLines(params LimitLinesPamams) string {
-	_, maxRows, _ := term.GetSize(int(p.output.Fd()))
+	_, maxRows, err := term.GetSize(int(p.output.Fd()))
+	if err != nil {
+		maxRows = 5
+	}
 	maxItems := min(maxRows, len(params.Lines))
 
 	slidingWindowLocation := 0
@@ -326,7 +329,7 @@ func (p *Prompt) Run() (any, error) {
 					continue
 				}
 				key := p.ParseKey(r)
-				p.onKeypress(key)
+				p.PressKey(key)
 				p.render(&prevFrame)
 				p.Emit(p.State, p.Value)
 			}

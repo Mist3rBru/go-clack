@@ -10,13 +10,12 @@ import (
 
 type PathPrompt struct {
 	Prompt
-	OnlyShowDir   bool
-	Value         string
-	Placeholder   string
-	Hint          string
-	HintOptions   []string
-	HintIndex     int
-	ValueWithHint string
+	OnlyShowDir bool
+	Value       string
+	Placeholder string
+	Hint        string
+	HintOptions []string
+	HintIndex   int
 }
 
 type PathPromptParams struct {
@@ -43,6 +42,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 		Value:       params.Value,
 		Placeholder: params.Placeholder,
 		OnlyShowDir: params.OnlyShowDir,
+		HintIndex:   -1,
 	}
 	if cwd, err := os.Getwd(); err == nil && params.Value == "" {
 		p.Prompt.Value = cwd
@@ -50,7 +50,6 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 		p.CursorIndex = len(cwd)
 	}
 	p.changeHint()
-	p.changeValueWithHint()
 
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
@@ -61,7 +60,6 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 			p.tabComplete()
 		} else {
 			p.changeHint()
-			p.changeValueWithHint()
 		}
 	})
 
@@ -112,18 +110,7 @@ func (p *PathPrompt) changeHint() {
 	}
 }
 
-func (p *PathPrompt) changeHintOption() {
-	if len(p.HintOptions) == 0 {
-		p.HintIndex = -1
-		p.HintOptions = p.mapHintOptions()
-	} else {
-		p.HintIndex = utils.MinMaxIndex(p.HintIndex+1, len(p.HintOptions))
-		p.Hint = strings.Replace(p.HintOptions[p.HintIndex], p.valueEnd(), "", 1)
-		p.changeValueWithHint()
-	}
-}
-
-func (p *PathPrompt) changeValueWithHint() {
+func (p *PathPrompt) ValueWithHint() string {
 	var (
 		value string
 		hint  string
@@ -141,7 +128,7 @@ func (p *PathPrompt) changeValueWithHint() {
 		value = s1 + color["inverse"](string(s2[0])) + s2[1:]
 		hint = color["dim"](p.Hint)
 	}
-	p.ValueWithHint = value + hint
+	return value + hint
 }
 
 func (p *PathPrompt) completeValue() {
@@ -157,17 +144,18 @@ func (p *PathPrompt) completeValue() {
 	p.Hint = ""
 	p.HintOptions = []string{}
 	p.changeHint()
-	p.changeValueWithHint()
 }
 
 func (p *PathPrompt) tabComplete() {
-	if len(p.HintOptions) == 0 {
-		p.HintOptions = p.mapHintOptions()
-	}
-	if len(p.HintOptions) == 1 {
+	hintOption := p.mapHintOptions()
+	if len(hintOption) == 1 {
 		p.completeValue()
+	} else if len(p.HintOptions) == 0 {
+		p.HintOptions = hintOption
+		p.HintIndex = 0
 	} else {
-		p.changeHintOption()
+		p.HintIndex = utils.MinMaxIndex(p.HintIndex+1, len(p.HintOptions))
+		p.Hint = strings.Replace(p.HintOptions[p.HintIndex], p.valueEnd(), "", 1)
 	}
 }
 
