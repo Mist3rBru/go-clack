@@ -12,17 +12,6 @@ import (
 	"golang.org/x/term"
 )
 
-var (
-	color = utils.CreateColors()
-)
-
-type Listener func(args ...any)
-
-type SelectOption struct {
-	Label string
-	Value any
-}
-
 type Prompt struct {
 	mu        sync.Mutex
 	listeners map[string][]Listener
@@ -117,52 +106,54 @@ func (p *Prompt) SetValue(value any) {
 	p.Value = value
 }
 
-func (p *Prompt) ParseKey(r rune) (string, string) {
+func (p *Prompt) ParseKey(r rune) *Key {
 	switch r {
 	case '\r', '\n':
-		return "Enter", ""
-	case '\b', 127:
-		return "Backspace", ""
+		return &Key{Name: "Enter"}
 	case ' ':
-		return "Space", ""
+		return &Key{Name: "Space"}
+	case '\b', 127:
+		return &Key{Name: "Backspace"}
+	case '\t':
+		return &Key{Name: "Tab"}
+	case 3:
+		return &Key{Name: "Cancel"}
 	case 27:
 		next, err := p.rl.Peek(2)
 		if err == nil && len(next) == 2 && next[0] == '[' {
 			switch next[1] {
 			case 'A':
 				p.rl.Discard(2)
-				return "ArrowUp", ""
+				return &Key{Name: "ArrowUp"}
 			case 'B':
 				p.rl.Discard(2)
-				return "ArrowDown", ""
+				return &Key{Name: "ArrowDown"}
 			case 'C':
 				p.rl.Discard(2)
-				return "ArrowRight", ""
+				return &Key{Name: "ArrowRight"}
 			case 'D':
 				p.rl.Discard(2)
-				return "ArrowLeft", ""
+				return &Key{Name: "ArrowLeft"}
 			case 'H':
 				p.rl.Discard(2)
-				return "Home", ""
+				return &Key{Name: "Home"}
 			case 'F':
 				p.rl.Discard(2)
-				return "End", ""
+				return &Key{Name: "End"}
 			}
 		}
-		return "", ""
-	case 3:
-		return "Cancel", ""
+		return &Key{}
 	default:
 		char := string(r)
-		return char, char
+		return &Key{Char: char, Name: char}
 	}
 }
 
-func (p *Prompt) trackKeyValue(key, char, value string) {
+func (p *Prompt) trackKeyValue(key *Key, value string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	switch key {
+	switch key.Name {
 	case "Backspace":
 		if p.CursorIndex == 0 {
 			break
@@ -189,30 +180,30 @@ func (p *Prompt) trackKeyValue(key, char, value string) {
 		}
 		p.CursorIndex++
 	default:
-		if char != "" {
-			p.Value = value[0:p.CursorIndex] + char + value[p.CursorIndex:]
+		if key.Char != "" {
+			p.Value = value[0:p.CursorIndex] + key.Char + value[p.CursorIndex:]
 			p.CursorIndex++
 		}
 	}
 }
 
-func (p *Prompt) onKeypress(key string, char string) {
+func (p *Prompt) onKeypress(key *Key) {
 	if p.State == "error" {
 		p.SetState("active")
 	}
 
 	strValue, ok := p.Value.(string)
 	if p.Track && ok {
-		p.trackKeyValue(key, char, strValue)
+		p.trackKeyValue(key, strValue)
 	}
 
-	p.Emit("key", key, char)
-	if key == "Enter" {
+	p.Emit("key", key)
+	if key.Name == "Enter" {
 		if p.State != "error" {
 			p.SetState("submit")
 		}
 	}
-	if key == "Cancel" {
+	if key.Name == "Cancel" {
 		p.SetState("cancel")
 	}
 }
@@ -333,8 +324,8 @@ func (p *Prompt) Run() (any, error) {
 				if size == 0 {
 					continue
 				}
-				key, char := p.ParseKey(r)
-				p.onKeypress(key, char)
+				key := p.ParseKey(r)
+				p.onKeypress(key)
 				p.render(&prevFrame)
 				p.Emit(p.State, p.Value)
 			}

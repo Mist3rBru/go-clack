@@ -33,7 +33,7 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 		}),
 		Value: params.Value,
 	}
-	p.Prompt.On("key", func(args ...any) {
+	p.On("key", func(args ...any) {
 		value, ok := p.Prompt.Value.(string)
 		if ok {
 			p.Value = value

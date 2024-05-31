@@ -102,19 +102,19 @@ func TestSetValue(t *testing.T) {
 func TestParseKey(t *testing.T) {
 	p := newPrompt()
 
-	key, char := p.ParseKey('\n')
+	key := p.ParseKey('\n')
 	assert.Equal(t, "Enter", key)
-	assert.Equal(t, "\n", char)
+	assert.Equal(t, "", key.Char)
 
-	key, char = p.ParseKey('a')
+	key = p.ParseKey('a')
 	assert.Equal(t, "a", key)
-	assert.Equal(t, "a", char)
+	assert.Equal(t, "a", key.Char)
 
-	key, char = p.ParseKey(3)
+	key = p.ParseKey(3)
 	assert.Equal(t, "Cancel", key)
-	assert.Equal(t, "", char)
+	assert.Equal(t, "", key.Char)
 
-	key, char = p.ParseKey(27)
+	key = p.ParseKey(27)
 	assert.Equal(t, "", key)
-	assert.Equal(t, "", char)
+	assert.Equal(t, "", key.Char)
 }

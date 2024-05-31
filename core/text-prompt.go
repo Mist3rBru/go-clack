@@ -32,11 +32,8 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 		}),
 		Value: params.Value,
 	}
-	p.Prompt.On("key", func(args ...any) {
-		value, ok := p.Prompt.Value.(string)
-		if ok {
-			p.Value = value
-		}
+	p.On("key", func(args ...any) {
+		p.Value = p.Prompt.Value.(string)
 	})
 	return p
 }

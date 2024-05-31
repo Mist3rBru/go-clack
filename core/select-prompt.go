@@ -41,9 +41,9 @@ func NewSelectPrompt(params SelectPromptParams) *SelectPrompt {
 		}),
 		Options: params.Options,
 	}
-	p.Prompt.On("key", func(args ...any) {
-		key := args[0].(string)
-		switch key {
+	p.On("key", func(args ...any) {
+		key := args[0].(*Key)
+		switch key.Name {
 		case "ArrowUp", "ArrowLeft":
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
 		case "ArrowDown", "ArrowRight":

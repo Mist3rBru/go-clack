@@ -54,9 +54,9 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	p.CurrentLayer = p.Root.Children
 	p.CurrentOption = p.Root.Children[0]
 
-	p.Prompt.On("key", func(args ...any) {
-		key := args[0].(string)
-		switch key {
+	p.On("key", func(args ...any) {
+		key := args[0].(*Key)
+		switch key.Name {
 		case "ArrowUp":
 			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
 		case "ArrowDown":
