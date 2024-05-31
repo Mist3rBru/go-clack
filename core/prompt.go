@@ -107,6 +107,7 @@ func (p *Prompt) SetValue(value any) {
 }
 
 func (p *Prompt) ParseKey(r rune) *Key {
+	// TODO: parse Backtab(shift+tab) and other variations of shift and ctrl
 	switch r {
 	case '\r', '\n':
 		return &Key{Name: "Enter"}
