@@ -124,16 +124,16 @@ func (p *Prompt) ParseKey(r rune) *Key {
 			switch next[1] {
 			case 'A':
 				p.rl.Discard(2)
-				return &Key{Name: "ArrowUp"}
+				return &Key{Name: "Up"}
 			case 'B':
 				p.rl.Discard(2)
-				return &Key{Name: "ArrowDown"}
+				return &Key{Name: "Down"}
 			case 'C':
 				p.rl.Discard(2)
-				return &Key{Name: "ArrowRight"}
+				return &Key{Name: "Right"}
 			case 'D':
 				p.rl.Discard(2)
-				return &Key{Name: "ArrowLeft"}
+				return &Key{Name: "Left"}
 			case 'H':
 				p.rl.Discard(2)
 				return &Key{Name: "Home"}
@@ -169,12 +169,12 @@ func (p *Prompt) trackKeyValue(key *Key, value string) {
 		p.CursorIndex = 0
 	case "End":
 		p.CursorIndex = len(value)
-	case "ArrowLeft":
+	case "Left":
 		if p.CursorIndex == 0 {
 			break
 		}
 		p.CursorIndex--
-	case "ArrowRight":
+	case "Right":
 		if p.CursorIndex == len(value) {
 			break
 		}

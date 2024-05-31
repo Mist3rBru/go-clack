@@ -39,9 +39,9 @@ func NewMultiSelectPrompt(params MultiSelectPromptParams) *MultiSelectPrompt {
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
-		case "ArrowUp", "ArrowLeft":
+		case "Up", "Left":
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
-		case "ArrowDown", "ArrowRight":
+		case "Down", "Right":
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
 		case "Home":
 			p.CursorIndex = 0
