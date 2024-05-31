@@ -228,30 +228,30 @@ type LimitLinesPamams struct {
 
 func (p *Prompt) LimitLines(params LimitLinesPamams) string {
 	_, maxRows, _ := term.GetSize(int(p.output.Fd()))
-	maxItems := int(utils.Min(maxRows, len(params.Lines)))
+	maxItems := min(maxRows, len(params.Lines))
 
 	slidingWindowLocation := 0
 	if params.CursorIndex >= maxItems-3 {
-		slidingWindowLocation = utils.Max(utils.Min(params.CursorIndex-maxItems+3, len(params.Lines)-maxItems), 0)
+		slidingWindowLocation = max(min(params.CursorIndex-maxItems+3, len(params.Lines)-maxItems), 0)
 	} else if params.CursorIndex < 2 {
-		slidingWindowLocation = utils.Max(params.CursorIndex-2, 0)
+		slidingWindowLocation = max(params.CursorIndex-2, 0)
 	}
 
-	frame := []string{}
+	result := []string{}
 	shouldRenderTopEllipsis := maxItems < len(params.Lines) && slidingWindowLocation > 0
 	shouldRenderBottomEllipsis := maxItems < len(params.Lines) && slidingWindowLocation+maxItems < len(params.Lines)
 
-	for i := slidingWindowLocation; i < maxItems; i++ {
-		isTopLimit := i == slidingWindowLocation && shouldRenderTopEllipsis
+	for i, line := range params.Lines[slidingWindowLocation : slidingWindowLocation+maxItems] {
+		isTopLimit := i == 0 && shouldRenderTopEllipsis
 		isBottomLimit := i == maxItems-1 && shouldRenderBottomEllipsis
 		if isTopLimit || isBottomLimit {
-			frame = append(frame, color["dim"]("..."))
+			result = append(result, color["dim"]("..."))
 		} else {
-			frame = append(frame, params.Lines[i])
+			result = append(result, line)
 		}
 	}
 
-	return strings.Join(frame, "\r\n")
+	return strings.Join(result, "\r\n")
 }
 
 func (p *Prompt) render(prevFrame *string) {
