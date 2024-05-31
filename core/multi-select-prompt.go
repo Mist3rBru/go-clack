@@ -12,7 +12,7 @@ type MultiSelectPrompt struct {
 	Options []SelectOption
 }
 
-type MultiSelectPromptOptions struct {
+type MultiSelectPromptParams struct {
 	Input   *os.File
 	Output  *os.File
 	Value   []any
@@ -20,21 +20,21 @@ type MultiSelectPromptOptions struct {
 	Render  func(p *MultiSelectPrompt) string
 }
 
-func NewMultiSelectPrompt(options MultiSelectPromptOptions) *MultiSelectPrompt {
+func NewMultiSelectPrompt(params MultiSelectPromptParams) *MultiSelectPrompt {
 	var p *MultiSelectPrompt
 	p = &MultiSelectPrompt{
-		Prompt: *NewPrompt(PromptOptions{
-			Input:       options.Input,
-			Output:      options.Output,
-			Value:       options.Value,
+		Prompt: *NewPrompt(PromptParams{
+			Input:       params.Input,
+			Output:      params.Output,
+			Value:       params.Value,
 			CursorIndex: 0,
 			Track:       false,
 			Render: func(_p *Prompt) string {
-				return options.Render(p)
+				return params.Render(p)
 			},
 		}),
-		Value:   options.Value,
-		Options: options.Options,
+		Value:   params.Value,
+		Options: params.Options,
 	}
 	p.Prompt.On("key", func(args ...any) {
 		key := args[0].(string)

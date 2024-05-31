@@ -25,7 +25,7 @@ type SelectPathPrompt struct {
 	OnlyShowDir   bool
 }
 
-type SelectPathPromptOptions struct {
+type SelectPathPromptParams struct {
 	Input       *os.File
 	Output      *os.File
 	Value       string
@@ -33,24 +33,24 @@ type SelectPathPromptOptions struct {
 	Render      func(p *SelectPathPrompt) string
 }
 
-func NewSelectPathPrompt(options SelectPathPromptOptions) *SelectPathPrompt {
+func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	var p *SelectPathPrompt
 	p = &SelectPathPrompt{
-		Prompt: *NewPrompt(PromptOptions{
-			Input:  options.Input,
-			Output: options.Output,
-			Value:  options.Value,
+		Prompt: *NewPrompt(PromptParams{
+			Input:  params.Input,
+			Output: params.Output,
+			Value:  params.Value,
 			Track:  false,
 			Render: func(_p *Prompt) string {
-				return options.Render(p)
+				return params.Render(p)
 			},
 		}),
-		OnlyShowDir: options.OnlyShowDir,
+		OnlyShowDir: params.OnlyShowDir,
 	}
-	if cwd, err := os.Getwd(); err == nil && options.Value == "" {
-		options.Value = cwd
+	if cwd, err := os.Getwd(); err == nil && params.Value == "" {
+		params.Value = cwd
 	}
-	p.Root = p.createRoot(options.Value)
+	p.Root = p.createRoot(params.Value)
 	p.CurrentLayer = p.Root.Children
 	p.CurrentOption = p.Root.Children[0]
 

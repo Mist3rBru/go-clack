@@ -11,26 +11,26 @@ type TextPrompt struct {
 	Value string
 }
 
-type TextPromptOptions struct {
+type TextPromptParams struct {
 	Input  *os.File
 	Output *os.File
 	Value  string
 	Render func(p *TextPrompt) string
 }
 
-func NewTextPrompt(options TextPromptOptions) *TextPrompt {
+func NewTextPrompt(params TextPromptParams) *TextPrompt {
 	var p *TextPrompt
 	p = &TextPrompt{
-		Prompt: *NewPrompt(PromptOptions{
-			Input:  options.Input,
-			Output: options.Output,
-			Value:  options.Value,
+		Prompt: *NewPrompt(PromptParams{
+			Input:  params.Input,
+			Output: params.Output,
+			Value:  params.Value,
 			Track:  true,
 			Render: func(_p *Prompt) string {
-				return options.Render(p)
+				return params.Render(p)
 			},
 		}),
-		Value: options.Value,
+		Value: params.Value,
 	}
 	p.Prompt.On("key", func(args ...any) {
 		value, ok := p.Prompt.Value.(string)

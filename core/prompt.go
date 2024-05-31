@@ -18,6 +18,11 @@ var (
 
 type Listener func(args ...any)
 
+type SelectOption struct {
+	Label string
+	Value any
+}
+
 type Prompt struct {
 	mu        sync.Mutex
 	listeners map[string][]Listener
@@ -34,7 +39,7 @@ type Prompt struct {
 	Render func(p *Prompt) string
 }
 
-type PromptOptions struct {
+type PromptParams struct {
 	Input       *os.File
 	Output      *os.File
 	Value       any
@@ -43,24 +48,24 @@ type PromptOptions struct {
 	Render      func(p *Prompt) string
 }
 
-func NewPrompt(options PromptOptions) *Prompt {
-	if strValue, ok := options.Value.(string); ok {
-		options.CursorIndex = len(strValue)
+func NewPrompt(params PromptParams) *Prompt {
+	if strValue, ok := params.Value.(string); ok {
+		params.CursorIndex = len(strValue)
 	}
 	return &Prompt{
 		mu:        sync.Mutex{},
 		listeners: make(map[string][]Listener),
 
-		input:  options.Input,
-		output: options.Output,
-		rl:     bufio.NewReader(options.Input),
+		input:  params.Input,
+		output: params.Output,
+		rl:     bufio.NewReader(params.Input),
 
 		State:       "initial",
-		Value:       options.Value,
-		CursorIndex: options.CursorIndex,
-		Track:       options.Track,
+		Value:       params.Value,
+		CursorIndex: params.CursorIndex,
+		Track:       params.Track,
 
-		Render: options.Render,
+		Render: params.Render,
 	}
 }
 

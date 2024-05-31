@@ -10,7 +10,7 @@ import (
 )
 
 func newPrompt() *core.Prompt {
-	return core.NewPrompt(core.PromptOptions{
+	return core.NewPrompt(core.PromptParams{
 		Input:  os.Stdin,
 		Output: os.Stdout,
 		Track:  true,

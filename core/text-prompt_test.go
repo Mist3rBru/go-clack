@@ -13,7 +13,7 @@ import (
 var color = utils.CreateColors()
 
 func newTextPrompt() *core.TextPrompt {
-	return core.NewTextPrompt(core.TextPromptOptions{
+	return core.NewTextPrompt(core.TextPromptParams{
 		Input:  os.Stdin,
 		Output: os.Stdout,
 		Value:  "",

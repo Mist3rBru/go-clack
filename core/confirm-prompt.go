@@ -13,7 +13,7 @@ type ConfirmPrompt struct {
 	Value    bool
 }
 
-type ConfirmPromptOptions struct {
+type ConfirmPromptParams struct {
 	Input    *os.File
 	Output   *os.File
 	Active   string
@@ -22,21 +22,21 @@ type ConfirmPromptOptions struct {
 	Render   func(p *ConfirmPrompt) string
 }
 
-func NewConfirmPrompt(options ConfirmPromptOptions) *ConfirmPrompt {
+func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 	var p *ConfirmPrompt
 	p = &ConfirmPrompt{
-		Prompt: *NewPrompt(PromptOptions{
-			Input:  options.Input,
-			Output: options.Output,
-			Value:  options.Value,
+		Prompt: *NewPrompt(PromptParams{
+			Input:  params.Input,
+			Output: params.Output,
+			Value:  params.Value,
 			Track:  false,
 			Render: func(_p *Prompt) string {
-				return options.Render(p)
+				return params.Render(p)
 			},
 		}),
-		Active:   options.Active,
-		Inactive: options.Inactive,
-		Value:    options.Value,
+		Active:   params.Active,
+		Inactive: params.Inactive,
+		Value:    params.Value,
 	}
 	p.Prompt.On("key", func(args ...any) {
 		key := args[0].(string)

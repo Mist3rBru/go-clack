@@ -12,26 +12,26 @@ type PasswordPrompt struct {
 	Value string
 }
 
-type PasswordPromptOptions struct {
+type PasswordPromptParams struct {
 	Input  *os.File
 	Output *os.File
 	Value  string
 	Render func(p *PasswordPrompt) string
 }
 
-func NewPasswordPrompt(options PasswordPromptOptions) *PasswordPrompt {
+func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 	var p *PasswordPrompt
 	p = &PasswordPrompt{
-		Prompt: *NewPrompt(PromptOptions{
-			Input:  options.Input,
-			Output: options.Output,
-			Value:  options.Value,
+		Prompt: *NewPrompt(PromptParams{
+			Input:  params.Input,
+			Output: params.Output,
+			Value:  params.Value,
 			Track:  true,
 			Render: func(_p *Prompt) string {
-				return options.Render(p)
+				return params.Render(p)
 			},
 		}),
-		Value: options.Value,
+		Value: params.Value,
 	}
 	p.Prompt.On("key", func(args ...any) {
 		value, ok := p.Prompt.Value.(string)
