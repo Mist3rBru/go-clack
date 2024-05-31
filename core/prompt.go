@@ -221,6 +221,39 @@ func (p *Prompt) write(str string) {
 	p.output.Write([]byte(str))
 }
 
+type LimitLinesPamams struct {
+	CursorIndex int
+	Lines       []string
+}
+
+func (p *Prompt) LimitLines(params LimitLinesPamams) string {
+	_, maxRows, _ := term.GetSize(int(p.output.Fd()))
+	maxItems := int(utils.Min(maxRows, len(params.Lines)))
+
+	slidingWindowLocation := 0
+	if params.CursorIndex >= maxItems-3 {
+		slidingWindowLocation = utils.Max(utils.Min(params.CursorIndex-maxItems+3, len(params.Lines)-maxItems), 0)
+	} else if params.CursorIndex < 2 {
+		slidingWindowLocation = utils.Max(params.CursorIndex-2, 0)
+	}
+
+	frame := []string{}
+	shouldRenderTopEllipsis := maxItems < len(params.Lines) && slidingWindowLocation > 0
+	shouldRenderBottomEllipsis := maxItems < len(params.Lines) && slidingWindowLocation+maxItems < len(params.Lines)
+
+	for i := slidingWindowLocation; i < maxItems; i++ {
+		isTopLimit := i == slidingWindowLocation && shouldRenderTopEllipsis
+		isBottomLimit := i == maxItems-1 && shouldRenderBottomEllipsis
+		if isTopLimit || isBottomLimit {
+			frame = append(frame, color["dim"]("..."))
+		} else {
+			frame = append(frame, params.Lines[i])
+		}
+	}
+
+	return strings.Join(frame, "\r\n")
+}
+
 func (p *Prompt) render(prevFrame *string) {
 	frame := p.Render(p)
 

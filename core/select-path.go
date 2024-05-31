@@ -93,6 +93,15 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 	return options
 }
 
+func (p *SelectPathPrompt) CursorIndex() int {
+	for i, option := range p.Options() {
+		if option.Path == p.CurrentOption.Path {
+			return i
+		}
+	}
+	return -1
+}
+
 func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
 	entries, err := os.ReadDir(node.Path)
 	if err != nil {
@@ -159,7 +168,6 @@ func (p *SelectPathPrompt) enterChildren() {
 	p.CurrentOption.Children = children
 	p.CurrentOption = children[0]
 	p.CurrentLayer = children
-
 }
 
 func (p *SelectPathPrompt) Run() (string, error) {
