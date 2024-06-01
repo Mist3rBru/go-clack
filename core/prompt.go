@@ -189,7 +189,7 @@ func (p *Prompt) trackKeyValue(key *Key, value string) {
 }
 
 func (p *Prompt) PressKey(key *Key) {
-	if p.State == "error" {
+	if p.State == "error" || p.State == "initial" {
 		p.SetState("active")
 	}
 
