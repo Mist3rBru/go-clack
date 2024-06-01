@@ -19,22 +19,22 @@ func newSelectPathPrompt() *core.SelectPathPrompt {
 func TestChangeSelectPathCursor(t *testing.T) {
 	p := newSelectPathPrompt()
 
-	assert.Equal(t, 1, p.CursorIndex())
+	assert.Equal(t, 1, p.CursorIndex)
 	p.PressKey(&core.Key{Name: "Down"})
-	assert.Equal(t, 2, p.CursorIndex())
+	assert.Equal(t, 2, p.CursorIndex)
 	p.PressKey(&core.Key{Name: "Up"})
-	assert.Equal(t, 1, p.CursorIndex())
+	assert.Equal(t, 1, p.CursorIndex)
 
 	p.PressKey(&core.Key{Name: "End"})
-	assert.Equal(t, len(p.Options())-1, p.CursorIndex())
+	assert.Equal(t, len(p.Options())-1, p.CursorIndex)
 	p.PressKey(&core.Key{Name: "Home"})
-	assert.Equal(t, 1, p.CursorIndex())
+	assert.Equal(t, 1, p.CursorIndex)
 
 	p.PressKey(&core.Key{Name: "Home"})
 	p.PressKey(&core.Key{Name: "Up"})
-	assert.Equal(t, len(p.Options())-1, p.CursorIndex())
+	assert.Equal(t, len(p.Options())-1, p.CursorIndex)
 	p.PressKey(&core.Key{Name: "Down"})
-	assert.Equal(t, 1, p.CursorIndex())
+	assert.Equal(t, 1, p.CursorIndex)
 }
 
 func TestChangeSelectPathValue(t *testing.T) {

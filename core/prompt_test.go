@@ -213,29 +213,23 @@ func TestLimitLines(t *testing.T) {
 		lines[i] = fmt.Sprint(i)
 	}
 
-	frame := p.LimitLines(core.LimitLinesPamams{
-		CursorIndex: 0,
-		Lines:       lines,
-	})
+	p.CursorIndex = 0
+	frame := p.LimitLines(lines, 0)
 	startLines := lines[0:5]
 	startLines[len(startLines)-1] = "..."
 	expected := strings.Join(startLines, "\r\n")
 	assert.Equal(t, expected, frame)
 
-	frame = p.LimitLines(core.LimitLinesPamams{
-		CursorIndex: 5,
-		Lines:       lines,
-	})
+	p.CursorIndex = 5
+	frame = p.LimitLines(lines, 0)
 	midLines := lines[3:8]
 	midLines[0] = "..."
 	midLines[len(midLines)-1] = "..."
 	expected = strings.Join(midLines, "\r\n")
 	assert.Equal(t, expected, frame)
 
-	frame = p.LimitLines(core.LimitLinesPamams{
-		CursorIndex: 9,
-		Lines:       lines,
-	})
+	p.CursorIndex = 9
+	frame = p.LimitLines(lines, 0)
 	lasLines := lines[5:10]
 	lasLines[0] = "..."
 	expected = strings.Join(lasLines, "\r\n")

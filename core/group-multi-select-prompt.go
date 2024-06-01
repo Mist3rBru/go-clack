@@ -48,10 +48,9 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 	var p *GroupMultiSelectPrompt[TValue]
 	p = &GroupMultiSelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
-			Input:       params.Input,
-			Output:      params.Output,
-			Value:       params.Value,
-			CursorIndex: 0,
+			Input:  params.Input,
+			Output: params.Output,
+			Value:  params.Value,
 			Render: func(_p *Prompt[[]TValue]) string {
 				return params.Render(p)
 			},

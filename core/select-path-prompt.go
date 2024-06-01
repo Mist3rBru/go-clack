@@ -39,8 +39,9 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	var p *SelectPathPrompt
 	p = &SelectPathPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
-			Input:  params.Input,
-			Output: params.Output,
+			Input:       params.Input,
+			Output:      params.Output,
+			CursorIndex: 1,
 			Validate: func(value string) error {
 				if params.Validate == nil {
 					return nil
@@ -78,6 +79,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 			p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
 		}
 		p.Value = p.CurrentOption.Path
+		p.CursorIndex = p.cursorIndex()
 	})
 	return p
 }
@@ -100,7 +102,7 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 	return options
 }
 
-func (p *SelectPathPrompt) CursorIndex() int {
+func (p *SelectPathPrompt) cursorIndex() int {
 	for i, option := range p.Options() {
 		if option.Path == p.CurrentOption.Path {
 			return i

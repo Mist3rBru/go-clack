@@ -229,30 +229,25 @@ func (p *Prompt[TValue]) write(str string) {
 	p.output.WriteString(str)
 }
 
-type LimitLinesPamams struct {
-	CursorIndex int
-	Lines       []string
-}
-
-func (p *Prompt[TValue]) LimitLines(params LimitLinesPamams) string {
+func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 	_, maxRows, err := term.GetSize(int(p.output.Fd()))
 	if err != nil {
 		maxRows = 5
 	}
-	maxItems := min(maxRows, len(params.Lines))
+	maxItems := min(maxRows-usedLines, len(lines))
 
 	slidingWindowLocation := 0
-	if params.CursorIndex >= maxItems-3 {
-		slidingWindowLocation = max(min(params.CursorIndex-maxItems+3, len(params.Lines)-maxItems), 0)
-	} else if params.CursorIndex < 2 {
-		slidingWindowLocation = max(params.CursorIndex-2, 0)
+	if p.CursorIndex >= maxItems-3 {
+		slidingWindowLocation = max(min(p.CursorIndex-maxItems+3, len(lines)-maxItems), 0)
+	} else if p.CursorIndex < 2 {
+		slidingWindowLocation = max(p.CursorIndex-2, 0)
 	}
 
 	result := []string{}
-	shouldRenderTopEllipsis := maxItems < len(params.Lines) && slidingWindowLocation > 0
-	shouldRenderBottomEllipsis := maxItems < len(params.Lines) && slidingWindowLocation+maxItems < len(params.Lines)
+	shouldRenderTopEllipsis := maxItems < len(lines) && slidingWindowLocation > 0
+	shouldRenderBottomEllipsis := maxItems < len(lines) && slidingWindowLocation+maxItems < len(lines)
 
-	for i, line := range params.Lines[slidingWindowLocation : slidingWindowLocation+maxItems] {
+	for i, line := range lines[slidingWindowLocation : slidingWindowLocation+maxItems] {
 		isTopLimit := i == 0 && shouldRenderTopEllipsis
 		isBottomLimit := i == maxItems-1 && shouldRenderBottomEllipsis
 		if isTopLimit || isBottomLimit {
