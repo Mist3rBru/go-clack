@@ -21,7 +21,7 @@ type Prompt[TValue any] struct {
 	input  *os.File
 	output *os.File
 
-	State       string
+	State       PromptState
 	Value       TValue
 	Error       string
 	CursorIndex int
@@ -165,8 +165,8 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 }
 
 func (p *Prompt[TValue]) PressKey(key *Key) {
-	if p.State == "error" || p.State == "initial" {
-		p.State = "active"
+	if p.State == PromptStateError || p.State == PromptStateInitial {
+		p.State = PromptStateActive
 	}
 
 	p.Emit(PromptEventKey, key)
@@ -175,18 +175,18 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 		if p.Validate != nil {
 			err := p.Validate(p.Value)
 			if err != nil {
-				p.State = "error"
+				p.State = PromptStateError
 				p.Error = err.Error()
 			}
 		}
-		if p.State != "error" {
-			p.State = "submit"
+		if p.State != PromptStateError {
+			p.State = PromptStateSubmit
 		}
 	}
 	if key.Name == KeyCancel {
-		p.State = "cancel"
+		p.State = PromptStateCancel
 	}
-	if p.State == "submit" || p.State == "cancel" {
+	if p.State == PromptStateSubmit || p.State == PromptStateCancel {
 		p.Emit(PromptEventFinalize)
 	}
 }
@@ -233,10 +233,10 @@ func (p *Prompt[TValue]) render(prevFrame *string) {
 		frame = strings.Join(strings.Split(frame, "\n"), "\r\n")
 	}
 
-	if p.State == "initial" {
+	if p.State == PromptStateInitial {
 		p.write(utils.HideCursor())
 		p.write(frame)
-		p.State = "active"
+		p.State = PromptStateActive
 		*prevFrame = frame
 		return
 	}

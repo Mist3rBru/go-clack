@@ -20,6 +20,16 @@ const (
 	PromptEventSubmit   PromptEvent = "submit"
 )
 
+type PromptState string
+
+const (
+	PromptStateInitial PromptState = "initial"
+	PromptStateActive  PromptState = "active"
+	PromptStateError   PromptState = "error"
+	PromptStateCancel  PromptState = "cancel"
+	PromptStateSubmit  PromptState = "submit"
+)
+
 type KeyName string
 
 type Key struct {

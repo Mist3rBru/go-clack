@@ -189,10 +189,10 @@ func TestTrackState(t *testing.T) {
 	p := newPrompt()
 
 	p.PressKey(&core.Key{Name: core.KeyCancel})
-	assert.Equal(t, "cancel", p.State)
+	assert.Equal(t, core.PromptStateCancel, p.State)
 
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, "submit", p.State)
+	assert.Equal(t, core.PromptStateSubmit, p.State)
 }
 
 func TestLimitLines(t *testing.T) {
@@ -233,7 +233,7 @@ func TestValidateValue(t *testing.T) {
 
 	p.Value = "foo"
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, "error", p.State)
+	assert.Equal(t, core.PromptStateError, p.State)
 	assert.Equal(t, "invalid value: foo", p.Error)
 }
 
