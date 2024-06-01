@@ -35,7 +35,7 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 		Active:   params.Active,
 		Inactive: params.Inactive,
 	}
-	p.On("key", func(args ...any) {
+	p.On(PromptEventKey, func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
 		case KeyUp, KeyDown, KeyLeft, KeyRight:

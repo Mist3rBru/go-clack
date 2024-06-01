@@ -62,7 +62,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	p.CurrentOption = p.Root.Children[0]
 	p.Value = p.CurrentOption.Path
 
-	p.On("key", func(args ...any) {
+	p.On(PromptEventKey, func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
 		case KeyUp:

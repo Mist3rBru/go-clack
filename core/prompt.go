@@ -17,7 +17,7 @@ type Listener func(args ...any)
 
 type Prompt[TValue any] struct {
 	mu        sync.Mutex
-	listeners map[string][]Listener
+	listeners map[PromptEvent][]Listener
 
 	rl     *bufio.Reader
 	input  *os.File
@@ -44,7 +44,7 @@ type PromptParams[TValue any] struct {
 func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	return &Prompt[TValue]{
 		mu:        sync.Mutex{},
-		listeners: make(map[string][]Listener),
+		listeners: make(map[PromptEvent][]Listener),
 
 		input:  params.Input,
 		output: params.Output,
@@ -59,13 +59,13 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	}
 }
 
-func (p *Prompt[TValue]) On(event string, listener Listener) {
+func (p *Prompt[TValue]) On(event PromptEvent, listener Listener) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.listeners[event] = append(p.listeners[event], listener)
 }
 
-func (p *Prompt[TValue]) Once(event string, listener Listener) {
+func (p *Prompt[TValue]) Once(event PromptEvent, listener Listener) {
 	var onceListener Listener
 	onceListener = func(args ...any) {
 		listener(args)
@@ -74,7 +74,7 @@ func (p *Prompt[TValue]) Once(event string, listener Listener) {
 	p.On(event, onceListener)
 }
 
-func (p *Prompt[TValue]) Off(event string, listener Listener) {
+func (p *Prompt[TValue]) Off(event PromptEvent, listener Listener) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	listeners := p.listeners[event]
@@ -86,7 +86,7 @@ func (p *Prompt[TValue]) Off(event string, listener Listener) {
 	}
 }
 
-func (p *Prompt[TValue]) Emit(event string, args ...any) {
+func (p *Prompt[TValue]) Emit(event PromptEvent, args ...any) {
 	p.mu.Lock()
 	listeners := append([]Listener{}, p.listeners[event]...)
 	p.mu.Unlock()
@@ -196,7 +196,7 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 		p.SetState("active")
 	}
 
-	p.Emit("key", key)
+	p.Emit(PromptEventKey, key)
 
 	if key.Name == KeyEnter {
 		if p.Validate != nil {
@@ -214,7 +214,7 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 		p.SetState("cancel")
 	}
 	if p.State == "submit" || p.State == "cancel" {
-		p.Emit("finalize")
+		p.Emit(PromptEventFinalize)
 	}
 }
 
@@ -309,8 +309,8 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 		p.write("\r\n")
 		close(done)
 	}
-	p.Once("submit", closeCb)
-	p.Once("cancel", closeCb)
+	p.Once(PromptEventSubmit, closeCb)
+	p.Once(PromptEventCancel, closeCb)
 
 	prevFrame := ""
 	p.render(&prevFrame)
@@ -331,7 +331,7 @@ outer:
 			key := p.ParseKey(r)
 			p.PressKey(key)
 			p.render(&prevFrame)
-			p.Emit(p.State, p.Value)
+			p.Emit(PromptEvent(p.State), p.Value)
 		}
 	}
 

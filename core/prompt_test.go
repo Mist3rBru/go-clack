@@ -19,78 +19,74 @@ func newPrompt() *core.Prompt[string] {
 	})
 }
 
+const testEvent = core.PromptEvent("test")
+
 func TestEmitEvent(t *testing.T) {
 	p := newPrompt()
-	event := "test"
 	arg := rand.Int()
 
-	p.On(event, func(args ...any) {
+	p.On(testEvent, func(args ...any) {
 		assert.Equal(t, args[0], arg)
 	})
-	p.Emit(event, arg)
+	p.Emit(testEvent, arg)
 }
 
 func TestEmitOtherEvent(t *testing.T) {
 	p := newPrompt()
-	event := "test"
 	calledTimes := 0
 
-	p.On(event, func(args ...any) {
+	p.On(testEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit("other" + event)
+	p.Emit(core.PromptEvent("other") + testEvent)
 	assert.Equal(t, 0, calledTimes)
 }
 
 func TestEmitEventWithMultiArgs(t *testing.T) {
 	p := newPrompt()
-	event := "test"
 	args := []any{rand.Int(), rand.Int()}
 
-	p.On(event, func(_args ...any) {
+	p.On(testEvent, func(_args ...any) {
 		assert.Equal(t, _args, args)
 	})
-	p.Emit(event, args...)
-	p.Emit(event, args[0], args[1])
+	p.Emit(testEvent, args...)
+	p.Emit(testEvent, args[0], args[1])
 }
 
 func TestEmitEventTwice(t *testing.T) {
 	p := newPrompt()
-	event := "test"
 	calledTimes := 0
 
-	p.On(event, func(args ...any) {
+	p.On(testEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit(event)
-	p.Emit(event)
+	p.Emit(testEvent)
+	p.Emit(testEvent)
 	assert.Equal(t, 2, calledTimes)
 }
 
 func TestEmitEventOnce(t *testing.T) {
 	p := newPrompt()
-	event := "test"
 	calledTimes := 0
 
-	p.Once(event, func(args ...any) {
+	p.Once(testEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit(event)
-	p.Emit(event)
+	p.Emit(testEvent)
+	p.Emit(testEvent)
 	assert.Equal(t, 1, calledTimes)
 }
 
 func TestEmitUnsubscribedEvent(t *testing.T) {
 	p := newPrompt()
-	event := "test"
 	calledTimes := 0
 	listener := func(args ...any) {
 		calledTimes++
 	}
 
-	p.On(event, listener)
-	p.Off(event, listener)
-	p.Emit(event)
+	p.On(testEvent, listener)
+	p.Off(testEvent, listener)
+	p.Emit(testEvent)
 	assert.Equal(t, 0, calledTimes)
 }
 
@@ -251,7 +247,7 @@ func TestValidateValue(t *testing.T) {
 func TestEmitFinalizeOnSubmit(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
-	p.On("finalize", func(args ...any) {
+	p.On(core.PromptEventFinalize, func(args ...any) {
 		calledTimes++
 	})
 

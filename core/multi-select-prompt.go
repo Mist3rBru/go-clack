@@ -32,7 +32,7 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 		}),
 		Options: params.Options,
 	}
-	p.On("key", func(args ...any) {
+	p.On(PromptEventKey, func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
 		case KeyUp, KeyLeft:

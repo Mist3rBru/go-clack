@@ -58,7 +58,7 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 		Options: options,
 	}
 
-	p.On("key", func(args ...any) {
+	p.On(PromptEventKey, func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
 		case KeyUp, KeyLeft:
