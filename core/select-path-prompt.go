@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -39,7 +40,6 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 		Prompt: *NewPrompt(PromptParams{
 			Input:  params.Input,
 			Output: params.Output,
-			Value:  params.Value,
 			Track:  false,
 			Render: func(_p *Prompt) string {
 				return params.Render(p)
@@ -53,6 +53,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	p.Root = p.createRoot(params.Value)
 	p.CurrentLayer = p.Root.Children
 	p.CurrentOption = p.Root.Children[0]
+	p.Value = p.CurrentOption.Path
 
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
@@ -103,6 +104,9 @@ func (p *SelectPathPrompt) CursorIndex() int {
 }
 
 func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
+	if node.Children == nil {
+		return nil, fmt.Errorf("node is not a directory: %s", node.Path)
+	}
 	entries, err := os.ReadDir(node.Path)
 	if err != nil {
 		return nil, err
@@ -129,10 +133,11 @@ func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
 
 func (p *SelectPathPrompt) createRoot(cwd string) *PathNode {
 	root := &PathNode{
-		Index: 0,
-		Depth: 0,
-		Path:  cwd,
-		Name:  cwd,
+		Index:    0,
+		Depth:    0,
+		Path:     cwd,
+		Name:     cwd,
+		Children: []*PathNode{},
 	}
 	root.Children, _ = p.mapNode(root)
 	return root
@@ -158,9 +163,6 @@ func (p *SelectPathPrompt) exitChildren() {
 }
 
 func (p *SelectPathPrompt) enterChildren() {
-	if p.CurrentOption.Children == nil {
-		return
-	}
 	children, err := p.mapNode(p.CurrentOption)
 	if err != nil || len(children) == 0 {
 		return
@@ -175,5 +177,5 @@ func (p *SelectPathPrompt) Run() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return p.Value, nil
+	return p.CurrentOption.Path, nil
 }

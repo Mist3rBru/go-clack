@@ -16,14 +16,29 @@ func newTextPrompt() *core.TextPrompt {
 	return core.NewTextPrompt(core.TextPromptParams{
 		Input:  os.Stdin,
 		Output: os.Stdout,
-		Value:  "",
 		Render: func(p *core.TextPrompt) string {
 			return p.Value
 		},
 	})
 }
 
-func TestValeuWithCursor(t *testing.T) {
+func TestTextPromptValueTrack(t *testing.T) {
+	p := newTextPrompt()
+
+	assert.Equal(t, "", p.Value)
+
+	p.PressKey(&core.Key{Char: "a"})
+	assert.Equal(t, "a", p.Value)
+
+	p.PressKey(&core.Key{Char: "b"})
+	assert.Equal(t, "ab", p.Value)
+
+	p.PressKey(&core.Key{Name: "Left"})
+	p.PressKey(&core.Key{Name: "Backspace"})
+	assert.Equal(t, "b", p.Value)
+}
+
+func TestTextPromptValueWithCursor(t *testing.T) {
 	p := newTextPrompt()
 	inverse := color["inverse"]
 	cursor := inverse(" ")

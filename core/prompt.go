@@ -38,7 +38,7 @@ type PromptParams struct {
 }
 
 func NewPrompt(params PromptParams) *Prompt {
-	if strValue, ok := params.Value.(string); ok {
+	if strValue, ok := params.Value.(string); ok && params.Track {
 		params.CursorIndex = len(strValue)
 	}
 	return &Prompt{
@@ -299,9 +299,7 @@ func (p *Prompt) Run() (any, error) {
 	}
 	defer term.Restore(int(p.input.Fd()), oldState)
 
-	wg := sync.WaitGroup{}
 	done := make(chan struct{})
-
 	closeCb := func(args ...any) {
 		p.write(utils.ShowCursor())
 		p.write("\r\n")
@@ -310,33 +308,28 @@ func (p *Prompt) Run() (any, error) {
 	p.Once("submit", closeCb)
 	p.Once("cancel", closeCb)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		prevFrame := ""
-		p.render(&prevFrame)
+	prevFrame := ""
+	p.render(&prevFrame)
 
-		for {
-			select {
-			case <-done:
-				return
-			default:
-				r, size, err := p.rl.ReadRune()
-				if err != nil {
-					continue
-				}
-				if size == 0 {
-					continue
-				}
-				key := p.ParseKey(r)
-				p.PressKey(key)
-				p.render(&prevFrame)
-				p.Emit(p.State, p.Value)
+outer:
+	for {
+		select {
+		case <-done:
+			break outer
+		default:
+			r, size, err := p.rl.ReadRune()
+			if err != nil {
+				continue
 			}
+			if size == 0 {
+				continue
+			}
+			key := p.ParseKey(r)
+			p.PressKey(key)
+			p.render(&prevFrame)
+			p.Emit(p.State, p.Value)
 		}
-	}()
-
-	wg.Wait()
+	}
 
 	if p.Value == nil {
 		return nil, fmt.Errorf("Prompt canceled")

@@ -20,19 +20,19 @@ type SelectPromptParams struct {
 }
 
 func NewSelectPrompt(params SelectPromptParams) *SelectPrompt {
-	var p *SelectPrompt
 	startIndex := 0
 	for i, option := range params.Options {
-		if option.Value == option.Value {
+		if option.Value == params.Value {
 			startIndex = i
 			break
 		}
 	}
+	var p *SelectPrompt
 	p = &SelectPrompt{
 		Prompt: *NewPrompt(PromptParams{
 			Input:       params.Input,
 			Output:      params.Output,
-			Value:       params.Value,
+			Value:       params.Options[startIndex].Value,
 			CursorIndex: startIndex,
 			Track:       false,
 			Render: func(_p *Prompt) string {
@@ -53,7 +53,7 @@ func NewSelectPrompt(params SelectPromptParams) *SelectPrompt {
 		case "End":
 			p.CursorIndex = len(p.Options) - 1
 		}
-		p.Value = p.Options[p.CursorIndex]
+		p.Value = p.Options[p.CursorIndex].Value
 	})
 	return p
 }
