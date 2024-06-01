@@ -9,9 +9,8 @@ import (
 )
 
 type PathPrompt struct {
-	Prompt
+	Prompt[string]
 	OnlyShowDir bool
-	Value       string
 	Placeholder string
 	Hint        string
 	HintOptions []string
@@ -31,19 +30,16 @@ type PathPromptParams struct {
 func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	var p *PathPrompt
 	p = &PathPrompt{
-		Prompt: *NewPrompt(PromptParams{
-			Input:  params.Input,
-			Output: params.Output,
-			Value:  params.Value,
-			Track:  true,
-			Validate: func(value any) error {
-				return params.Validate(p.Value)
-			},
-			Render: func(_p *Prompt) string {
+		Prompt: *NewPrompt(PromptParams[string]{
+			Input:       params.Input,
+			Output:      params.Output,
+			Value:       params.Value,
+			CursorIndex: len(params.Value),
+			Validate:    params.Validate,
+			Render: func(_p *Prompt[string]) string {
 				return params.Render(p)
 			},
 		}),
-		Value:       params.Value,
 		Placeholder: params.Placeholder,
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,
@@ -57,7 +53,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
-		p.Value = p.Prompt.Value.(string)
+		p.Value = p.TrackKeyValue(key, p.Value)
 		if key.Name == "Right" && p.CursorIndex >= len(p.Value) {
 			p.completeValue()
 		} else if key.Name == "Tab" {
@@ -161,12 +157,4 @@ func (p *PathPrompt) tabComplete() {
 		p.HintIndex = utils.MinMaxIndex(p.HintIndex+1, len(p.HintOptions))
 		p.Hint = strings.Replace(p.HintOptions[p.HintIndex], p.valueEnd(), "", 1)
 	}
-}
-
-func (p *PathPrompt) Run() (string, error) {
-	_, err := p.Prompt.Run()
-	if err != nil {
-		return "", err
-	}
-	return p.Value, nil
 }

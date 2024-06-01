@@ -23,6 +23,15 @@ func newTextPrompt() *core.TextPrompt {
 	})
 }
 
+func TestTextPromptInitialValue(t *testing.T) {
+	p := core.NewTextPrompt(core.TextPromptParams{
+		Value: "foo",
+	})
+
+	assert.Equal(t, "foo", p.Value)
+	assert.Equal(t, 3, p.CursorIndex)
+}
+
 func TestTextPromptValueTrack(t *testing.T) {
 	p := newTextPrompt()
 

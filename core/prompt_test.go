@@ -11,11 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newPrompt() *core.Prompt {
-	return core.NewPrompt(core.PromptParams{
+func newPrompt() *core.Prompt[string] {
+	return core.NewPrompt(core.PromptParams[string]{
 		Input:  os.Stdin,
 		Output: os.Stdout,
-		Track:  true,
 		Value:  "",
 	})
 }
@@ -121,16 +120,16 @@ func TestTrackValue(t *testing.T) {
 	assert.Equal(t, "", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.PressKey(&core.Key{Char: "a"})
+	p.Value = p.TrackKeyValue(&core.Key{Char: "a"}, p.Value)
 	assert.Equal(t, "a", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
-	p.PressKey(&core.Key{Char: "b"})
+	p.Value = p.TrackKeyValue(&core.Key{Char: "b"}, p.Value)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.CursorIndex = 1
-	p.PressKey(&core.Key{Char: "c"})
+	p.Value = p.TrackKeyValue(&core.Key{Char: "c"}, p.Value)
 	assert.Equal(t, "acb", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 }
@@ -140,32 +139,32 @@ func TestTrackCursor(t *testing.T) {
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.PressKey(&core.Key{Name: "Home"})
+	p.TrackKeyValue(&core.Key{Name: "Home"}, p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.PressKey(&core.Key{Name: "End"})
+	p.TrackKeyValue(&core.Key{Name: "End"}, p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.PressKey(&core.Key{Name: "Left"})
+	p.TrackKeyValue(&core.Key{Name: "Left"}, p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.PressKey(&core.Key{Name: "Left"})
+	p.TrackKeyValue(&core.Key{Name: "Left"}, p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 2
-	p.PressKey(&core.Key{Name: "Right"})
+	p.TrackKeyValue(&core.Key{Name: "Right"}, p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.PressKey(&core.Key{Name: "Right"})
+	p.TrackKeyValue(&core.Key{Name: "Right"}, p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 }
 
@@ -174,25 +173,25 @@ func TestTrackBackspace(t *testing.T) {
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.Value = p.TrackKeyValue(&core.Key{Name: "Backspace"}, p.Value)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 2
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.Value = p.TrackKeyValue(&core.Key{Name: "Backspace"}, p.Value)
 	assert.Equal(t, "ac", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 1
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.Value = p.TrackKeyValue(&core.Key{Name: "Backspace"}, p.Value)
 	assert.Equal(t, "bc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.Value = p.TrackKeyValue(&core.Key{Name: "Backspace"}, p.Value)
 	assert.Equal(t, "abc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 }
@@ -245,7 +244,7 @@ func TestLimitLines(t *testing.T) {
 
 func TestValidateValue(t *testing.T) {
 	p := newPrompt()
-	p.Validate = func(value any) error {
+	p.Validate = func(value string) error {
 		return fmt.Errorf("invalid value: %v", value)
 	}
 

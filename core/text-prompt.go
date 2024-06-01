@@ -1,14 +1,11 @@
 package core
 
 import (
-	"fmt"
 	"os"
 )
 
 type TextPrompt struct {
-	Prompt
-
-	Value string
+	Prompt[string]
 }
 
 type TextPromptParams struct {
@@ -22,22 +19,19 @@ type TextPromptParams struct {
 func NewTextPrompt(params TextPromptParams) *TextPrompt {
 	var p *TextPrompt
 	p = &TextPrompt{
-		Prompt: *NewPrompt(PromptParams{
-			Input:  params.Input,
-			Output: params.Output,
-			Value:  params.Value,
-			Track:  true,
-			Validate: func(value any) error {
-				return params.Validate(p.Value)
-			},
-			Render: func(_p *Prompt) string {
+		Prompt: *NewPrompt(PromptParams[string]{
+			Input:       params.Input,
+			Output:      params.Output,
+			Value:       params.Value,
+			CursorIndex: len(params.Value),
+			Validate:    params.Validate,
+			Render: func(_p *Prompt[string]) string {
 				return params.Render(p)
 			},
 		}),
-		Value: params.Value,
 	}
 	p.On("key", func(args ...any) {
-		p.Value = p.Prompt.Value.(string)
+		p.Value = p.TrackKeyValue(args[0].(*Key), p.Value)
 	})
 	return p
 }
@@ -48,16 +42,4 @@ func (p *TextPrompt) ValueWithCursor() string {
 		return p.Value + inverse(" ")
 	}
 	return p.Value[0:p.CursorIndex] + inverse(string(p.Value[p.CursorIndex])) + p.Value[p.CursorIndex+1:]
-}
-
-func (p *TextPrompt) Run() (string, error) {
-	result, err := p.Prompt.Run()
-	if err != nil {
-		return "", err
-	}
-	resultStr, ok := result.(string)
-	if !ok {
-		return "", fmt.Errorf("unexpected result type")
-	}
-	return resultStr, nil
 }

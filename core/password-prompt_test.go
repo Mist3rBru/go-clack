@@ -13,7 +13,17 @@ func newPasswordPrompt() *core.PasswordPrompt {
 	return core.NewPasswordPrompt(core.PasswordPromptParams{
 		Input:  os.Stdin,
 		Output: os.Stdout,
+		Value:  "",
 	})
+}
+
+func TestPasswordPromptInitialValue(t *testing.T) {
+	p := core.NewPasswordPrompt(core.PasswordPromptParams{
+		Value: "foo",
+	})
+
+	assert.Equal(t, "foo", p.Value)
+	assert.Equal(t, 3, p.CursorIndex)
 }
 
 func TestChangePasswordValue(t *testing.T) {
@@ -28,7 +38,7 @@ func TestChangePasswordValue(t *testing.T) {
 	assert.Equal(t, "a", p.Value)
 }
 
-func TestChangPasswordMask(t *testing.T) {
+func TestChangePasswordMask(t *testing.T) {
 	p := newPasswordPrompt()
 
 	assert.Equal(t, " ", p.ValueWithCursor())

@@ -6,16 +6,7 @@ var (
 	color = utils.CreateColors()
 )
 
-type Listener func(args ...any)
-
-type SelectOption struct {
+type SelectOption[TValue comparable] struct {
 	Label string
-	Value any
-}
-
-type Key struct {
-	Char  string
-	Name  string
-	Shift bool
-	Ctrl  bool
+	Value TValue
 }

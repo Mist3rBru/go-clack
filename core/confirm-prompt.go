@@ -7,10 +7,9 @@ import (
 )
 
 type ConfirmPrompt struct {
-	Prompt
+	Prompt[bool]
 	Active   string
 	Inactive string
-	Value    bool
 }
 
 type ConfirmPromptParams struct {
@@ -25,18 +24,16 @@ type ConfirmPromptParams struct {
 func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 	var p *ConfirmPrompt
 	p = &ConfirmPrompt{
-		Prompt: *NewPrompt(PromptParams{
+		Prompt: *NewPrompt(PromptParams[bool]{
 			Input:  params.Input,
 			Output: params.Output,
 			Value:  params.Value,
-			Track:  false,
-			Render: func(_p *Prompt) string {
+			Render: func(_p *Prompt[bool]) string {
 				return params.Render(p)
 			},
 		}),
 		Active:   params.Active,
 		Inactive: params.Inactive,
-		Value:    params.Value,
 	}
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
@@ -47,12 +44,4 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 		}
 	})
 	return p
-}
-
-func (p *ConfirmPrompt) Run() (bool, error) {
-	_, err := p.Prompt.Run()
-	if err != nil {
-		return false, err
-	}
-	return p.Value, nil
 }

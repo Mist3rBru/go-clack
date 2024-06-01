@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newSelectKeyPrompt() *core.SelectKeyPrompt {
-	return core.NewSelectKeyPrompt(core.SelectKeyPromptParams{
+func newSelectKeyPrompt() *core.SelectKeyPrompt[string] {
+	return core.NewSelectKeyPrompt(core.SelectKeyPromptParams[string]{
 		Input:  os.Stdin,
 		Output: os.Stdout,
-		Options: []core.SelectKeyOption{
+		Options: []core.SelectKeyOption[string]{
 			{
 				Key:   "a",
 				Value: "a",
@@ -30,7 +30,7 @@ func TestSelectKeyPromptKey(t *testing.T) {
 
 	p.PressKey(&core.Key{Name: "invalid-key"})
 	assert.Equal(t, "active", p.State)
-	assert.Equal(t, nil, p.Value)
+	assert.Equal(t, "", p.Value)
 
 	p.PressKey(&core.Key{Name: "Enter"})
 	assert.Equal(t, "submit", p.State)

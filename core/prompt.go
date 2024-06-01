@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -12,7 +13,16 @@ import (
 	"golang.org/x/term"
 )
 
-type Prompt struct {
+type Listener func(args ...any)
+
+type Key struct {
+	Char  string
+	Name  string
+	Shift bool
+	Ctrl  bool
+}
+
+type Prompt[TValue any] struct {
 	mu        sync.Mutex
 	listeners map[string][]Listener
 
@@ -21,30 +31,25 @@ type Prompt struct {
 	output *os.File
 
 	State       string
-	Value       any
+	Value       TValue
 	Error       string
-	Track       bool
 	CursorIndex int
 
-	Validate func(value any) error
-	Render   func(p *Prompt) string
+	Validate func(value TValue) error
+	Render   func(p *Prompt[TValue]) string
 }
 
-type PromptParams struct {
+type PromptParams[TValue any] struct {
 	Input       *os.File
 	Output      *os.File
-	Value       any
+	Value       TValue
 	CursorIndex int
-	Track       bool
-	Validate    func(value any) error
-	Render      func(p *Prompt) string
+	Validate    func(value TValue) error
+	Render      func(p *Prompt[TValue]) string
 }
 
-func NewPrompt(params PromptParams) *Prompt {
-	if strValue, ok := params.Value.(string); ok && params.Track {
-		params.CursorIndex = len(strValue)
-	}
-	return &Prompt{
+func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
+	return &Prompt[TValue]{
 		mu:        sync.Mutex{},
 		listeners: make(map[string][]Listener),
 
@@ -55,29 +60,28 @@ func NewPrompt(params PromptParams) *Prompt {
 		State:       "initial",
 		Value:       params.Value,
 		CursorIndex: params.CursorIndex,
-		Track:       params.Track,
 
 		Validate: params.Validate,
 		Render:   params.Render,
 	}
 }
 
-func (p *Prompt) On(event string, listener Listener) {
+func (p *Prompt[TValue]) On(event string, listener Listener) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.listeners[event] = append(p.listeners[event], listener)
 }
 
-func (p *Prompt) Once(event string, listener Listener) {
+func (p *Prompt[TValue]) Once(event string, listener Listener) {
 	var onceListener Listener
 	onceListener = func(args ...any) {
-		listener(args...)
+		listener(args)
 		p.Off(event, onceListener)
 	}
 	p.On(event, onceListener)
 }
 
-func (p *Prompt) Off(event string, listener Listener) {
+func (p *Prompt[TValue]) Off(event string, listener Listener) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	listeners := p.listeners[event]
@@ -89,34 +93,34 @@ func (p *Prompt) Off(event string, listener Listener) {
 	}
 }
 
-func (p *Prompt) Emit(event string, args ...any) {
+func (p *Prompt[TValue]) Emit(event string, args ...any) {
 	p.mu.Lock()
-	listeners := append([]Listener(nil), p.listeners[event]...)
+	listeners := append([]Listener{}, p.listeners[event]...)
 	p.mu.Unlock()
 	for _, listener := range listeners {
 		listener(args...)
 	}
 }
 
-func (p *Prompt) SetState(state string) {
+func (p *Prompt[TValue]) SetState(state string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.State = state
 }
 
-func (p *Prompt) SetValue(value any) {
+func (p *Prompt[TValue]) SetValue(value TValue) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.Value = value
 }
 
-func (p *Prompt) SetError(err error) {
+func (p *Prompt[TValue]) SetError(err error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.Error = err.Error()
 }
 
-func (p *Prompt) ParseKey(r rune) *Key {
+func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	// TODO: parse Backtab(shift+tab) and other variations of shift and ctrl
 	switch r {
 	case '\r', '\n':
@@ -160,22 +164,18 @@ func (p *Prompt) ParseKey(r rune) *Key {
 	}
 }
 
-func (p *Prompt) trackKeyValue(key *Key, value string) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
+func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 	switch key.Name {
 	case "Backspace":
-		if p.CursorIndex == 0 {
-			break
+		if p.CursorIndex > 0 {
+			if p.CursorIndex == len(value) {
+				p.CursorIndex--
+				value = value[0:p.CursorIndex]
+			} else {
+				p.CursorIndex--
+				value = value[0:p.CursorIndex] + value[p.CursorIndex+1:]
+			}
 		}
-		if p.CursorIndex == len(value) {
-			p.CursorIndex--
-			p.Value = value[0:p.CursorIndex]
-			break
-		}
-		p.CursorIndex--
-		p.Value = value[0:p.CursorIndex] + value[p.CursorIndex+1:]
 	case "Home":
 		p.CursorIndex = 0
 	case "End":
@@ -186,29 +186,25 @@ func (p *Prompt) trackKeyValue(key *Key, value string) {
 		}
 		p.CursorIndex--
 	case "Right":
-		if p.CursorIndex == len(value) {
-			break
+		if p.CursorIndex < len(value) {
+			p.CursorIndex++
 		}
-		p.CursorIndex++
 	default:
 		if len(key.Char) == 1 {
-			p.Value = value[0:p.CursorIndex] + key.Char + value[p.CursorIndex:]
+			value = value[0:p.CursorIndex] + key.Char + value[p.CursorIndex:]
 			p.CursorIndex++
 		}
 	}
+	return value
 }
 
-func (p *Prompt) PressKey(key *Key) {
+func (p *Prompt[TValue]) PressKey(key *Key) {
 	if p.State == "error" || p.State == "initial" {
 		p.SetState("active")
 	}
 
-	strValue, ok := p.Value.(string)
-	if p.Track && ok {
-		p.trackKeyValue(key, strValue)
-	}
-
 	p.Emit("key", key)
+
 	if key.Name == "Enter" {
 		if p.Validate != nil {
 			err := p.Validate(p.Value)
@@ -229,7 +225,7 @@ func (p *Prompt) PressKey(key *Key) {
 	}
 }
 
-func (p *Prompt) write(str string) {
+func (p *Prompt[TValue]) write(str string) {
 	p.output.WriteString(str)
 }
 
@@ -238,7 +234,7 @@ type LimitLinesPamams struct {
 	Lines       []string
 }
 
-func (p *Prompt) LimitLines(params LimitLinesPamams) string {
+func (p *Prompt[TValue]) LimitLines(params LimitLinesPamams) string {
 	_, maxRows, err := term.GetSize(int(p.output.Fd()))
 	if err != nil {
 		maxRows = 5
@@ -269,7 +265,7 @@ func (p *Prompt) LimitLines(params LimitLinesPamams) string {
 	return strings.Join(result, "\r\n")
 }
 
-func (p *Prompt) render(prevFrame *string) {
+func (p *Prompt[TValue]) render(prevFrame *string) {
 	frame := p.Render(p)
 
 	if lines := strings.Split(frame, "\r\n"); len(lines) == 1 {
@@ -312,10 +308,10 @@ func (p *Prompt) render(prevFrame *string) {
 	*prevFrame = frame
 }
 
-func (p *Prompt) Run() (any, error) {
+func (p *Prompt[TValue]) Run() (TValue, error) {
 	oldState, err := term.MakeRaw(int(p.input.Fd()))
 	if err != nil {
-		return nil, err
+		return p.Value, err
 	}
 	defer term.Restore(int(p.input.Fd()), oldState)
 
@@ -351,8 +347,8 @@ outer:
 		}
 	}
 
-	if p.Value == nil {
-		return nil, fmt.Errorf("Prompt canceled")
+	if ref := reflect.ValueOf(p.Value); ref.IsNil() {
+		return p.Value, fmt.Errorf("Prompt canceled")
 	}
 
 	return p.Value, nil

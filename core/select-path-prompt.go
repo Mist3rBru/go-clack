@@ -18,7 +18,7 @@ type PathNode struct {
 }
 
 type SelectPathPrompt struct {
-	Prompt
+	Prompt[string]
 	Root          *PathNode
 	CurrentLayer  []*PathNode
 	CurrentOption *PathNode
@@ -38,14 +38,16 @@ type SelectPathPromptParams struct {
 func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	var p *SelectPathPrompt
 	p = &SelectPathPrompt{
-		Prompt: *NewPrompt(PromptParams{
+		Prompt: *NewPrompt(PromptParams[string]{
 			Input:  params.Input,
 			Output: params.Output,
-			Track:  false,
-			Validate: func(value any) error {
+			Validate: func(value string) error {
+				if params.Validate == nil {
+					return nil
+				}
 				return params.Validate(p.CurrentOption.Path)
 			},
-			Render: func(_p *Prompt) string {
+			Render: func(_p *Prompt[string]) string {
 				return params.Render(p)
 			},
 		}),
@@ -174,12 +176,4 @@ func (p *SelectPathPrompt) enterChildren() {
 	p.CurrentOption.Children = children
 	p.CurrentOption = children[0]
 	p.CurrentLayer = children
-}
-
-func (p *SelectPathPrompt) Run() (string, error) {
-	_, err := p.Prompt.Run()
-	if err != nil {
-		return "", err
-	}
-	return p.CurrentOption.Path, nil
 }

@@ -6,34 +6,31 @@ import (
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
-type MultiSelectPrompt struct {
-	Prompt
-	Value   []any
-	Options []SelectOption
+type MultiSelectPrompt[TValue comparable] struct {
+	Prompt[[]TValue]
+	Options []SelectOption[TValue]
 }
 
-type MultiSelectPromptParams struct {
+type MultiSelectPromptParams[TValue comparable] struct {
 	Input   *os.File
 	Output  *os.File
-	Value   []any
-	Options []SelectOption
-	Render  func(p *MultiSelectPrompt) string
+	Value   []TValue
+	Options []SelectOption[TValue]
+	Render  func(p *MultiSelectPrompt[TValue]) string
 }
 
-func NewMultiSelectPrompt(params MultiSelectPromptParams) *MultiSelectPrompt {
-	var p *MultiSelectPrompt
-	p = &MultiSelectPrompt{
-		Prompt: *NewPrompt(PromptParams{
+func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TValue]) *MultiSelectPrompt[TValue] {
+	var p *MultiSelectPrompt[TValue]
+	p = &MultiSelectPrompt[TValue]{
+		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:       params.Input,
 			Output:      params.Output,
 			Value:       params.Value,
 			CursorIndex: 0,
-			Track:       false,
-			Render: func(_p *Prompt) string {
+			Render: func(_p *Prompt[[]TValue]) string {
 				return params.Render(p)
 			},
 		}),
-		Value:   params.Value,
 		Options: params.Options,
 	}
 	p.On("key", func(args ...any) {
@@ -56,10 +53,10 @@ func NewMultiSelectPrompt(params MultiSelectPromptParams) *MultiSelectPrompt {
 			}
 		case "a":
 			if len(p.Value) == len(p.Options) {
-				p.Value = []any{}
+				p.Value = []TValue{}
 				break
 			}
-			p.Value = []any{}
+			p.Value = []TValue{}
 			for _, option := range p.Options {
 				p.Value = append(p.Value, option.Value)
 			}
@@ -68,19 +65,11 @@ func NewMultiSelectPrompt(params MultiSelectPromptParams) *MultiSelectPrompt {
 	return p
 }
 
-func (p *MultiSelectPrompt) IsSelected(option SelectOption) (int, bool) {
+func (p *MultiSelectPrompt[TValue]) IsSelected(option SelectOption[TValue]) (int, bool) {
 	for i, value := range p.Value {
 		if value == option.Value {
 			return i, true
 		}
 	}
 	return -1, false
-}
-
-func (p *MultiSelectPrompt) Run() ([]any, error) {
-	_, err := p.Prompt.Run()
-	if err != nil {
-		return nil, err
-	}
-	return p.Value, nil
 }

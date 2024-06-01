@@ -6,20 +6,20 @@ import (
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
-type SelectPrompt struct {
-	Prompt
-	Options []SelectOption
+type SelectPrompt[TValue comparable] struct {
+	Prompt[TValue]
+	Options []SelectOption[TValue]
 }
 
-type SelectPromptParams struct {
+type SelectPromptParams[TValue comparable] struct {
 	Input   *os.File
 	Output  *os.File
-	Value   any
-	Options []SelectOption
-	Render  func(p *SelectPrompt) string
+	Value   TValue
+	Options []SelectOption[TValue]
+	Render  func(p *SelectPrompt[TValue]) string
 }
 
-func NewSelectPrompt(params SelectPromptParams) *SelectPrompt {
+func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *SelectPrompt[TValue] {
 	startIndex := 0
 	for i, option := range params.Options {
 		if option.Value == params.Value {
@@ -27,15 +27,14 @@ func NewSelectPrompt(params SelectPromptParams) *SelectPrompt {
 			break
 		}
 	}
-	var p *SelectPrompt
-	p = &SelectPrompt{
-		Prompt: *NewPrompt(PromptParams{
+	var p *SelectPrompt[TValue]
+	p = &SelectPrompt[TValue]{
+		Prompt: *NewPrompt(PromptParams[TValue]{
 			Input:       params.Input,
 			Output:      params.Output,
 			Value:       params.Options[startIndex].Value,
 			CursorIndex: startIndex,
-			Track:       false,
-			Render: func(_p *Prompt) string {
+			Render: func(_p *Prompt[TValue]) string {
 				return params.Render(p)
 			},
 		}),
@@ -56,12 +55,4 @@ func NewSelectPrompt(params SelectPromptParams) *SelectPrompt {
 		p.Value = p.Options[p.CursorIndex].Value
 	})
 	return p
-}
-
-func (p *SelectPrompt) Run() (any, error) {
-	_, err := p.Prompt.Run()
-	if err != nil {
-		return nil, err
-	}
-	return p.Value, nil
 }

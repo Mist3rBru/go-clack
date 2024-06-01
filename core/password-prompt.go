@@ -1,15 +1,12 @@
 package core
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
 
 type PasswordPrompt struct {
-	Prompt
-
-	Value string
+	Prompt[string]
 }
 
 type PasswordPromptParams struct {
@@ -23,25 +20,19 @@ type PasswordPromptParams struct {
 func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 	var p *PasswordPrompt
 	p = &PasswordPrompt{
-		Prompt: *NewPrompt(PromptParams{
-			Input:  params.Input,
-			Output: params.Output,
-			Value:  params.Value,
-			Track:  true,
-			Validate: func(value any) error {
-				return params.Validate(p.Value)
-			},
-			Render: func(_p *Prompt) string {
+		Prompt: *NewPrompt(PromptParams[string]{
+			Input:       params.Input,
+			Output:      params.Output,
+			Value:       params.Value,
+			CursorIndex: len(params.Value),
+			Validate:    params.Validate,
+			Render: func(_p *Prompt[string]) string {
 				return params.Render(p)
 			},
 		}),
-		Value: params.Value,
 	}
 	p.On("key", func(args ...any) {
-		value, ok := p.Prompt.Value.(string)
-		if ok {
-			p.Value = value
-		}
+		p.Value = p.TrackKeyValue(args[0].(*Key), p.Value)
 	})
 	return p
 }
@@ -53,16 +44,4 @@ func (p *PasswordPrompt) ValueWithCursor() string {
 		return maskedValue + inverse(" ")
 	}
 	return maskedValue[0:p.CursorIndex] + inverse(string(maskedValue[p.CursorIndex])) + maskedValue[p.CursorIndex+1:]
-}
-
-func (p *PasswordPrompt) Run() (string, error) {
-	result, err := p.Prompt.Run()
-	if err != nil {
-		return "", err
-	}
-	resultStr, ok := result.(string)
-	if !ok {
-		return "", fmt.Errorf("unexpected result type")
-	}
-	return resultStr, nil
 }

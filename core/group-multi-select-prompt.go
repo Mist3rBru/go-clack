@@ -6,37 +6,36 @@ import (
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
-type GroupSelectOption struct {
+type GroupSelectOption[TValue comparable] struct {
 	Label   string
-	Value   any
+	Value   TValue
 	IsGroup bool
-	Options []*GroupSelectOption
+	Options []*GroupSelectOption[TValue]
 }
 
-type GroupMultiSelectPrompt struct {
-	Prompt
-	Options []*GroupSelectOption
-	Value   []any
+type GroupMultiSelectPrompt[TValue comparable] struct {
+	Prompt[[]TValue]
+	Options []*GroupSelectOption[TValue]
 }
 
-type GroupMultiSelectPromptParams struct {
+type GroupMultiSelectPromptParams[TValue comparable] struct {
 	Input   *os.File
 	Output  *os.File
-	Options map[string][]SelectOption
-	Value   []any
-	Render  func(p *GroupMultiSelectPrompt) string
+	Options map[string][]SelectOption[TValue]
+	Value   []TValue
+	Render  func(p *GroupMultiSelectPrompt[TValue]) string
 }
 
-func NewGroupMultiSelectPrompt(params GroupMultiSelectPromptParams) *GroupMultiSelectPrompt {
-	options := []*GroupSelectOption{}
+func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptParams[TValue]) *GroupMultiSelectPrompt[TValue] {
+	options := []*GroupSelectOption[TValue]{}
 	for groupName, groupOptions := range params.Options {
-		group := &GroupSelectOption{
+		group := &GroupSelectOption[TValue]{
 			Label:   groupName,
 			IsGroup: true,
 		}
 		options = append(options, group)
 		for _, groupOption := range groupOptions {
-			option := &GroupSelectOption{
+			option := &GroupSelectOption[TValue]{
 				Label:   groupOption.Label,
 				Value:   groupOption.Value,
 				IsGroup: false,
@@ -46,20 +45,18 @@ func NewGroupMultiSelectPrompt(params GroupMultiSelectPromptParams) *GroupMultiS
 		}
 	}
 
-	var p *GroupMultiSelectPrompt
-	p = &GroupMultiSelectPrompt{
-		Prompt: *NewPrompt(PromptParams{
+	var p *GroupMultiSelectPrompt[TValue]
+	p = &GroupMultiSelectPrompt[TValue]{
+		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:       params.Input,
 			Output:      params.Output,
 			Value:       params.Value,
 			CursorIndex: 0,
-			Track:       false,
-			Render: func(_p *Prompt) string {
+			Render: func(_p *Prompt[[]TValue]) string {
 				return params.Render(p)
 			},
 		}),
 		Options: options,
-		Value:   params.Value,
 	}
 
 	p.On("key", func(args ...any) {
@@ -80,7 +77,7 @@ func NewGroupMultiSelectPrompt(params GroupMultiSelectPromptParams) *GroupMultiS
 	return p
 }
 
-func (p *GroupMultiSelectPrompt) IsGroupSelected(group *GroupSelectOption) bool {
+func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupSelectOption[TValue]) bool {
 	counter := 0
 	for _, option := range group.Options {
 		for _, v := range p.Value {
@@ -93,7 +90,7 @@ func (p *GroupMultiSelectPrompt) IsGroupSelected(group *GroupSelectOption) bool 
 	return counter == len(group.Options)
 }
 
-func (p *GroupMultiSelectPrompt) IsSelected(option *GroupSelectOption) (int, bool) {
+func (p *GroupMultiSelectPrompt[TValue]) IsSelected(option *GroupSelectOption[TValue]) (int, bool) {
 	for i, v := range p.Value {
 		if v == option.Value {
 			return i, true
@@ -102,7 +99,7 @@ func (p *GroupMultiSelectPrompt) IsSelected(option *GroupSelectOption) (int, boo
 	return -1, false
 }
 
-func (p *GroupMultiSelectPrompt) toggleOption() {
+func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
 	option := p.Options[p.CursorIndex]
 	if option.IsGroup {
 		if p.IsGroupSelected(option) {
@@ -125,12 +122,4 @@ func (p *GroupMultiSelectPrompt) toggleOption() {
 			p.Value = append(p.Value, option.Value)
 		}
 	}
-}
-
-func (p *GroupMultiSelectPrompt) Run() ([]any, error) {
-	_, err := p.Prompt.Run()
-	if err != nil {
-		return nil, err
-	}
-	return p.Value, nil
 }

@@ -4,32 +4,31 @@ import (
 	"os"
 )
 
-type SelectKeyOption struct {
+type SelectKeyOption[TValue any] struct {
 	Label string
-	Value any
+	Value TValue
 	Key   string
 }
 
-type SelectKeyPrompt struct {
-	Prompt
-	Options []SelectKeyOption
+type SelectKeyPrompt[TValue any] struct {
+	Prompt[TValue]
+	Options []SelectKeyOption[TValue]
 }
 
-type SelectKeyPromptParams struct {
+type SelectKeyPromptParams[TValue any] struct {
 	Input   *os.File
 	Output  *os.File
-	Options []SelectKeyOption
-	Render  func(p *SelectKeyPrompt) string
+	Options []SelectKeyOption[TValue]
+	Render  func(p *SelectKeyPrompt[TValue]) string
 }
 
-func NewSelectKeyPrompt(params SelectKeyPromptParams) *SelectKeyPrompt {
-	var p *SelectKeyPrompt
-	p = &SelectKeyPrompt{
-		Prompt: *NewPrompt(PromptParams{
+func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *SelectKeyPrompt[TValue] {
+	var p *SelectKeyPrompt[TValue]
+	p = &SelectKeyPrompt[TValue]{
+		Prompt: *NewPrompt(PromptParams[TValue]{
 			Input:  params.Input,
 			Output: params.Output,
-			Track:  false,
-			Render: func(_p *Prompt) string {
+			Render: func(_p *Prompt[TValue]) string {
 				return params.Render(p)
 			},
 		}),

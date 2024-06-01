@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newSelectPrompt() *core.SelectPrompt {
-	return core.NewSelectPrompt(core.SelectPromptParams{
+func newSelectPrompt() *core.SelectPrompt[string] {
+	return core.NewSelectPrompt(core.SelectPromptParams[string]{
 		Input:  os.Stdin,
 		Output: os.Stdout,
-		Options: []core.SelectOption{
+		Options: []core.SelectOption[string]{
 			{Value: "a"},
 			{Value: "b"},
 			{Value: "c"},

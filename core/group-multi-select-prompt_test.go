@@ -8,19 +8,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newGroupMultiSelectPrompt() *core.GroupMultiSelectPrompt {
-	options := make(map[string][]core.SelectOption)
-	options["foo"] = []core.SelectOption{
+func newGroupMultiSelectPrompt() *core.GroupMultiSelectPrompt[string] {
+	options := make(map[string][]core.SelectOption[string])
+	options["foo"] = []core.SelectOption[string]{
 		{Value: "a"},
 		{Value: "b"},
 		{Value: "c"},
 	}
-	options["bar"] = []core.SelectOption{
+	options["bar"] = []core.SelectOption[string]{
 		{Value: "x"},
 		{Value: "y"},
 		{Value: "z"},
 	}
-	return core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams{
+	return core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
 		Input:   os.Stdin,
 		Output:  os.Stdout,
 		Options: options,
@@ -55,27 +55,27 @@ func TestChangeGroupMultiSelectCursor(t *testing.T) {
 func TestSelectGroupMultiSelectOption(t *testing.T) {
 	p := newGroupMultiSelectPrompt()
 
-	assert.Equal(t, []any(nil), p.Value)
+	assert.Equal(t, []string(nil), p.Value)
 
 	p.PressKey(&core.Key{Name: "Down"})
 	p.PressKey(&core.Key{Name: "Space"})
-	assert.Equal(t, []any{p.Options[1].Value}, p.Value)
+	assert.Equal(t, []string{p.Options[1].Value}, p.Value)
 
 	p.PressKey(&core.Key{Name: "Down"})
 	p.PressKey(&core.Key{Name: "Space"})
-	assert.Equal(t, []any{p.Options[1].Value, p.Options[2].Value}, p.Value)
+	assert.Equal(t, []string{p.Options[1].Value, p.Options[2].Value}, p.Value)
 
 	p.PressKey(&core.Key{Name: "Space"})
-	assert.Equal(t, []any{p.Options[1].Value}, p.Value)
+	assert.Equal(t, []string{p.Options[1].Value}, p.Value)
 }
 
 func TestSelectGroupMultiSelectGroupOption(t *testing.T) {
 	p := newGroupMultiSelectPrompt()
 
-	assert.Equal(t, []any(nil), p.Value)
+	assert.Equal(t, []string(nil), p.Value)
 
 	p.PressKey(&core.Key{Name: "Space"})
-	expected := []any{}
+	expected := []string{}
 	for i := 1; i < len(p.Options); i++ {
 		if p.Options[i].IsGroup {
 			break
@@ -85,10 +85,10 @@ func TestSelectGroupMultiSelectGroupOption(t *testing.T) {
 	assert.Equal(t, expected, p.Value)
 
 	p.PressKey(&core.Key{Name: "Space"})
-	assert.Equal(t, []any{}, p.Value)
+	assert.Equal(t, []string{}, p.Value)
 
-	expected = []any{}
-	p.Value = []any{}
+	expected = []string{}
+	p.Value = []string{}
 	for i, option := range p.Options {
 		if option.IsGroup {
 			p.CursorIndex = i
@@ -107,12 +107,12 @@ func TestGroupMultiSelectIsSelected(t *testing.T) {
 	assert.Equal(t, -1, i)
 	assert.Equal(t, false, isSelected)
 
-	p.Value = []any{p.Options[1].Value}
+	p.Value = []string{p.Options[1].Value}
 	i, isSelected = p.IsSelected(p.Options[1])
 	assert.Equal(t, 0, i)
 	assert.Equal(t, true, isSelected)
 
-	p.Value = []any{p.Options[1].Value, p.Options[2].Value}
+	p.Value = []string{p.Options[1].Value, p.Options[2].Value}
 	i, isSelected = p.IsSelected(p.Options[2])
 	assert.Equal(t, 1, i)
 	assert.Equal(t, true, isSelected)
@@ -125,11 +125,11 @@ func TestGroupMultiSelectIsGroupSelected(t *testing.T) {
 	isSelected := p.IsGroupSelected(group)
 	assert.Equal(t, false, isSelected)
 
-	p.Value = []any{p.Options[1].Value}
+	p.Value = []string{p.Options[1].Value}
 	isSelected = p.IsGroupSelected(group)
 	assert.Equal(t, false, isSelected)
 
-	p.Value = []any{}
+	p.Value = []string{}
 	for _, option := range group.Options {
 		p.Value = append(p.Value, option.Value)
 	}
