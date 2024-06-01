@@ -116,7 +116,7 @@ func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
 		if p.OnlyShowDir && !entry.IsDir() {
 			continue
 		}
-		child := PathNode{
+		child := &PathNode{
 			Index:  i,
 			Depth:  node.Depth + 1,
 			Path:   path.Join(node.Path, entry.Name()),
@@ -126,7 +126,7 @@ func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
 		if entry.IsDir() {
 			child.Children = []*PathNode{}
 		}
-		children = append(children, &child)
+		children = append(children, child)
 	}
 	return children, nil
 }
