@@ -6,7 +6,6 @@ import (
 	"os"
 	"reflect"
 	"strings"
-	"sync"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 
@@ -16,7 +15,6 @@ import (
 type Listener func(args ...any)
 
 type Prompt[TValue any] struct {
-	mu        sync.Mutex
 	listeners map[PromptEvent][]Listener
 
 	rl     *bufio.Reader
@@ -43,7 +41,6 @@ type PromptParams[TValue any] struct {
 
 func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	return &Prompt[TValue]{
-		mu:        sync.Mutex{},
 		listeners: make(map[PromptEvent][]Listener),
 
 		input:  params.Input,
@@ -60,8 +57,6 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 }
 
 func (p *Prompt[TValue]) On(event PromptEvent, listener Listener) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
 	p.listeners[event] = append(p.listeners[event], listener)
 }
 
@@ -75,8 +70,6 @@ func (p *Prompt[TValue]) Once(event PromptEvent, listener Listener) {
 }
 
 func (p *Prompt[TValue]) Off(event PromptEvent, listener Listener) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
 	listeners := p.listeners[event]
 	for i, l := range listeners {
 		if fmt.Sprintf("%p", l) == fmt.Sprintf("%p", listener) {
@@ -87,30 +80,10 @@ func (p *Prompt[TValue]) Off(event PromptEvent, listener Listener) {
 }
 
 func (p *Prompt[TValue]) Emit(event PromptEvent, args ...any) {
-	p.mu.Lock()
 	listeners := append([]Listener{}, p.listeners[event]...)
-	p.mu.Unlock()
 	for _, listener := range listeners {
 		listener(args...)
 	}
-}
-
-func (p *Prompt[TValue]) SetState(state string) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.State = state
-}
-
-func (p *Prompt[TValue]) SetValue(value TValue) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.Value = value
-}
-
-func (p *Prompt[TValue]) SetError(err error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.Error = err.Error()
 }
 
 func (p *Prompt[TValue]) ParseKey(r rune) *Key {
@@ -193,7 +166,7 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 
 func (p *Prompt[TValue]) PressKey(key *Key) {
 	if p.State == "error" || p.State == "initial" {
-		p.SetState("active")
+		p.State = "active"
 	}
 
 	p.Emit(PromptEventKey, key)
@@ -202,16 +175,16 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 		if p.Validate != nil {
 			err := p.Validate(p.Value)
 			if err != nil {
-				p.SetState("error")
-				p.SetError(err)
+				p.State = "error"
+				p.Error = err.Error()
 			}
 		}
 		if p.State != "error" {
-			p.SetState("submit")
+			p.State = "submit"
 		}
 	}
 	if key.Name == KeyCancel {
-		p.SetState("cancel")
+		p.State = "cancel"
 	}
 	if p.State == "submit" || p.State == "cancel" {
 		p.Emit(PromptEventFinalize)
@@ -263,7 +236,7 @@ func (p *Prompt[TValue]) render(prevFrame *string) {
 	if p.State == "initial" {
 		p.write(utils.HideCursor())
 		p.write(frame)
-		p.SetState("active")
+		p.State = "active"
 		*prevFrame = frame
 		return
 	}

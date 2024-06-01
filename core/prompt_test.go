@@ -90,13 +90,6 @@ func TestEmitUnsubscribedEvent(t *testing.T) {
 	assert.Equal(t, 0, calledTimes)
 }
 
-func TestSetValue(t *testing.T) {
-	p := newPrompt()
-	p.Value = ""
-	p.SetValue("test")
-	assert.Equal(t, "test", p.Value)
-}
-
 func TestParseKey(t *testing.T) {
 	p := newPrompt()
 
