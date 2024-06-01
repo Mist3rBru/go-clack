@@ -24,24 +24,24 @@ func TestChangeSelectCursor(t *testing.T) {
 	p := newSelectPrompt()
 
 	assert.Equal(t, 0, p.CursorIndex)
-	p.PressKey(&core.Key{Name: "Down"})
+	p.PressKey(&core.Key{Name: core.KeyDown})
 	assert.Equal(t, 1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: "Right"})
+	p.PressKey(&core.Key{Name: core.KeyRight})
 	assert.Equal(t, 2, p.CursorIndex)
-	p.PressKey(&core.Key{Name: "Up"})
+	p.PressKey(&core.Key{Name: core.KeyUp})
 	assert.Equal(t, 1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: "Left"})
+	p.PressKey(&core.Key{Name: core.KeyLeft})
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.PressKey(&core.Key{Name: "End"})
+	p.PressKey(&core.Key{Name: core.KeyEnd})
 	assert.Equal(t, len(p.Options)-1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: "Home"})
+	p.PressKey(&core.Key{Name: core.KeyHome})
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.CursorIndex = 0
-	p.PressKey(&core.Key{Name: "Up"})
+	p.PressKey(&core.Key{Name: core.KeyUp})
 	assert.Equal(t, len(p.Options)-1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: "Down"})
+	p.PressKey(&core.Key{Name: core.KeyDown})
 	assert.Equal(t, 0, p.CursorIndex)
 }
 
@@ -49,10 +49,10 @@ func TestChangeSelectValue(t *testing.T) {
 	p := newSelectPrompt()
 
 	assert.Equal(t, p.Options[0].Value, p.Value)
-	p.PressKey(&core.Key{Name: "Down"})
+	p.PressKey(&core.Key{Name: core.KeyDown})
 	assert.Equal(t, p.Options[1].Value, p.Value)
-	p.PressKey(&core.Key{Name: "Down"})
+	p.PressKey(&core.Key{Name: core.KeyDown})
 	assert.Equal(t, p.Options[2].Value, p.Value)
-	p.PressKey(&core.Key{Name: "Up"})
+	p.PressKey(&core.Key{Name: core.KeyUp})
 	assert.Equal(t, p.Options[1].Value, p.Value)
 }

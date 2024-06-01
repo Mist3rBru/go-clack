@@ -37,7 +37,7 @@ func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *Selec
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
 		for _, option := range p.Options {
-			if key.Name == option.Key {
+			if key.Name == KeyName(option.Key) {
 				p.State = "submit"
 				p.Value = option.Value
 				p.Emit("submit", p.Value)

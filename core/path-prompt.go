@@ -54,9 +54,9 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
 		p.Value = p.TrackKeyValue(key, p.Value)
-		if key.Name == "Right" && p.CursorIndex >= len(p.Value) {
+		if key.Name == KeyRight && p.CursorIndex >= len(p.Value) {
 			p.completeValue()
-		} else if key.Name == "Tab" {
+		} else if key.Name == KeyTab {
 			p.tabComplete()
 		} else {
 			p.changeHint()

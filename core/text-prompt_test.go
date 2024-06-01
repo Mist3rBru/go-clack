@@ -43,8 +43,8 @@ func TestTextPromptValueTrack(t *testing.T) {
 	p.PressKey(&core.Key{Char: "b"})
 	assert.Equal(t, "ab", p.Value)
 
-	p.PressKey(&core.Key{Name: "Left"})
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.PressKey(&core.Key{Name: core.KeyLeft})
+	p.PressKey(&core.Key{Name: core.KeyBackspace})
 	assert.Equal(t, "b", p.Value)
 }
 
@@ -78,7 +78,7 @@ func TestValidateText(t *testing.T) {
 		},
 	})
 
-	p.PressKey(&core.Key{Name: "Enter"})
+	p.PressKey(&core.Key{Name: core.KeyEnter})
 	assert.Equal(t, "error", p.State)
 	assert.Equal(t, "invalid value: 123", p.Error)
 }

@@ -65,17 +65,17 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
-		case "Up":
+		case KeyUp:
 			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
-		case "Down":
+		case KeyDown:
 			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
-		case "Left":
+		case KeyLeft:
 			p.exitChildren()
-		case "Right":
+		case KeyRight:
 			p.enterChildren()
-		case "Home":
+		case KeyHome:
 			p.CurrentOption = p.CurrentLayer[0]
-		case "End":
+		case KeyEnd:
 			p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
 		}
 		p.Value = p.CurrentOption.Path

@@ -15,13 +15,6 @@ import (
 
 type Listener func(args ...any)
 
-type Key struct {
-	Char  string
-	Name  string
-	Shift bool
-	Ctrl  bool
-}
-
 type Prompt[TValue any] struct {
 	mu        sync.Mutex
 	listeners map[string][]Listener
@@ -124,49 +117,49 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	// TODO: parse Backtab(shift+tab) and other variations of shift and ctrl
 	switch r {
 	case '\r', '\n':
-		return &Key{Name: "Enter"}
+		return &Key{Name: KeyEnter}
 	case ' ':
-		return &Key{Name: "Space"}
+		return &Key{Name: KeySpace}
 	case '\b', 127:
-		return &Key{Name: "Backspace"}
+		return &Key{Name: KeyBackspace}
 	case '\t':
-		return &Key{Name: "Tab"}
+		return &Key{Name: KeyTab}
 	case 3:
-		return &Key{Name: "Cancel"}
+		return &Key{Name: KeyCancel}
 	case 27:
 		next, err := p.rl.Peek(2)
 		if err == nil && len(next) == 2 && next[0] == '[' {
 			switch next[1] {
 			case 'A':
 				p.rl.Discard(2)
-				return &Key{Name: "Up"}
+				return &Key{Name: KeyUp}
 			case 'B':
 				p.rl.Discard(2)
-				return &Key{Name: "Down"}
+				return &Key{Name: KeyDown}
 			case 'C':
 				p.rl.Discard(2)
-				return &Key{Name: "Right"}
+				return &Key{Name: KeyRight}
 			case 'D':
 				p.rl.Discard(2)
-				return &Key{Name: "Left"}
+				return &Key{Name: KeyLeft}
 			case 'H':
 				p.rl.Discard(2)
-				return &Key{Name: "Home"}
+				return &Key{Name: KeyHome}
 			case 'F':
 				p.rl.Discard(2)
-				return &Key{Name: "End"}
+				return &Key{Name: KeyEnd}
 			}
 		}
 		return &Key{}
 	default:
 		char := string(r)
-		return &Key{Char: char, Name: char}
+		return &Key{Char: char, Name: KeyName(char)}
 	}
 }
 
 func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 	switch key.Name {
-	case "Backspace":
+	case KeyBackspace:
 		if p.CursorIndex > 0 {
 			if p.CursorIndex == len(value) {
 				p.CursorIndex--
@@ -176,16 +169,16 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 				value = value[0:p.CursorIndex] + value[p.CursorIndex+1:]
 			}
 		}
-	case "Home":
+	case KeyHome:
 		p.CursorIndex = 0
-	case "End":
+	case KeyEnd:
 		p.CursorIndex = len(value)
-	case "Left":
+	case KeyLeft:
 		if p.CursorIndex == 0 {
 			break
 		}
 		p.CursorIndex--
-	case "Right":
+	case KeyRight:
 		if p.CursorIndex < len(value) {
 			p.CursorIndex++
 		}
@@ -205,7 +198,7 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 
 	p.Emit("key", key)
 
-	if key.Name == "Enter" {
+	if key.Name == KeyEnter {
 		if p.Validate != nil {
 			err := p.Validate(p.Value)
 			if err != nil {
@@ -217,7 +210,7 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 			p.SetState("submit")
 		}
 	}
-	if key.Name == "Cancel" {
+	if key.Name == KeyCancel {
 		p.SetState("cancel")
 	}
 	if p.State == "submit" || p.State == "cancel" {

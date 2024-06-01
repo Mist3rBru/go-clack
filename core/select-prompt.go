@@ -43,13 +43,13 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 	p.On("key", func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
-		case "Up", "Left":
+		case KeyUp, KeyLeft:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
-		case "Down", "Right":
+		case KeyDown, KeyRight:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
-		case "Home":
+		case KeyHome:
 			p.CursorIndex = 0
-		case "End":
+		case KeyEnd:
 			p.CursorIndex = len(p.Options) - 1
 		}
 		p.Value = p.Options[p.CursorIndex].Value

@@ -34,7 +34,7 @@ func TestChangePasswordValue(t *testing.T) {
 	assert.Equal(t, "a", p.Value)
 	p.PressKey(&core.Key{Char: "b"})
 	assert.Equal(t, "ab", p.Value)
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.PressKey(&core.Key{Name: core.KeyBackspace})
 	assert.Equal(t, "a", p.Value)
 }
 
@@ -46,9 +46,9 @@ func TestChangePasswordMask(t *testing.T) {
 	assert.Equal(t, "* ", p.ValueWithCursor())
 	p.PressKey(&core.Key{Char: "b"})
 	assert.Equal(t, "** ", p.ValueWithCursor())
-	p.PressKey(&core.Key{Name: "Left"})
+	p.PressKey(&core.Key{Name: core.KeyLeft})
 	assert.Equal(t, "**", p.ValueWithCursor())
-	p.PressKey(&core.Key{Name: "Backspace"})
+	p.PressKey(&core.Key{Name: core.KeyBackspace})
 	assert.Equal(t, "*", p.ValueWithCursor())
 }
 
@@ -60,7 +60,7 @@ func TestValidatePassword(t *testing.T) {
 		},
 	})
 
-	p.PressKey(&core.Key{Name: "Enter"})
+	p.PressKey(&core.Key{Name: core.KeyEnter})
 	assert.Equal(t, "error", p.State)
 	assert.Equal(t, "invalid password: 123", p.Error)
 }

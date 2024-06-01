@@ -32,7 +32,7 @@ func TestSelectKeyPromptKey(t *testing.T) {
 	assert.Equal(t, "active", p.State)
 	assert.Equal(t, "", p.Value)
 
-	p.PressKey(&core.Key{Name: "Enter"})
+	p.PressKey(&core.Key{Name: core.KeyEnter})
 	assert.Equal(t, "submit", p.State)
 	assert.Equal(t, "enter", p.Value)
 
