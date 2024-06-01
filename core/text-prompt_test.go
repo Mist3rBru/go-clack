@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -58,4 +59,17 @@ func TestTextPromptValueWithCursor(t *testing.T) {
 	p.CursorIndex = 0
 	expected = inverse("f") + "oo"
 	assert.Equal(t, expected, p.ValueWithCursor())
+}
+
+func TestValidateText(t *testing.T) {
+	p := core.NewTextPrompt(core.TextPromptParams{
+		Value: "123",
+		Validate: func(value string) error {
+			return fmt.Errorf("invalid value: %s", value)
+		},
+	})
+
+	p.PressKey(&core.Key{Name: "Enter"})
+	assert.Equal(t, "error", p.State)
+	assert.Equal(t, "invalid value: 123", p.Error)
 }

@@ -13,10 +13,11 @@ type PasswordPrompt struct {
 }
 
 type PasswordPromptParams struct {
-	Input  *os.File
-	Output *os.File
-	Value  string
-	Render func(p *PasswordPrompt) string
+	Input    *os.File
+	Output   *os.File
+	Value    string
+	Validate func(value string) error
+	Render   func(p *PasswordPrompt) string
 }
 
 func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
@@ -27,6 +28,9 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 			Output: params.Output,
 			Value:  params.Value,
 			Track:  true,
+			Validate: func(value any) error {
+				return params.Validate(p.Value)
+			},
 			Render: func(_p *Prompt) string {
 				return params.Render(p)
 			},

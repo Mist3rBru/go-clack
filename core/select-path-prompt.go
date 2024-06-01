@@ -31,6 +31,7 @@ type SelectPathPromptParams struct {
 	Output      *os.File
 	Value       string
 	OnlyShowDir bool
+	Validate    func(path string) error
 	Render      func(p *SelectPathPrompt) string
 }
 
@@ -41,6 +42,9 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 			Input:  params.Input,
 			Output: params.Output,
 			Track:  false,
+			Validate: func(value any) error {
+				return params.Validate(p.CurrentOption.Path)
+			},
 			Render: func(_p *Prompt) string {
 				return params.Render(p)
 			},

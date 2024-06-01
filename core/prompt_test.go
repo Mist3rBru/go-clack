@@ -242,3 +242,26 @@ func TestLimitLines(t *testing.T) {
 	expected = strings.Join(lasLines, "\r\n")
 	assert.Equal(t, expected, frame)
 }
+
+func TestValidateValue(t *testing.T) {
+	p := newPrompt()
+	p.Validate = func(value any) error {
+		return fmt.Errorf("invalid value: %v", value)
+	}
+
+	p.Value = "foo"
+	p.PressKey(&core.Key{Name: "Enter"})
+	assert.Equal(t, "error", p.State)
+	assert.Equal(t, "invalid value: foo", p.Error)
+}
+
+func TestEmitFinalizeOnSubmit(t *testing.T) {
+	p := newPrompt()
+	calledTimes := 0
+	p.On("finalize", func(args ...any) {
+		calledTimes++
+	})
+
+	p.PressKey(&core.Key{Name: "Enter"})
+	assert.Equal(t, 1, calledTimes)
+}

@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -106,4 +107,17 @@ func TestPathValueWithHint(t *testing.T) {
 	p.Hint = "/"
 	p.CursorIndex = len(p.Value) - 1
 	assert.Equal(t, p.Value+p.Hint, p.ValueWithHint())
+}
+
+func TestValidatePath(t *testing.T) {
+	p := core.NewPathPrompt(core.PathPromptParams{
+		Value: "/folder",
+		Validate: func(value string) error {
+			return fmt.Errorf("invalid path: %s", value)
+		},
+	})
+
+	p.PressKey(&core.Key{Name: "Enter"})
+	assert.Equal(t, "error", p.State)
+	assert.Equal(t, "invalid path: /folder", p.Error)
 }

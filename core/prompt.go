@@ -22,10 +22,12 @@ type Prompt struct {
 
 	State       string
 	Value       any
+	Error       string
 	Track       bool
 	CursorIndex int
 
-	Render func(p *Prompt) string
+	Validate func(value any) error
+	Render   func(p *Prompt) string
 }
 
 type PromptParams struct {
@@ -34,6 +36,7 @@ type PromptParams struct {
 	Value       any
 	CursorIndex int
 	Track       bool
+	Validate    func(value any) error
 	Render      func(p *Prompt) string
 }
 
@@ -54,7 +57,8 @@ func NewPrompt(params PromptParams) *Prompt {
 		CursorIndex: params.CursorIndex,
 		Track:       params.Track,
 
-		Render: params.Render,
+		Validate: params.Validate,
+		Render:   params.Render,
 	}
 }
 
@@ -104,6 +108,12 @@ func (p *Prompt) SetValue(value any) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.Value = value
+}
+
+func (p *Prompt) SetError(err error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Error = err.Error()
 }
 
 func (p *Prompt) ParseKey(r rune) *Key {
@@ -200,12 +210,22 @@ func (p *Prompt) PressKey(key *Key) {
 
 	p.Emit("key", key)
 	if key.Name == "Enter" {
+		if p.Validate != nil {
+			err := p.Validate(p.Value)
+			if err != nil {
+				p.SetState("error")
+				p.SetError(err)
+			}
+		}
 		if p.State != "error" {
 			p.SetState("submit")
 		}
 	}
 	if key.Name == "Cancel" {
 		p.SetState("cancel")
+	}
+	if p.State == "submit" || p.State == "cancel" {
+		p.Emit("finalize")
 	}
 }
 

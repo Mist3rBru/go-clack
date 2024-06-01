@@ -24,6 +24,7 @@ type PathPromptParams struct {
 	Value       string
 	Placeholder string
 	OnlyShowDir bool
+	Validate    func(value string) error
 	Render      func(p *PathPrompt) string
 }
 
@@ -35,6 +36,9 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 			Output: params.Output,
 			Value:  params.Value,
 			Track:  true,
+			Validate: func(value any) error {
+				return params.Validate(p.Value)
+			},
 			Render: func(_p *Prompt) string {
 				return params.Render(p)
 			},

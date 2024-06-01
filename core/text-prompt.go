@@ -12,10 +12,11 @@ type TextPrompt struct {
 }
 
 type TextPromptParams struct {
-	Input  *os.File
-	Output *os.File
-	Value  string
-	Render func(p *TextPrompt) string
+	Input    *os.File
+	Output   *os.File
+	Value    string
+	Validate func(value string) error
+	Render   func(p *TextPrompt) string
 }
 
 func NewTextPrompt(params TextPromptParams) *TextPrompt {
@@ -26,6 +27,9 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			Output: params.Output,
 			Value:  params.Value,
 			Track:  true,
+			Validate: func(value any) error {
+				return params.Validate(p.Value)
+			},
 			Render: func(_p *Prompt) string {
 				return params.Render(p)
 			},
