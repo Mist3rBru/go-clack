@@ -79,6 +79,6 @@ func TestValidateText(t *testing.T) {
 	})
 
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.PromptStateError, p.State)
+	assert.Equal(t, core.StateError, p.State)
 	assert.Equal(t, "invalid value: 123", p.Error)
 }

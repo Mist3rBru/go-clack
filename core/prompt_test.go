@@ -19,7 +19,7 @@ func newPrompt() *core.Prompt[string] {
 	})
 }
 
-const testEvent = core.PromptEvent("test")
+const testEvent = core.Event("test")
 
 func TestEmitEvent(t *testing.T) {
 	p := newPrompt()
@@ -38,7 +38,7 @@ func TestEmitOtherEvent(t *testing.T) {
 	p.On(testEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit(core.PromptEvent("other") + testEvent)
+	p.Emit(core.Event("other") + testEvent)
 	assert.Equal(t, 0, calledTimes)
 }
 
@@ -189,10 +189,10 @@ func TestTrackState(t *testing.T) {
 	p := newPrompt()
 
 	p.PressKey(&core.Key{Name: core.KeyCancel})
-	assert.Equal(t, core.PromptStateCancel, p.State)
+	assert.Equal(t, core.StateCancel, p.State)
 
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.PromptStateSubmit, p.State)
+	assert.Equal(t, core.StateSubmit, p.State)
 }
 
 func TestLimitLines(t *testing.T) {
@@ -233,14 +233,14 @@ func TestValidateValue(t *testing.T) {
 
 	p.Value = "foo"
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.PromptStateError, p.State)
+	assert.Equal(t, core.StateError, p.State)
 	assert.Equal(t, "invalid value: foo", p.Error)
 }
 
 func TestEmitFinalizeOnSubmit(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
-	p.On(core.PromptEventFinalize, func(args ...any) {
+	p.On(core.EventFinalize, func(args ...any) {
 		calledTimes++
 	})
 

@@ -29,15 +29,15 @@ func TestSelectKeyPromptKey(t *testing.T) {
 	p := newSelectKeyPrompt()
 
 	p.PressKey(&core.Key{Name: "invalid-key"})
-	assert.Equal(t, core.PromptStateActive, p.State)
+	assert.Equal(t, core.StateActive, p.State)
 	assert.Equal(t, "", p.Value)
 
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.PromptStateSubmit, p.State)
+	assert.Equal(t, core.StateSubmit, p.State)
 	assert.Equal(t, "enter", p.Value)
 
-	p.State = core.PromptStateActive
+	p.State = core.StateActive
 	p.PressKey(&core.Key{Name: "a"})
-	assert.Equal(t, core.PromptStateSubmit, p.State)
+	assert.Equal(t, core.StateSubmit, p.State)
 	assert.Equal(t, "a", p.Value)
 }

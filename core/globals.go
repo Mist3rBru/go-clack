@@ -11,23 +11,23 @@ type SelectOption[TValue comparable] struct {
 	Value TValue
 }
 
-type PromptEvent string
+type Event string
 
 const (
-	PromptEventKey      PromptEvent = "key"
-	PromptEventFinalize PromptEvent = "finalize"
-	PromptEventCancel   PromptEvent = "cancel"
-	PromptEventSubmit   PromptEvent = "submit"
+	EventKey      Event = "key"
+	EventFinalize Event = "finalize"
+	EventCancel   Event = "cancel"
+	EventSubmit   Event = "submit"
 )
 
-type PromptState string
+type State string
 
 const (
-	PromptStateInitial PromptState = "initial"
-	PromptStateActive  PromptState = "active"
-	PromptStateError   PromptState = "error"
-	PromptStateCancel  PromptState = "cancel"
-	PromptStateSubmit  PromptState = "submit"
+	StateInitial State = "initial"
+	StateActive  State = "active"
+	StateError   State = "error"
+	StateCancel  State = "cancel"
+	StateSubmit  State = "submit"
 )
 
 type KeyName string

@@ -117,6 +117,6 @@ func TestValidateSelectPathValue(t *testing.T) {
 	})
 
 	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.PromptStateError, p.State)
+	assert.Equal(t, core.StateError, p.State)
 	assert.Equal(t, fmt.Sprintf("invalid path: %s", p.CurrentOption.Path), p.Error)
 }

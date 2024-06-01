@@ -15,13 +15,13 @@ import (
 type Listener func(args ...any)
 
 type Prompt[TValue any] struct {
-	listeners map[PromptEvent][]Listener
+	listeners map[Event][]Listener
 
 	rl     *bufio.Reader
 	input  *os.File
 	output *os.File
 
-	State       PromptState
+	State       State
 	Value       TValue
 	Error       string
 	CursorIndex int
@@ -41,7 +41,7 @@ type PromptParams[TValue any] struct {
 
 func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	return &Prompt[TValue]{
-		listeners: make(map[PromptEvent][]Listener),
+		listeners: make(map[Event][]Listener),
 
 		input:  params.Input,
 		output: params.Output,
@@ -56,11 +56,11 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	}
 }
 
-func (p *Prompt[TValue]) On(event PromptEvent, listener Listener) {
+func (p *Prompt[TValue]) On(event Event, listener Listener) {
 	p.listeners[event] = append(p.listeners[event], listener)
 }
 
-func (p *Prompt[TValue]) Once(event PromptEvent, listener Listener) {
+func (p *Prompt[TValue]) Once(event Event, listener Listener) {
 	var onceListener Listener
 	onceListener = func(args ...any) {
 		listener(args)
@@ -69,7 +69,7 @@ func (p *Prompt[TValue]) Once(event PromptEvent, listener Listener) {
 	p.On(event, onceListener)
 }
 
-func (p *Prompt[TValue]) Off(event PromptEvent, listener Listener) {
+func (p *Prompt[TValue]) Off(event Event, listener Listener) {
 	listeners := p.listeners[event]
 	for i, l := range listeners {
 		if fmt.Sprintf("%p", l) == fmt.Sprintf("%p", listener) {
@@ -79,7 +79,7 @@ func (p *Prompt[TValue]) Off(event PromptEvent, listener Listener) {
 	}
 }
 
-func (p *Prompt[TValue]) Emit(event PromptEvent, args ...any) {
+func (p *Prompt[TValue]) Emit(event Event, args ...any) {
 	listeners := append([]Listener{}, p.listeners[event]...)
 	for _, listener := range listeners {
 		listener(args...)
@@ -165,29 +165,29 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 }
 
 func (p *Prompt[TValue]) PressKey(key *Key) {
-	if p.State == PromptStateError || p.State == PromptStateInitial {
-		p.State = PromptStateActive
+	if p.State == StateError || p.State == StateInitial {
+		p.State = StateActive
 	}
 
-	p.Emit(PromptEventKey, key)
+	p.Emit(EventKey, key)
 
 	if key.Name == KeyEnter {
 		if p.Validate != nil {
 			err := p.Validate(p.Value)
 			if err != nil {
-				p.State = PromptStateError
+				p.State = StateError
 				p.Error = err.Error()
 			}
 		}
-		if p.State != PromptStateError {
-			p.State = PromptStateSubmit
+		if p.State != StateError {
+			p.State = StateSubmit
 		}
 	}
 	if key.Name == KeyCancel {
-		p.State = PromptStateCancel
+		p.State = StateCancel
 	}
-	if p.State == PromptStateSubmit || p.State == PromptStateCancel {
-		p.Emit(PromptEventFinalize)
+	if p.State == StateSubmit || p.State == StateCancel {
+		p.Emit(EventFinalize)
 	}
 }
 
@@ -233,10 +233,10 @@ func (p *Prompt[TValue]) render(prevFrame *string) {
 		frame = strings.Join(strings.Split(frame, "\n"), "\r\n")
 	}
 
-	if p.State == PromptStateInitial {
+	if p.State == StateInitial {
 		p.write(utils.HideCursor())
 		p.write(frame)
-		p.State = PromptStateActive
+		p.State = StateActive
 		*prevFrame = frame
 		return
 	}
@@ -282,8 +282,8 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 		p.write("\r\n")
 		close(done)
 	}
-	p.Once(PromptEventSubmit, closeCb)
-	p.Once(PromptEventCancel, closeCb)
+	p.Once(EventSubmit, closeCb)
+	p.Once(EventCancel, closeCb)
 
 	prevFrame := ""
 	p.render(&prevFrame)
@@ -304,7 +304,7 @@ outer:
 			key := p.ParseKey(r)
 			p.PressKey(key)
 			p.render(&prevFrame)
-			p.Emit(PromptEvent(p.State), p.Value)
+			p.Emit(Event(p.State), p.Value)
 		}
 	}
 
