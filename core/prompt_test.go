@@ -225,6 +225,114 @@ func TestLimitLines(t *testing.T) {
 	assert.Equal(t, expected, frame)
 }
 
+func TestFormatLines(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{"a", "b"}
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
+		FirstLine: core.FormatLineOptions{
+			Sides: "-",
+		},
+		NewLine: core.FormatLineOptions{
+			Sides: "*",
+		},
+	})
+	expected := strings.Join([]string{
+		fmt.Sprintf("- %s -", "a"),
+		fmt.Sprintf("* %s *", "b"),
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	lines = []string{strings.Repeat("a", 81), "b"}
+	frame = p.FormatLines(lines, core.FormatLinesOptions{
+		FirstLine: core.FormatLineOptions{
+			Sides: "-",
+		},
+		LastLine: core.FormatLineOptions{
+			Sides: "*",
+		},
+	})
+	expected = strings.Join([]string{
+		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
+		fmt.Sprintf("- %s -", strings.Repeat("a", 5)),
+		fmt.Sprintf("* %s *", "b"),
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	lines = []string{strings.Repeat("a", 180), "b"}
+	frame = p.FormatLines(lines, core.FormatLinesOptions{
+		FirstLine: core.FormatLineOptions{
+			Sides: "-",
+		},
+		Default: core.FormatLineOptions{
+			Sides: "*",
+		},
+		LastLine: core.FormatLineOptions{
+			Sides: "-",
+		},
+	})
+	expected = strings.Join([]string{
+		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
+		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
+		fmt.Sprintf("- %s -", strings.Repeat("a", 28)),
+		fmt.Sprintf("- %s -", "b"),
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	lines = []string{strings.Repeat("a", 67), "b"}
+	width := 70
+	frame = p.FormatLines(lines, core.FormatLinesOptions{
+		Default: core.FormatLineOptions{
+			Sides: "|",
+		},
+		MinWidth: &width,
+		MaxWidth: &width,
+	})
+	expected = strings.Join([]string{
+		fmt.Sprintf("| %s%s |", strings.Repeat("a", 66), strings.Repeat(" ", 0)),
+		fmt.Sprintf("| %s%s |", strings.Repeat("a", 1), strings.Repeat(" ", 65)),
+		fmt.Sprintf("| %s%s |", strings.Repeat("b", 1), strings.Repeat(" ", 65)),
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	lines = []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
+	frame = p.FormatLines(lines, core.FormatLinesOptions{
+		FirstLine: core.FormatLineOptions{
+			Start: "-",
+			End:   "*",
+		},
+		NewLine: core.FormatLineOptions{
+			Start: "*",
+			End:   "-",
+		},
+		LastLine: core.FormatLineOptions{
+			Start: "=",
+			End:   "=",
+		},
+	})
+	expected = strings.Join([]string{
+		fmt.Sprintf("- %s %s *", strings.Repeat("a", 20), strings.Repeat("b", 55)),
+		fmt.Sprintf("- %s *", strings.Repeat("b", 25)),
+		fmt.Sprintf("= %s =", strings.Repeat("c", 1)),
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+
+	lines = []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
+	frame = p.FormatLines(lines, core.FormatLinesOptions{
+		Default: core.FormatLineOptions{
+			Style: func(line string) string {
+				return fmt.Sprintf("(%s)", line)
+			},
+		},
+	})
+	expected = strings.Join([]string{
+		fmt.Sprintf("  (%s %s)  ", strings.Repeat("a", 20), strings.Repeat("b", 53)),
+		fmt.Sprintf("  (%s)  ", strings.Repeat("b", 27)),
+		fmt.Sprintf("  (%s)  ", strings.Repeat("c", 1)),
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+}
+
 func TestValidateValue(t *testing.T) {
 	p := newPrompt()
 	p.Validate = func(value string) error {

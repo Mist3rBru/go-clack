@@ -3,6 +3,7 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"reflect"
 	"strings"
@@ -224,6 +225,227 @@ func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 	}
 
 	return strings.Join(result, "\r\n")
+}
+
+type LineOption string
+
+const (
+	FirstLine LineOption = "firstLine"
+	NewLine   LineOption = "newLine"
+	LastLine  LineOption = "lastLine"
+)
+
+type FormatLineOptions struct {
+	Start string
+	End   string
+	Sides string
+	Style func(line string) string
+}
+
+type FormatLinesOptions struct {
+	FirstLine FormatLineOptions
+	NewLine   FormatLineOptions
+	LastLine  FormatLineOptions
+	Default   FormatLineOptions
+	MinWidth  *int
+	MaxWidth  *int
+}
+
+func getOptionOrDefault(line LineOption, opt string, options FormatLinesOptions) string {
+	switch line {
+	case FirstLine:
+		switch opt {
+		case "start":
+			if options.FirstLine.Start != "" {
+				return options.FirstLine.Start
+			} else if options.FirstLine.Sides != "" {
+				return options.FirstLine.Sides
+			} else if options.Default.Start != "" {
+				return options.Default.Start
+			}
+		case "end":
+			if options.FirstLine.End != "" {
+				return options.FirstLine.End
+			} else if options.FirstLine.Sides != "" {
+				return options.FirstLine.Sides
+			} else if options.Default.End != "" {
+				return options.Default.End
+			}
+		}
+	case NewLine:
+		switch opt {
+		case "start":
+			if options.NewLine.Start != "" {
+				return options.NewLine.Start
+			} else if options.NewLine.Sides != "" {
+				return options.NewLine.Sides
+			} else if options.Default.Start != "" {
+				return options.Default.Start
+			}
+		case "end":
+			if options.NewLine.End != "" {
+				return options.NewLine.End
+			} else if options.NewLine.Sides != "" {
+				return options.NewLine.Sides
+			} else if options.Default.End != "" {
+				return options.Default.End
+			}
+		}
+	case LastLine:
+		switch opt {
+		case "start":
+			if options.LastLine.Start != "" {
+				return options.LastLine.Start
+			} else if options.LastLine.Sides != "" {
+				return options.LastLine.Sides
+			} else if options.Default.Start != "" {
+				return options.Default.Start
+			}
+		case "end":
+			if options.LastLine.End != "" {
+				return options.LastLine.End
+			} else if options.LastLine.Sides != "" {
+				return options.LastLine.Sides
+			} else if options.Default.End != "" {
+				return options.Default.End
+			}
+		}
+	}
+	if options.Default.Sides != "" {
+		return options.Default.Sides
+	}
+	return " "
+}
+
+func getStyleOrDefault(line LineOption, options FormatLinesOptions) func(line string) string {
+	switch line {
+	case FirstLine:
+		if options.FirstLine.Style != nil {
+			return options.FirstLine.Style
+		}
+	case NewLine:
+		if options.NewLine.Style != nil {
+			return options.NewLine.Style
+		}
+	case LastLine:
+		if options.LastLine.Style != nil {
+			return options.LastLine.Style
+		}
+	}
+	if options.Default.Style != nil {
+		return options.Default.Style
+	}
+	return func(line string) string { return line }
+}
+
+func getLineOptions(options FormatLinesOptions, line LineOption) FormatLineOptions {
+	return FormatLineOptions{
+		Start: getOptionOrDefault(line, "start", options),
+		End:   getOptionOrDefault(line, "end", options),
+		Style: getStyleOrDefault(line, options),
+	}
+}
+
+func mergeOptions(primary, secondary FormatLineOptions) FormatLineOptions {
+	ifEmpty := func(a, b string) string {
+		if a == " " {
+			return b
+		}
+		return a
+	}
+
+	ifNil := func(a, b func(line string) string) func(line string) string {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+
+	return FormatLineOptions{
+		Start: ifEmpty(primary.Start, secondary.Start),
+		End:   ifEmpty(primary.End, secondary.End),
+		Style: ifNil(primary.Style, secondary.Style),
+	}
+}
+
+func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions) string {
+	terminalWidth, _, err := term.GetSize(int(p.output.Fd()))
+	if err != nil {
+		terminalWidth = 80
+	}
+	if options.MinWidth == nil {
+		minWidth := 0
+		options.MinWidth = &minWidth
+	}
+	if options.MaxWidth == nil {
+		maxWidth := math.MaxInt
+		options.MaxWidth = &maxWidth
+	}
+	minWidth := max(*options.MinWidth, 1)
+	maxWith := min(*options.MaxWidth, terminalWidth)
+
+	firstLine := getLineOptions(options, FirstLine)
+	newLine := getLineOptions(options, NewLine)
+	lastLine := getLineOptions(options, LastLine)
+
+	formattedLines := []string{}
+	for i, line := range lines {
+		var opts FormatLineOptions
+		if i == 0 && len(lines) == 1 {
+			opts = mergeOptions(firstLine, lastLine)
+		} else if i == 0 {
+			opts = firstLine
+		} else if i == 1 && len(lines) == 2 {
+			opts = mergeOptions(lastLine, newLine)
+		} else if i+1 == len(lines) {
+			opts = lastLine
+		} else {
+			opts = newLine
+		}
+
+		emptySlots := utils.StrLength(opts.Start+opts.End) + utils.StrLength(opts.Style("")) + 2
+		formatAndAddLine := func(line string) {
+			styledLine := opts.Style(line)
+			fullLine := styledLine + strings.Repeat(" ", max(minWidth-utils.StrLength(styledLine)-emptySlots, 0))
+			formattedLine := fmt.Sprintf("%s %s %s", opts.Start, fullLine, opts.End)
+			formattedLines = append(formattedLines, formattedLine)
+		}
+
+		currentLine := ""
+		for _, word := range strings.Split(line, " ") {
+			if word == "" {
+				currentLine += " "
+			} else if currentLine == "" && utils.StrLength(word)+emptySlots <= maxWith {
+				currentLine = word
+			} else if utils.StrLength(currentLine+word)+emptySlots+1 <= maxWith {
+				currentLine += " " + word
+			} else if utils.StrLength(word)+emptySlots >= maxWith {
+				var splitIndex int
+				if utils.StrLength(currentLine) == 0 {
+					splitIndex = maxWith - emptySlots
+					formatAndAddLine(word[0:splitIndex])
+				} else {
+					splitIndex = maxWith - utils.StrLength(currentLine) - emptySlots - 1
+					formatAndAddLine(currentLine + " " + word[0:splitIndex])
+				}
+
+				chunkLength := maxWith - emptySlots
+				chunk := word[splitIndex:]
+				for utils.StrLength(chunk) > chunkLength {
+					formatAndAddLine(chunk[0:chunkLength])
+					chunk = chunk[chunkLength:]
+				}
+
+				currentLine = chunk
+			} else {
+				formatAndAddLine(currentLine)
+				currentLine = word
+			}
+		}
+		formatAndAddLine(currentLine)
+	}
+
+	return strings.Join(formattedLines, "\r\n")
 }
 
 func (p *Prompt[TValue]) render(prevFrame *string) {

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"regexp"
 	"strings"
 )
 
@@ -20,6 +21,39 @@ func DiffLines(a string, b string) []int {
 	}
 
 	return diff
+}
+
+func isControlCharacter(r rune) bool {
+	return r <= 0x1f || (r >= 0x7f && r <= 0x9f)
+}
+
+func isCombiningCharacter(r rune) bool {
+	return r >= 0x300 && r <= 0x36f
+}
+
+func isSurrogatePair(r rune) bool {
+	return r >= 0xd800 && r <= 0xdbff
+}
+
+func StrLength(str string) int {
+	if len(str) == 0 {
+		return 0
+	}
+	ansiRegex := regexp.MustCompile(`[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))`)
+	parsedStr := ansiRegex.ReplaceAllString(str, "")
+	length := 0
+
+	for i := 0; i < len(parsedStr); i++ {
+		r := rune(parsedStr[i])
+		if isControlCharacter(r) || isCombiningCharacter(r) {
+			continue
+		} else if isSurrogatePair(r) {
+			i++
+		}
+		length++
+	}
+
+	return length
 }
 
 func MinMaxIndex(index int, max int) int {
