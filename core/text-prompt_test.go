@@ -87,9 +87,11 @@ func TestTextPromptPlaceholderCompletion(t *testing.T) {
 	p.Value = ""
 	p.PressKey(&core.Key{Name: core.KeyTab})
 	assert.Equal(t, "foo", p.Value)
+	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Placeholder = "foo"
 	p.Value = "bar"
 	p.PressKey(&core.Key{Name: core.KeyTab})
 	assert.Equal(t, "bar", p.Value)
+	assert.Equal(t, 3, p.CursorIndex)
 }

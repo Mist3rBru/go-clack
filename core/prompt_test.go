@@ -237,20 +237,29 @@ func TestFormatLines(t *testing.T) {
 		fmt.Sprintf("* %s *", "b"),
 	}, "\r\n")
 	assert.Equal(t, expected, frame)
+}
 
-	lines = []string{strings.Repeat("a", 81), "b"}
-	frame = p.FormatLines(lines, core.FormatLinesOptions{
+func TestFormatLinesWithOverflowedWords(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{strings.Repeat("a", 81), strings.Repeat("b", 76), strings.Repeat("c", 79)}
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
 		FirstLine: core.FormatLineOptions{
 			Sides: "-",
+		},
+		Default: core.FormatLineOptions{
+			Sides: "|",
 		},
 		LastLine: core.FormatLineOptions{
 			Sides: "*",
 		},
 	})
-	expected = strings.Join([]string{
+	expected := strings.Join([]string{
 		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
 		fmt.Sprintf("- %s -", strings.Repeat("a", 5)),
-		fmt.Sprintf("* %s *", "b"),
+		fmt.Sprintf("| %s |", strings.Repeat("b", 76)),
+		fmt.Sprintf("* %s *", strings.Repeat("c", 76)),
+		fmt.Sprintf("* %s *", strings.Repeat("c", 3)),
 	}, "\r\n")
 	assert.Equal(t, expected, frame)
 
@@ -273,58 +282,89 @@ func TestFormatLines(t *testing.T) {
 		fmt.Sprintf("- %s -", "b"),
 	}, "\r\n")
 	assert.Equal(t, expected, frame)
+}
 
-	lines = []string{strings.Repeat("a", 67), "b"}
+func TestFormatLinesWithBoxFormat(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{strings.Repeat("a", 67), "b"}
 	width := 70
-	frame = p.FormatLines(lines, core.FormatLinesOptions{
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
 		Default: core.FormatLineOptions{
 			Sides: "|",
 		},
 		MinWidth: &width,
 		MaxWidth: &width,
 	})
-	expected = strings.Join([]string{
+	expected := strings.Join([]string{
 		fmt.Sprintf("| %s%s |", strings.Repeat("a", 66), strings.Repeat(" ", 0)),
 		fmt.Sprintf("| %s%s |", strings.Repeat("a", 1), strings.Repeat(" ", 65)),
 		fmt.Sprintf("| %s%s |", strings.Repeat("b", 1), strings.Repeat(" ", 65)),
 	}, "\r\n")
 	assert.Equal(t, expected, frame)
+}
 
-	lines = []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
-	frame = p.FormatLines(lines, core.FormatLinesOptions{
+func TestFormatLinesWithComplexParams(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
 		FirstLine: core.FormatLineOptions{
 			Start: "-",
-			End:   "*",
 		},
 		NewLine: core.FormatLineOptions{
-			Start: "*",
-			End:   "-",
+			End: "-",
 		},
 		LastLine: core.FormatLineOptions{
 			Start: "=",
 			End:   "=",
 		},
+		Default: core.FormatLineOptions{
+			Sides: "*",
+		},
 	})
-	expected = strings.Join([]string{
+	expected := strings.Join([]string{
 		fmt.Sprintf("- %s %s *", strings.Repeat("a", 20), strings.Repeat("b", 55)),
 		fmt.Sprintf("- %s *", strings.Repeat("b", 25)),
 		fmt.Sprintf("= %s =", strings.Repeat("c", 1)),
 	}, "\r\n")
 	assert.Equal(t, expected, frame)
+}
 
-	lines = []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
-	frame = p.FormatLines(lines, core.FormatLinesOptions{
+func TestFormatLinesWithStyleCallback(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
 		Default: core.FormatLineOptions{
 			Style: func(line string) string {
 				return fmt.Sprintf("(%s)", line)
 			},
 		},
 	})
-	expected = strings.Join([]string{
+	expected := strings.Join([]string{
 		fmt.Sprintf("  (%s %s)  ", strings.Repeat("a", 20), strings.Repeat("b", 53)),
 		fmt.Sprintf("  (%s)  ", strings.Repeat("b", 27)),
 		fmt.Sprintf("  (%s)  ", strings.Repeat("c", 1)),
 	}, "\r\n")
+	assert.Equal(t, expected, frame)
+}
+
+func TestFormatLinesWithBlackLine(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{color["inverse"](" ")}
+	width := 80
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
+		Default: core.FormatLineOptions{
+			Start: "|",
+		},
+		LastLine: core.FormatLineOptions{
+			End: "|",
+		},
+		MinWidth: &width,
+	})
+	expected := fmt.Sprintf("| %s |", strings.Repeat(" ", 76))
 	assert.Equal(t, expected, frame)
 }
 

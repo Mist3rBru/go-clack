@@ -416,6 +416,11 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 			formattedLines = append(formattedLines, formattedLine)
 		}
 
+		if len(lines) == 1 && strings.Trim(lines[0], " ") == "" {
+			formatAndAddLine("")
+			break
+		}
+
 		currentLine := ""
 		for _, word := range strings.Split(line, " ") {
 			if word == "" {

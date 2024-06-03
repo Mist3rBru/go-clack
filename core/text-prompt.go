@@ -37,6 +37,7 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 		key := args[0].(*Key)
 		if key.Name == KeyTab && p.Value == "" && p.Placeholder != "" {
 			p.Value = p.Placeholder
+			p.CursorIndex = len(p.Placeholder)
 			return
 		} else {
 			p.Value = p.TrackKeyValue(key, p.Value)
