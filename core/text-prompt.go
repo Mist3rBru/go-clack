@@ -6,12 +6,14 @@ import (
 
 type TextPrompt struct {
 	Prompt[string]
+	Placeholder string
 }
 
 type TextPromptParams struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue string
+	Placeholder  string
 	Validate     func(value string) error
 	Render       func(p *TextPrompt) string
 }
@@ -29,9 +31,16 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 				return params.Render(p)
 			},
 		}),
+		Placeholder: params.Placeholder,
 	}
 	p.On(EventKey, func(args ...any) {
-		p.Value = p.TrackKeyValue(args[0].(*Key), p.Value)
+		key := args[0].(*Key)
+		if key.Name == KeyTab && p.Value == "" && p.Placeholder != "" {
+			p.Value = p.Placeholder
+			return
+		} else {
+			p.Value = p.TrackKeyValue(key, p.Value)
+		}
 	})
 	return p
 }

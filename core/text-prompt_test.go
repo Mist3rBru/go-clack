@@ -67,7 +67,7 @@ func TestTextPromptValueWithCursor(t *testing.T) {
 	assert.Equal(t, expected, p.ValueWithCursor())
 }
 
-func TestValidateText(t *testing.T) {
+func TestTextPromptValidate(t *testing.T) {
 	p := core.NewTextPrompt(core.TextPromptParams{
 		InitialValue: "123",
 		Validate: func(value string) error {
@@ -78,4 +78,18 @@ func TestValidateText(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.KeyEnter})
 	assert.Equal(t, core.StateError, p.State)
 	assert.Equal(t, "invalid value: 123", p.Error)
+}
+
+func TestTextPromptPlaceholderCompletion(t *testing.T) {
+	p := newTextPrompt()
+
+	p.Placeholder = "foo"
+	p.Value = ""
+	p.PressKey(&core.Key{Name: core.KeyTab})
+	assert.Equal(t, "foo", p.Value)
+
+	p.Placeholder = "foo"
+	p.Value = "bar"
+	p.PressKey(&core.Key{Name: core.KeyTab})
+	assert.Equal(t, "bar", p.Value)
 }
