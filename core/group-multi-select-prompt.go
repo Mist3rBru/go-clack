@@ -19,11 +19,11 @@ type GroupMultiSelectPrompt[TValue comparable] struct {
 }
 
 type GroupMultiSelectPromptParams[TValue comparable] struct {
-	Input   *os.File
-	Output  *os.File
-	Options map[string][]SelectOption[TValue]
-	Value   []TValue
-	Render  func(p *GroupMultiSelectPrompt[TValue]) string
+	Input        *os.File
+	Output       *os.File
+	Options      map[string][]SelectOption[TValue]
+	InitialValue []TValue
+	Render       func(p *GroupMultiSelectPrompt[TValue]) string
 }
 
 func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptParams[TValue]) *GroupMultiSelectPrompt[TValue] {
@@ -48,9 +48,9 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 	var p *GroupMultiSelectPrompt[TValue]
 	p = &GroupMultiSelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
-			Input:  params.Input,
-			Output: params.Output,
-			Value:  params.Value,
+			Input:        params.Input,
+			Output:       params.Output,
+			InitialValue: params.InitialValue,
 			Render: func(_p *Prompt[[]TValue]) string {
 				return params.Render(p)
 			},

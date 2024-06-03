@@ -18,24 +18,24 @@ type PathPrompt struct {
 }
 
 type PathPromptParams struct {
-	Input       *os.File
-	Output      *os.File
-	Value       string
-	Placeholder string
-	OnlyShowDir bool
-	Validate    func(value string) error
-	Render      func(p *PathPrompt) string
+	Input        *os.File
+	Output       *os.File
+	InitialValue string
+	Placeholder  string
+	OnlyShowDir  bool
+	Validate     func(value string) error
+	Render       func(p *PathPrompt) string
 }
 
 func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	var p *PathPrompt
 	p = &PathPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
-			Input:       params.Input,
-			Output:      params.Output,
-			Value:       params.Value,
-			CursorIndex: len(params.Value),
-			Validate:    params.Validate,
+			Input:        params.Input,
+			Output:       params.Output,
+			InitialValue: params.InitialValue,
+			CursorIndex:  len(params.InitialValue),
+			Validate:     params.Validate,
 			Render: func(_p *Prompt[string]) string {
 				return params.Render(p)
 			},
@@ -44,7 +44,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,
 	}
-	if cwd, err := os.Getwd(); err == nil && params.Value == "" {
+	if cwd, err := os.Getwd(); err == nil && params.InitialValue == "" {
 		p.Prompt.Value = cwd
 		p.Value = cwd
 		p.CursorIndex = len(cwd)

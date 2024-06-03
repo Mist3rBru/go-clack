@@ -108,7 +108,7 @@ func TestPathValueWithHint(t *testing.T) {
 
 func TestValidatePath(t *testing.T) {
 	p := core.NewPathPrompt(core.PathPromptParams{
-		Value: "/folder",
+		InitialValue: "/folder",
 		Validate: func(value string) error {
 			return fmt.Errorf("invalid path: %s", value)
 		},

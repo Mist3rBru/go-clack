@@ -9,22 +9,22 @@ type TextPrompt struct {
 }
 
 type TextPromptParams struct {
-	Input    *os.File
-	Output   *os.File
-	Value    string
-	Validate func(value string) error
-	Render   func(p *TextPrompt) string
+	Input        *os.File
+	Output       *os.File
+	InitialValue string
+	Validate     func(value string) error
+	Render       func(p *TextPrompt) string
 }
 
 func NewTextPrompt(params TextPromptParams) *TextPrompt {
 	var p *TextPrompt
 	p = &TextPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
-			Input:       params.Input,
-			Output:      params.Output,
-			Value:       params.Value,
-			CursorIndex: len(params.Value),
-			Validate:    params.Validate,
+			Input:        params.Input,
+			Output:       params.Output,
+			InitialValue: params.InitialValue,
+			CursorIndex:  len(params.InitialValue),
+			Validate:     params.Validate,
 			Render: func(_p *Prompt[string]) string {
 				return params.Render(p)
 			},

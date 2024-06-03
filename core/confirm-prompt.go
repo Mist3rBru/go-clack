@@ -13,21 +13,21 @@ type ConfirmPrompt struct {
 }
 
 type ConfirmPromptParams struct {
-	Input    *os.File
-	Output   *os.File
-	Active   string
-	Inactive string
-	Value    bool
-	Render   func(p *ConfirmPrompt) string
+	Input        *os.File
+	Output       *os.File
+	Active       string
+	Inactive     string
+	InitialValue bool
+	Render       func(p *ConfirmPrompt) string
 }
 
 func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 	var p *ConfirmPrompt
 	p = &ConfirmPrompt{
 		Prompt: *NewPrompt(PromptParams[bool]{
-			Input:  params.Input,
-			Output: params.Output,
-			Value:  params.Value,
+			Input:        params.Input,
+			Output:       params.Output,
+			InitialValue: params.InitialValue,
 			Render: func(_p *Prompt[bool]) string {
 				return params.Render(p)
 			},

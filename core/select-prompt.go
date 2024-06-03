@@ -12,17 +12,17 @@ type SelectPrompt[TValue comparable] struct {
 }
 
 type SelectPromptParams[TValue comparable] struct {
-	Input   *os.File
-	Output  *os.File
-	Value   TValue
-	Options []SelectOption[TValue]
-	Render  func(p *SelectPrompt[TValue]) string
+	Input        *os.File
+	Output       *os.File
+	InitialValue TValue
+	Options      []SelectOption[TValue]
+	Render       func(p *SelectPrompt[TValue]) string
 }
 
 func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *SelectPrompt[TValue] {
 	startIndex := 0
 	for i, option := range params.Options {
-		if option.Value == params.Value {
+		if option.Value == params.InitialValue {
 			startIndex = i
 			break
 		}
@@ -30,10 +30,10 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 	var p *SelectPrompt[TValue]
 	p = &SelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[TValue]{
-			Input:       params.Input,
-			Output:      params.Output,
-			Value:       params.Options[startIndex].Value,
-			CursorIndex: startIndex,
+			Input:        params.Input,
+			Output:       params.Output,
+			InitialValue: params.Options[startIndex].Value,
+			CursorIndex:  startIndex,
 			Render: func(_p *Prompt[TValue]) string {
 				return params.Render(p)
 			},

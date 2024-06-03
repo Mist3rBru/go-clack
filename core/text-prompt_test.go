@@ -22,7 +22,7 @@ func newTextPrompt() *core.TextPrompt {
 
 func TestTextPromptInitialValue(t *testing.T) {
 	p := core.NewTextPrompt(core.TextPromptParams{
-		Value: "foo",
+		InitialValue: "foo",
 	})
 
 	assert.Equal(t, "foo", p.Value)
@@ -69,7 +69,7 @@ func TestTextPromptValueWithCursor(t *testing.T) {
 
 func TestValidateText(t *testing.T) {
 	p := core.NewTextPrompt(core.TextPromptParams{
-		Value: "123",
+		InitialValue: "123",
 		Validate: func(value string) error {
 			return fmt.Errorf("invalid value: %s", value)
 		},

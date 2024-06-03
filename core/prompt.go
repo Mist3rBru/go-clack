@@ -31,12 +31,12 @@ type Prompt[TValue any] struct {
 }
 
 type PromptParams[TValue any] struct {
-	Input       *os.File
-	Output      *os.File
-	Value       TValue
-	CursorIndex int
-	Validate    func(value TValue) error
-	Render      func(p *Prompt[TValue]) string
+	Input        *os.File
+	Output       *os.File
+	InitialValue TValue
+	CursorIndex  int
+	Validate     func(value TValue) error
+	Render       func(p *Prompt[TValue]) string
 }
 
 func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
@@ -54,7 +54,7 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 		rl:     bufio.NewReader(params.Input),
 
 		State:       "initial",
-		Value:       params.Value,
+		Value:       params.InitialValue,
 		CursorIndex: params.CursorIndex,
 
 		Validate: params.Validate,

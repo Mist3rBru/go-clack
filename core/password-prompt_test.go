@@ -14,7 +14,7 @@ func newPasswordPrompt() *core.PasswordPrompt {
 
 func TestPasswordPromptInitialValue(t *testing.T) {
 	p := core.NewPasswordPrompt(core.PasswordPromptParams{
-		Value: "foo",
+		InitialValue: "foo",
 	})
 
 	assert.Equal(t, "foo", p.Value)
@@ -49,7 +49,7 @@ func TestChangePasswordMask(t *testing.T) {
 
 func TestValidatePassword(t *testing.T) {
 	p := core.NewPasswordPrompt(core.PasswordPromptParams{
-		Value: "123",
+		InitialValue: "123",
 		Validate: func(value string) error {
 			return fmt.Errorf("invalid password: %s", value)
 		},
