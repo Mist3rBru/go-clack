@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
@@ -536,8 +535,8 @@ outer:
 		}
 	}
 
-	if ref := reflect.ValueOf(p.Value); ref.IsNil() {
-		return p.Value, fmt.Errorf("Prompt canceled")
+	if p.State == StateCancel {
+		return p.Value, fmt.Errorf("prompt canceled")
 	}
 
 	return p.Value, nil
