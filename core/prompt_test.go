@@ -301,6 +301,9 @@ func TestFormatLinesWithBoxFormat(t *testing.T) {
 		fmt.Sprintf("| %s%s |", strings.Repeat("a", 1), strings.Repeat(" ", 65)),
 		fmt.Sprintf("| %s%s |", strings.Repeat("b", 1), strings.Repeat(" ", 65)),
 	}, "\r\n")
+	for i, line := range strings.Split(frame, "\r\n") {
+		assert.Equal(t, width, len(line), fmt.Sprintf("index: %d\nline: %s", i, line))
+	}
 	assert.Equal(t, expected, frame)
 }
 

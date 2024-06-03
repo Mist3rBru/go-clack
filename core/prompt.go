@@ -390,7 +390,7 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 		maxWidth := math.MaxInt
 		options.MaxWidth = &maxWidth
 	}
-	minWidth := max(*options.MinWidth, 1)
+	minWidth := max(*options.MinWidth, 0)
 	maxWith := min(*options.MaxWidth, terminalWidth)
 
 	firstLine := getLineOptions(options, FirstLine)
@@ -412,11 +412,31 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 			opts = newLine
 		}
 
-		emptySlots := utils.StrLength(opts.Start+opts.End) + utils.StrLength(opts.Style("")) + 2
+		// If empty slot > 0. Sum empty space
+		startEmptySlots := utils.StrLength(opts.Start)
+		if startEmptySlots != 0 {
+			startEmptySlots++
+		}
+		endEmptySlots := utils.StrLength(opts.End)
+		if endEmptySlots > 0 {
+			endEmptySlots++
+		}
+		emptySlots := startEmptySlots + endEmptySlots + utils.StrLength(opts.Style(""))
+
 		formatAndAddLine := func(line string) {
+			var startSpace, endSpace string
+			if startEmptySlots > 0 {
+				startSpace = " "
+			}
 			styledLine := opts.Style(line)
-			fullLine := styledLine + strings.Repeat(" ", max(minWidth-utils.StrLength(styledLine)-emptySlots, 0))
-			formattedLine := fmt.Sprintf("%s %s %s", opts.Start, fullLine, opts.End)
+			if minWidth > 0 && endEmptySlots > 0 {
+				endSpace = strings.Repeat(" ", max(minWidth+1-startEmptySlots-utils.StrLength(styledLine)-endEmptySlots, 0))
+			} else if minWidth > 0 {
+				endSpace = strings.Repeat(" ", max(minWidth+1-startEmptySlots-utils.StrLength(styledLine), 0))
+			} else if endEmptySlots > 0 {
+				endSpace = " "
+			}
+			formattedLine := strings.Join([]string{opts.Start, startSpace, styledLine, endSpace, opts.End}, "")
 			formattedLines = append(formattedLines, formattedLine)
 		}
 

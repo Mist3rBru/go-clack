@@ -23,4 +23,5 @@ func TestStrLength(t *testing.T) {
 	assert.Equal(t, 1, utils.StrLength(color["inverse"](" ")))
 	assert.Equal(t, 5, utils.StrLength(color["cyan"]("| foo")))
 	assert.Equal(t, 5, utils.StrLength(color["gray"]("|")+" "+color["dim"]("foo")))
+	assert.Equal(t, 1, utils.StrLength(color["green"]("◆")))
 }
