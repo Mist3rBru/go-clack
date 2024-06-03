@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"math"
 	"os"
@@ -22,9 +23,10 @@ type Prompt[TValue any] struct {
 	output *os.File
 
 	State       State
-	Value       TValue
 	Error       string
+	Value       TValue
 	CursorIndex int
+	Frame       string
 
 	Validate func(value TValue) error
 	Render   func(p *Prompt[TValue]) string
@@ -136,7 +138,8 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	}
 }
 
-func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
+func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
+	value := *valuePtr
 	switch key.Name {
 	case KeyBackspace:
 		if p.CursorIndex > 0 {
@@ -167,7 +170,8 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string) string {
 			p.CursorIndex++
 		}
 	}
-	return value
+
+	*valuePtr = value
 }
 
 func (p *Prompt[TValue]) PressKey(key *Key) {
@@ -421,11 +425,9 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 			break
 		}
 
-		currentLine := ""
+		var currentLine string
 		for _, word := range strings.Split(line, " ") {
-			if word == "" {
-				currentLine += " "
-			} else if currentLine == "" && utils.StrLength(word)+emptySlots <= maxWith {
+			if currentLine == "" && utils.StrLength(word)+emptySlots <= maxWith {
 				currentLine = word
 			} else if utils.StrLength(currentLine+word)+emptySlots+1 <= maxWith {
 				currentLine += " " + word
@@ -458,7 +460,7 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 	return strings.Join(formattedLines, "\r\n")
 }
 
-func (p *Prompt[TValue]) render(prevFrame *string) {
+func (p *Prompt[TValue]) render() {
 	frame := p.Render(p)
 
 	if lines := strings.Split(frame, "\r\n"); len(lines) == 1 {
@@ -468,18 +470,17 @@ func (p *Prompt[TValue]) render(prevFrame *string) {
 	if p.State == StateInitial {
 		p.write(utils.HideCursor())
 		p.write(frame)
-		p.State = StateActive
-		*prevFrame = frame
+		p.Frame = frame
 		return
 	}
 
-	if frame == *prevFrame {
+	if frame == p.Frame {
 		return
 	}
 
-	diff := utils.DiffLines(frame, *prevFrame)
+	diff := utils.DiffLines(frame, p.Frame)
 	diffLineIndex := diff[0]
-	prevFrameLines := strings.Split((*prevFrame), "\n")
+	prevFrameLines := strings.Split((p.Frame), "\n")
 
 	// Move to first diff line
 	p.write(utils.MoveCursor(-(len(prevFrameLines) - 1), -999))
@@ -489,7 +490,7 @@ func (p *Prompt[TValue]) render(prevFrame *string) {
 		p.write(utils.EraseCurrentLine())
 		lines := strings.Split(frame, "\n")
 		p.write(lines[diffLineIndex])
-		*prevFrame = frame
+		p.Frame = frame
 		p.write(utils.MoveCursorDown(len(lines) - diffLineIndex - 1))
 		return
 	}
@@ -498,15 +499,17 @@ func (p *Prompt[TValue]) render(prevFrame *string) {
 	lines := strings.Split(frame, "\n")
 	newLines := lines[diffLineIndex:]
 	p.write(strings.Join(newLines, "\n"))
-	*prevFrame = frame
+	p.Frame = frame
 }
 
 func (p *Prompt[TValue]) Run() (TValue, error) {
-	oldState, err := term.MakeRaw(int(p.input.Fd()))
-	if err != nil {
-		return p.Value, err
+	if flag.Lookup("test.v") == nil {
+		oldState, err := term.MakeRaw(int(p.input.Fd()))
+		if err != nil {
+			return p.Value, err
+		}
+		defer term.Restore(int(p.input.Fd()), oldState)
 	}
-	defer term.Restore(int(p.input.Fd()), oldState)
 
 	done := make(chan struct{})
 	closeCb := func(args ...any) {
@@ -517,8 +520,7 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 	p.Once(EventSubmit, closeCb)
 	p.Once(EventCancel, closeCb)
 
-	prevFrame := ""
-	p.render(&prevFrame)
+	p.render()
 
 outer:
 	for {
@@ -535,7 +537,7 @@ outer:
 			}
 			key := p.ParseKey(r)
 			p.PressKey(key)
-			p.render(&prevFrame)
+			p.render()
 			p.Emit(Event(p.State), p.Value)
 		}
 	}

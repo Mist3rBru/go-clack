@@ -40,7 +40,7 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			p.CursorIndex = len(p.Placeholder)
 			return
 		} else {
-			p.Value = p.TrackKeyValue(key, p.Value)
+			p.TrackKeyValue(key, &p.Value)
 		}
 	})
 	return p

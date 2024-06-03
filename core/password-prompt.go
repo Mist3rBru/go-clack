@@ -32,7 +32,7 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 		}),
 	}
 	p.On(EventKey, func(args ...any) {
-		p.Value = p.TrackKeyValue(args[0].(*Key), p.Value)
+		p.TrackKeyValue(args[0].(*Key), &p.Value)
 	})
 	return p
 }

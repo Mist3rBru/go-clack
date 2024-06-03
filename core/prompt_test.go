@@ -104,16 +104,16 @@ func TestTrackValue(t *testing.T) {
 	assert.Equal(t, "", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.Value = p.TrackKeyValue(&core.Key{Char: "a"}, p.Value)
+	p.TrackKeyValue(&core.Key{Char: "a"}, &p.Value)
 	assert.Equal(t, "a", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
-	p.Value = p.TrackKeyValue(&core.Key{Char: "b"}, p.Value)
+	p.TrackKeyValue(&core.Key{Char: "b"}, &p.Value)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.CursorIndex = 1
-	p.Value = p.TrackKeyValue(&core.Key{Char: "c"}, p.Value)
+	p.TrackKeyValue(&core.Key{Char: "c"}, &p.Value)
 	assert.Equal(t, "acb", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 }
@@ -123,32 +123,32 @@ func TestTrackCursor(t *testing.T) {
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyHome}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyHome}, &p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.KeyEnd}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyEnd}, &p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyLeft}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyLeft}, &p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.KeyLeft}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyLeft}, &p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 2
-	p.TrackKeyValue(&core.Key{Name: core.KeyRight}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyRight}, &p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyRight}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyRight}, &p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 }
 
@@ -157,25 +157,25 @@ func TestTrackBackspace(t *testing.T) {
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.Value = p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 2
-	p.Value = p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
 	assert.Equal(t, "ac", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 1
-	p.Value = p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
 	assert.Equal(t, "bc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.Value = p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
 	assert.Equal(t, "abc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 }
