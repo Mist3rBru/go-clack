@@ -10,10 +10,7 @@ import (
 )
 
 func newPathPrompt() *core.PathPrompt {
-	return core.NewPathPrompt(core.PathPromptParams{
-		Input:  os.Stdin,
-		Output: os.Stdout,
-	})
+	return core.NewPathPrompt(core.PathPromptParams{})
 }
 
 func TestPathDefaultValue(t *testing.T) {

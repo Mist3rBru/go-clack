@@ -41,6 +41,12 @@ type PromptParams[TValue any] struct {
 }
 
 func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
+	if params.Input == nil {
+		params.Input = os.Stdin
+	}
+	if params.Output == nil {
+		params.Output = os.Stdout
+	}
 	return &Prompt[TValue]{
 		listeners: make(map[Event][]Listener),
 

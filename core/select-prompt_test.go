@@ -1,7 +1,6 @@
 package core_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -10,8 +9,6 @@ import (
 
 func newSelectPrompt() *core.SelectPrompt[string] {
 	return core.NewSelectPrompt(core.SelectPromptParams[string]{
-		Input:  os.Stdin,
-		Output: os.Stdout,
 		Options: []core.SelectOption[string]{
 			{Value: "a"},
 			{Value: "b"},

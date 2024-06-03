@@ -3,7 +3,6 @@ package core_test
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"strings"
 	"testing"
 
@@ -12,11 +11,7 @@ import (
 )
 
 func newPrompt() *core.Prompt[string] {
-	return core.NewPrompt(core.PromptParams[string]{
-		Input:  os.Stdin,
-		Output: os.Stdout,
-		Value:  "",
-	})
+	return core.NewPrompt(core.PromptParams[string]{})
 }
 
 const testEvent = core.Event("test")

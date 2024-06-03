@@ -1,7 +1,6 @@
 package core_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -10,8 +9,6 @@ import (
 
 func newMultiSelectPrompt() *core.MultiSelectPrompt[string] {
 	return core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
-		Input:  os.Stdin,
-		Output: os.Stdout,
 		Options: []core.SelectOption[string]{
 			{Value: "a"},
 			{Value: "b"},

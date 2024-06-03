@@ -2,7 +2,6 @@ package core_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -15,8 +14,6 @@ var color = utils.CreateColors()
 
 func newTextPrompt() *core.TextPrompt {
 	return core.NewTextPrompt(core.TextPromptParams{
-		Input:  os.Stdin,
-		Output: os.Stdout,
 		Render: func(p *core.TextPrompt) string {
 			return p.Value
 		},

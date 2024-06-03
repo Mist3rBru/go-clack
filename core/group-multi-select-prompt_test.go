@@ -1,7 +1,6 @@
 package core_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -21,8 +20,6 @@ func newGroupMultiSelectPrompt() *core.GroupMultiSelectPrompt[string] {
 		{Value: "z"},
 	}
 	return core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
-		Input:   os.Stdin,
-		Output:  os.Stdout,
 		Options: options,
 	})
 }

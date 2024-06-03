@@ -2,7 +2,6 @@ package core_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -10,11 +9,7 @@ import (
 )
 
 func newPasswordPrompt() *core.PasswordPrompt {
-	return core.NewPasswordPrompt(core.PasswordPromptParams{
-		Input:  os.Stdin,
-		Output: os.Stdout,
-		Value:  "",
-	})
+	return core.NewPasswordPrompt(core.PasswordPromptParams{})
 }
 
 func TestPasswordPromptInitialValue(t *testing.T) {

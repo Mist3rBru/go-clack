@@ -2,7 +2,6 @@ package core_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -10,10 +9,7 @@ import (
 )
 
 func newSelectPathPrompt() *core.SelectPathPrompt {
-	return core.NewSelectPathPrompt(core.SelectPathPromptParams{
-		Input:  os.Stdin,
-		Output: os.Stdout,
-	})
+	return core.NewSelectPathPrompt(core.SelectPathPromptParams{})
 }
 
 func TestChangeSelectPathCursor(t *testing.T) {

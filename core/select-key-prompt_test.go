@@ -1,7 +1,6 @@
 package core_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -10,8 +9,6 @@ import (
 
 func newSelectKeyPrompt() *core.SelectKeyPrompt[string] {
 	return core.NewSelectKeyPrompt(core.SelectKeyPromptParams[string]{
-		Input:  os.Stdin,
-		Output: os.Stdout,
 		Options: []core.SelectKeyOption[string]{
 			{
 				Key:   "a",

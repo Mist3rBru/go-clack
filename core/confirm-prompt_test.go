@@ -1,7 +1,6 @@
 package core_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -10,8 +9,6 @@ import (
 
 func newConfirmPrompt() *core.ConfirmPrompt {
 	return core.NewConfirmPrompt(core.ConfirmPromptParams{
-		Input:    os.Stdin,
-		Output:   os.Stdout,
 		Active:   "Yes",
 		Inactive: "No",
 	})
