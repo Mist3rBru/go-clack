@@ -21,7 +21,6 @@ type PathPromptParams struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue string
-	Placeholder  string
 	OnlyShowDir  bool
 	Validate     func(value string) error
 	Render       func(p *PathPrompt) string
@@ -43,7 +42,6 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 				return params.Render(p)
 			},
 		}),
-		Placeholder: params.Placeholder,
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,
 	}
@@ -113,7 +111,7 @@ func (p *PathPrompt) changeHint() {
 	}
 }
 
-func (p *PathPrompt) ValueWithHint() string {
+func (p *PathPrompt) ValueWithCursor() string {
 	var (
 		value string
 		hint  string

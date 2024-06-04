@@ -91,19 +91,19 @@ func TestPathComplete(t *testing.T) {
 func TestPathValueWithHint(t *testing.T) {
 	p := newPathPrompt()
 
-	assert.Equal(t, p.Value+p.Hint, p.ValueWithHint())
+	assert.Equal(t, p.Value+p.Hint, p.ValueWithCursor())
 
 	p.Hint = ""
 	p.CursorIndex = len(p.Value)
-	assert.Equal(t, p.Value+" ", p.ValueWithHint())
+	assert.Equal(t, p.Value+" ", p.ValueWithCursor())
 
 	p.Hint = ""
 	p.CursorIndex = len(p.Value) - 1
-	assert.Equal(t, p.Value, p.ValueWithHint())
+	assert.Equal(t, p.Value, p.ValueWithCursor())
 
 	p.Hint = "/"
 	p.CursorIndex = len(p.Value) - 1
-	assert.Equal(t, p.Value+p.Hint, p.ValueWithHint())
+	assert.Equal(t, p.Value+p.Hint, p.ValueWithCursor())
 }
 
 func TestValidatePath(t *testing.T) {
