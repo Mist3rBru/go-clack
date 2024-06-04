@@ -37,7 +37,7 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 			switch p.State {
 			case core.SubmitState, core.CancelState:
 			default:
-				var radioOptions []string
+				radioOptions := make([]string, len(params.Options))
 				for i, option := range params.Options {
 					var radio, label, hint string
 					if i == p.CursorIndex {
@@ -50,7 +50,7 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 						radio = utils.Color["dim"](utils.S_RADIO_INACTIVE)
 						label = utils.Color["dim"](option.Label)
 					}
-					radioOptions = append(radioOptions, strings.Join([]string{radio, label, hint}, " "))
+					radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
 				}
 				value = p.LimitLines(radioOptions, 3)
 			}

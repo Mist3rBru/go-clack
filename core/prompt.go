@@ -454,8 +454,10 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 
 		var currentLine string
 		for _, word := range strings.Split(line, " ") {
-			if currentLine == "" && utils.StrLength(word)+emptySlots <= maxWith {
-				currentLine = word
+			if word == "" {
+				currentLine += " "
+			} else if strings.Trim(currentLine, " ") == "" && utils.StrLength(currentLine+word)+emptySlots <= maxWith {
+				currentLine += word
 			} else if utils.StrLength(currentLine+word)+emptySlots+1 <= maxWith {
 				currentLine += " " + word
 			} else if utils.StrLength(word)+emptySlots >= maxWith {

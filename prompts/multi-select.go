@@ -52,7 +52,7 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 				}
 
 			default:
-				var radioOptions []string
+				radioOptions := make([]string, len(params.Options))
 				for i, option := range p.Options {
 					var radio, label, hint string
 					if option.IsSelected && i == p.CursorIndex {
@@ -74,7 +74,7 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 						radio = utils.Color["dim"](utils.S_CHECKBOX_INACTIVE)
 						label = utils.Color["dim"](option.Label)
 					}
-					radioOptions = append(radioOptions, strings.Join([]string{radio, label, hint}, " "))
+					radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
 				}
 				value = p.LimitLines(radioOptions, 3)
 			}

@@ -246,6 +246,26 @@ func TestFormatLines(t *testing.T) {
 	assert.Equal(t, expected, frame)
 }
 
+func TestFormatLinesWithBlankSpaces(t *testing.T) {
+	p := newPrompt()
+
+	lines := []string{"a", " b", "  c", "x", " y", "  z"}
+	frame := p.FormatLines(lines, core.FormatLinesOptions{
+		Default: core.FormatLineOptions{
+			Start: "|",
+		},
+	})
+	expected := strings.Join([]string{
+		"| a",
+		"|  b",
+		"|   c",
+		"| x",
+		"|  y",
+		"|   z",
+	}, "\r\n")
+	assert.Equal(t, expected, frame)
+}
+
 func TestFormatLinesWithOverflowedWords(t *testing.T) {
 	p := newPrompt()
 

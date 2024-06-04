@@ -24,10 +24,13 @@ func Path(params PathParams) (string, error) {
 				hintOptions = "\n"
 			}
 			for i, hintOption := range p.HintOptions {
+				if i != 0 {
+					hintOptions += " "
+				}
 				if i == p.HintIndex {
-					hintOptions += " " + utils.Color["cyan"](hintOption)
+					hintOptions += utils.Color["cyan"](hintOption)
 				} else {
-					hintOptions += " " + utils.Color["dim"](hintOption)
+					hintOptions += utils.Color["dim"](hintOption)
 				}
 			}
 			valueWithCursorAndOptions := p.ValueWithCursor() + hintOptions

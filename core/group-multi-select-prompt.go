@@ -6,15 +6,15 @@ import (
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
-type GroupSelectOption[TValue comparable] struct {
+type GroupMultiSelectOption[TValue comparable] struct {
 	MultiSelectOption[TValue]
 	IsGroup bool
-	Options []*GroupSelectOption[TValue]
+	Options []*GroupMultiSelectOption[TValue]
 }
 
 type GroupMultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
-	Options []*GroupSelectOption[TValue]
+	Options []*GroupMultiSelectOption[TValue]
 }
 
 type GroupMultiSelectPromptParams[TValue comparable] struct {
@@ -26,25 +26,25 @@ type GroupMultiSelectPromptParams[TValue comparable] struct {
 }
 
 func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptParams[TValue]) *GroupMultiSelectPrompt[TValue] {
-	options := []*GroupSelectOption[TValue]{}
+	options := []*GroupMultiSelectOption[TValue]{}
 	for groupName, groupOptions := range params.Options {
-		group := &GroupSelectOption[TValue]{
+		group := &GroupMultiSelectOption[TValue]{
 			MultiSelectOption: MultiSelectOption[TValue]{
 				Label: groupName,
 			},
 			IsGroup: true,
-			Options: []*GroupSelectOption[TValue]{},
+			Options: make([]*GroupMultiSelectOption[TValue], len(groupOptions)),
 		}
 		options = append(options, group)
-		for _, groupOption := range groupOptions {
-			option := &GroupSelectOption[TValue]{
+		for i, groupOption := range groupOptions {
+			option := &GroupMultiSelectOption[TValue]{
 				MultiSelectOption: MultiSelectOption[TValue]{
 					Label:      groupOption.Label,
 					Value:      groupOption.Value,
 					IsSelected: groupOption.IsSelected,
 				},
 			}
-			group.Options = append(group.Options, option)
+			group.Options[i] = option
 			options = append(options, option)
 		}
 	}
@@ -94,7 +94,7 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 	return p
 }
 
-func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupSelectOption[TValue]) bool {
+func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupMultiSelectOption[TValue]) bool {
 	for _, option := range group.Options {
 		if !option.IsSelected {
 			return false
