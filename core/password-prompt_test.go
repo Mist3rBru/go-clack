@@ -33,18 +33,32 @@ func TestChangePasswordValue(t *testing.T) {
 	assert.Equal(t, "a", p.Value)
 }
 
-func TestChangePasswordMask(t *testing.T) {
+func TestPasswordMask(t *testing.T) {
 	p := newPasswordPrompt()
 
-	assert.Equal(t, " ", p.ValueWithCursor())
+	assert.Equal(t, "", p.ValueWithMask())
 	p.PressKey(&core.Key{Char: "a"})
-	assert.Equal(t, "* ", p.ValueWithCursor())
+	assert.Equal(t, "*", p.ValueWithMask())
 	p.PressKey(&core.Key{Char: "b"})
-	assert.Equal(t, "** ", p.ValueWithCursor())
+	assert.Equal(t, "**", p.ValueWithMask())
 	p.PressKey(&core.Key{Name: core.LeftKey})
-	assert.Equal(t, "**", p.ValueWithCursor())
+	assert.Equal(t, "**", p.ValueWithMask())
 	p.PressKey(&core.Key{Name: core.BackspaceKey})
-	assert.Equal(t, "*", p.ValueWithCursor())
+	assert.Equal(t, "*", p.ValueWithMask())
+}
+
+func TestPasswordMaskWithCursor(t *testing.T) {
+	p := newPasswordPrompt()
+
+	assert.Equal(t, " ", p.ValueWithMaskAndCursor())
+	p.PressKey(&core.Key{Char: "a"})
+	assert.Equal(t, "* ", p.ValueWithMaskAndCursor())
+	p.PressKey(&core.Key{Char: "b"})
+	assert.Equal(t, "** ", p.ValueWithMaskAndCursor())
+	p.PressKey(&core.Key{Name: core.LeftKey})
+	assert.Equal(t, "**", p.ValueWithMaskAndCursor())
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, "*", p.ValueWithMaskAndCursor())
 }
 
 func TestValidatePassword(t *testing.T) {

@@ -40,7 +40,11 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 	return p
 }
 
-func (p *PasswordPrompt) ValueWithCursor() string {
+func (p *PasswordPrompt) ValueWithMask() string {
+	return strings.Repeat("*", len(p.Value))
+}
+
+func (p *PasswordPrompt) ValueWithMaskAndCursor() string {
 	inverse := color["inverse"]
 	maskedValue := strings.Repeat("*", len(p.Value))
 	if p.CursorIndex == len(p.Value) {
