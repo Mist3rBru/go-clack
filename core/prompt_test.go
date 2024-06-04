@@ -346,9 +346,9 @@ func TestFormatLinesWithStyleCallback(t *testing.T) {
 		},
 	})
 	expected := strings.Join([]string{
-		fmt.Sprintf("  (%s %s)  ", strings.Repeat("a", 20), strings.Repeat("b", 53)),
-		fmt.Sprintf("  (%s)  ", strings.Repeat("b", 27)),
-		fmt.Sprintf("  (%s)  ", strings.Repeat("c", 1)),
+		fmt.Sprintf("(%s %s)", strings.Repeat("a", 20), strings.Repeat("b", 57)),
+		fmt.Sprintf("(%s)", strings.Repeat("b", 23)),
+		fmt.Sprintf("(%s)", strings.Repeat("c", 1)),
 	}, "\r\n")
 	assert.Equal(t, expected, frame)
 }

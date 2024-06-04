@@ -323,7 +323,7 @@ func getOptionOrDefault(line LineOption, opt string, options FormatLinesOptions)
 	if options.Default.Sides != "" {
 		return options.Default.Sides
 	}
-	return " "
+	return ""
 }
 
 func getStyleOrDefault(line LineOption, options FormatLinesOptions) func(line string) string {
@@ -357,7 +357,7 @@ func getLineOptions(options FormatLinesOptions, line LineOption) FormatLineOptio
 
 func mergeOptions(primary, secondary FormatLineOptions) FormatLineOptions {
 	ifEmpty := func(a, b string) string {
-		if a == " " {
+		if a == "" {
 			return b
 		}
 		return a
@@ -447,6 +447,9 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 
 		var currentLine string
 		for _, word := range strings.Split(line, " ") {
+			if word == "" {
+				continue
+			}
 			if currentLine == "" && utils.StrLength(word)+emptySlots <= maxWith {
 				currentLine = word
 			} else if utils.StrLength(currentLine+word)+emptySlots+1 <= maxWith {
