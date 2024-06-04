@@ -28,14 +28,17 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			CursorIndex:  len(params.InitialValue),
 			Validate:     params.Validate,
 			Render: func(_p *Prompt[string]) string {
+				if params.Render == nil {
+					return ErrMissingRender.Error()
+				}
 				return params.Render(p)
 			},
 		}),
 		Placeholder: params.Placeholder,
 	}
-	p.On(EventKey, func(args ...any) {
+	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
-		if key.Name == KeyTab && p.Value == "" && p.Placeholder != "" {
+		if key.Name == TabKey && p.Value == "" && p.Placeholder != "" {
 			p.Value = p.Placeholder
 			p.CursorIndex = len(p.Placeholder)
 			return

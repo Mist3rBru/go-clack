@@ -27,11 +27,14 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 			CursorIndex:  len(params.InitialValue),
 			Validate:     params.Validate,
 			Render: func(_p *Prompt[string]) string {
+				if params.Render == nil {
+					return ErrMissingRender.Error()
+				}
 				return params.Render(p)
 			},
 		}),
 	}
-	p.On(EventKey, func(args ...any) {
+	p.On(KeyEvent, func(args ...any) {
 		p.TrackKeyValue(args[0].(*Key), &p.Value)
 	})
 	return p

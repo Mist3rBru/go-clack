@@ -27,15 +27,15 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 			FirstLine: core.FormatLineOptions{
 				Start: SymbolState(ctx.State),
 			},
-			Default: core.FormatLineOptions{
+			NewLine: core.FormatLineOptions{
 				Start: Color["gray"](S_BAR),
 			},
 		}),
 	}, "\r\n")
 
 	switch ctx.State {
-	case core.StateError:
-		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
+	case core.ErrorState:
+		value := ctx.FormatLines(strings.Split(params.ValueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
 				Start: Color["yellow"](S_BAR),
 			},
@@ -54,7 +54,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		})
 		return strings.Join([]string{title, value, err}, "\r\n")
 
-	case core.StateCancel:
+	case core.CancelState:
 		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
 				Start: Color["gray"](S_BAR),
@@ -69,7 +69,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		end := Color["gray"](S_BAR)
 		return strings.Join([]string{title, value, end}, "\r\n")
 
-	case core.StateSubmit:
+	case core.SubmitState:
 		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
 				Start: Color["gray"](S_BAR),
@@ -84,7 +84,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 			FirstLine: core.FormatLineOptions{
 				Start: SymbolState(ctx.State),
 			},
-			Default: core.FormatLineOptions{
+			NewLine: core.FormatLineOptions{
 				Start: Color["cyan"](S_BAR),
 			},
 		})
@@ -92,10 +92,8 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		var valueWithCursor string
 		if params.Placeholder != "" && params.Value == "" {
 			valueWithCursor = Color["inverse"](string(params.Placeholder[0])) + Color["dim"](params.Placeholder[1:])
-		} else if params.ValueWithCursor != "" {
-			valueWithCursor = params.ValueWithCursor
 		} else {
-			valueWithCursor = params.Value
+			valueWithCursor = params.ValueWithCursor
 		}
 		value := ctx.FormatLines(strings.Split(valueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{

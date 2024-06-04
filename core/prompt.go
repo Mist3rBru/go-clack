@@ -48,6 +48,11 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	if params.Output == nil {
 		params.Output = os.Stdout
 	}
+	if params.Render == nil {
+		params.Render = func(p *Prompt[TValue]) string {
+			return ""
+		}
+	}
 	return &Prompt[TValue]{
 		listeners: make(map[Event][]Listener),
 
@@ -98,37 +103,37 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	// TODO: parse Backtab(shift+tab) and other variations of shift and ctrl
 	switch r {
 	case '\r', '\n':
-		return &Key{Name: KeyEnter}
+		return &Key{Name: EnterKey}
 	case ' ':
-		return &Key{Name: KeySpace}
+		return &Key{Name: SpaceKey}
 	case '\b', 127:
-		return &Key{Name: KeyBackspace}
+		return &Key{Name: BackspaceKey}
 	case '\t':
-		return &Key{Name: KeyTab}
+		return &Key{Name: TabKey}
 	case 3:
-		return &Key{Name: KeyCancel}
+		return &Key{Name: CancelKey}
 	case 27:
 		next, err := p.rl.Peek(2)
 		if err == nil && len(next) == 2 && next[0] == '[' {
 			switch next[1] {
 			case 'A':
 				p.rl.Discard(2)
-				return &Key{Name: KeyUp}
+				return &Key{Name: UpKey}
 			case 'B':
 				p.rl.Discard(2)
-				return &Key{Name: KeyDown}
+				return &Key{Name: DownKey}
 			case 'C':
 				p.rl.Discard(2)
-				return &Key{Name: KeyRight}
+				return &Key{Name: RightKey}
 			case 'D':
 				p.rl.Discard(2)
-				return &Key{Name: KeyLeft}
+				return &Key{Name: LeftKey}
 			case 'H':
 				p.rl.Discard(2)
-				return &Key{Name: KeyHome}
+				return &Key{Name: HomeKey}
 			case 'F':
 				p.rl.Discard(2)
-				return &Key{Name: KeyEnd}
+				return &Key{Name: EndKey}
 			}
 		}
 		return &Key{}
@@ -141,7 +146,7 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 	value := *valuePtr
 	switch key.Name {
-	case KeyBackspace:
+	case BackspaceKey:
 		if p.CursorIndex > 0 {
 			if p.CursorIndex == len(value) {
 				p.CursorIndex--
@@ -151,16 +156,16 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 				value = value[0:p.CursorIndex] + value[p.CursorIndex+1:]
 			}
 		}
-	case KeyHome:
+	case HomeKey:
 		p.CursorIndex = 0
-	case KeyEnd:
+	case EndKey:
 		p.CursorIndex = len(value)
-	case KeyLeft:
+	case LeftKey:
 		if p.CursorIndex == 0 {
 			break
 		}
 		p.CursorIndex--
-	case KeyRight:
+	case RightKey:
 		if p.CursorIndex < len(value) {
 			p.CursorIndex++
 		}
@@ -175,30 +180,32 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 }
 
 func (p *Prompt[TValue]) PressKey(key *Key) {
-	if p.State == StateError || p.State == StateInitial {
-		p.State = StateActive
+	if p.State == ErrorState || p.State == InitialState {
+		p.State = ActiveState
 	}
 
-	p.Emit(EventKey, key)
+	p.Emit(KeyEvent, key)
 
-	if key.Name == KeyEnter {
+	if key.Name == EnterKey {
 		if p.Validate != nil {
 			err := p.Validate(p.Value)
 			if err != nil {
-				p.State = StateError
+				p.State = ErrorState
 				p.Error = err.Error()
 			}
 		}
-		if p.State != StateError {
-			p.State = StateSubmit
+		if p.State != ErrorState {
+			p.State = SubmitState
 		}
 	}
-	if key.Name == KeyCancel {
-		p.State = StateCancel
+	if key.Name == CancelKey {
+		p.State = CancelState
 	}
-	if p.State == StateSubmit || p.State == StateCancel {
-		p.Emit(EventFinalize)
+	if p.State == SubmitState || p.State == CancelState {
+		p.Emit(FinalizeEvent)
 	}
+	p.render()
+	p.Emit(Event(p.State), p.Value)
 }
 
 func (p *Prompt[TValue]) write(str string) {
@@ -401,7 +408,7 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 	for i, line := range lines {
 		var opts FormatLineOptions
 		if i == 0 && len(lines) == 1 {
-			opts = mergeOptions(firstLine, lastLine)
+			opts = mergeOptions(lastLine, firstLine)
 		} else if i == 0 {
 			opts = firstLine
 		} else if i == 1 && len(lines) == 2 {
@@ -447,9 +454,6 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 
 		var currentLine string
 		for _, word := range strings.Split(line, " ") {
-			if word == "" {
-				continue
-			}
 			if currentLine == "" && utils.StrLength(word)+emptySlots <= maxWith {
 				currentLine = word
 			} else if utils.StrLength(currentLine+word)+emptySlots+1 <= maxWith {
@@ -490,7 +494,7 @@ func (p *Prompt[TValue]) render() {
 		frame = strings.Join(strings.Split(frame, "\n"), "\r\n")
 	}
 
-	if p.State == StateInitial {
+	if p.State == InitialState {
 		p.write(utils.HideCursor())
 		p.write(frame)
 		p.Frame = frame
@@ -540,8 +544,8 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 		p.write("\r\n")
 		close(done)
 	}
-	p.Once(EventSubmit, closeCb)
-	p.Once(EventCancel, closeCb)
+	p.Once(SubmitEvent, closeCb)
+	p.Once(CancelEvent, closeCb)
 
 	p.render()
 
@@ -560,13 +564,11 @@ outer:
 			}
 			key := p.ParseKey(r)
 			p.PressKey(key)
-			p.render()
-			p.Emit(Event(p.State), p.Value)
 		}
 	}
 
-	if p.State == StateCancel {
-		return p.Value, fmt.Errorf("prompt canceled")
+	if p.State == CancelState {
+		return p.Value, ErrCancelPrompt
 	}
 
 	return p.Value, nil

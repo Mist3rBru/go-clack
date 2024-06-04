@@ -88,13 +88,13 @@ func TestEmitUnsubscribedEvent(t *testing.T) {
 func TestParseKey(t *testing.T) {
 	p := newPrompt()
 
-	assert.Equal(t, core.Key{Name: core.KeyEnter}, *p.ParseKey('\n'))
-	assert.Equal(t, core.Key{Name: core.KeyEnter}, *p.ParseKey('\r'))
-	assert.Equal(t, core.Key{Name: core.KeySpace}, *p.ParseKey(' '))
-	assert.Equal(t, core.Key{Name: core.KeyBackspace}, *p.ParseKey('\b'))
-	assert.Equal(t, core.Key{Name: core.KeyBackspace}, *p.ParseKey(127))
-	assert.Equal(t, core.Key{Name: core.KeyTab}, *p.ParseKey('\t'))
-	assert.Equal(t, core.Key{Name: core.KeyCancel}, *p.ParseKey(3))
+	assert.Equal(t, core.Key{Name: core.EnterKey}, *p.ParseKey('\n'))
+	assert.Equal(t, core.Key{Name: core.EnterKey}, *p.ParseKey('\r'))
+	assert.Equal(t, core.Key{Name: core.SpaceKey}, *p.ParseKey(' '))
+	assert.Equal(t, core.Key{Name: core.BackspaceKey}, *p.ParseKey('\b'))
+	assert.Equal(t, core.Key{Name: core.BackspaceKey}, *p.ParseKey(127))
+	assert.Equal(t, core.Key{Name: core.TabKey}, *p.ParseKey('\t'))
+	assert.Equal(t, core.Key{Name: core.CancelKey}, *p.ParseKey(3))
 	assert.Equal(t, core.Key{Name: "a", Char: "a"}, *p.ParseKey('a'))
 }
 
@@ -123,32 +123,32 @@ func TestTrackCursor(t *testing.T) {
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyHome}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.HomeKey}, &p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.KeyEnd}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.EndKey}, &p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyLeft}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.LeftKey}, &p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.KeyLeft}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.LeftKey}, &p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 2
-	p.TrackKeyValue(&core.Key{Name: core.KeyRight}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.RightKey}, &p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyRight}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.RightKey}, &p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 }
 
@@ -157,25 +157,25 @@ func TestTrackBackspace(t *testing.T) {
 
 	p.Value = "abc"
 	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 2
-	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
 	assert.Equal(t, "ac", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 1
-	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
 	assert.Equal(t, "bc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.Value = "abc"
 	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.KeyBackspace}, &p.Value)
+	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
 	assert.Equal(t, "abc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 }
@@ -183,11 +183,11 @@ func TestTrackBackspace(t *testing.T) {
 func TestTrackState(t *testing.T) {
 	p := newPrompt()
 
-	p.PressKey(&core.Key{Name: core.KeyCancel})
-	assert.Equal(t, core.StateCancel, p.State)
+	p.PressKey(&core.Key{Name: core.CancelKey})
+	assert.Equal(t, core.CancelState, p.State)
 
-	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.StateSubmit, p.State)
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.SubmitState, p.State)
 }
 
 func TestLimitLines(t *testing.T) {
@@ -378,18 +378,18 @@ func TestValidateValue(t *testing.T) {
 	}
 
 	p.Value = "foo"
-	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.StateError, p.State)
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
 	assert.Equal(t, "invalid value: foo", p.Error)
 }
 
 func TestEmitFinalizeOnSubmit(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
-	p.On(core.EventFinalize, func(args ...any) {
+	p.On(core.FinalizeEvent, func(args ...any) {
 		calledTimes++
 	})
 
-	p.PressKey(&core.Key{Name: core.KeyEnter})
+	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, 1, calledTimes)
 }

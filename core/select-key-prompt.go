@@ -29,18 +29,21 @@ func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *Selec
 			Input:  params.Input,
 			Output: params.Output,
 			Render: func(_p *Prompt[TValue]) string {
+				if params.Render == nil {
+					return ErrMissingRender.Error()
+				}
 				return params.Render(p)
 			},
 		}),
 		Options: params.Options,
 	}
-	p.On(EventKey, func(args ...any) {
+	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
 		for _, option := range p.Options {
 			if key.Name == KeyName(option.Key) {
-				p.State = StateSubmit
+				p.State = SubmitState
 				p.Value = option.Value
-				p.Emit(EventSubmit, p.Value)
+				p.Emit(SubmitEvent, p.Value)
 				return
 			}
 		}

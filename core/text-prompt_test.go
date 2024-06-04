@@ -40,8 +40,8 @@ func TestTextPromptValueTrack(t *testing.T) {
 	p.PressKey(&core.Key{Char: "b"})
 	assert.Equal(t, "ab", p.Value)
 
-	p.PressKey(&core.Key{Name: core.KeyLeft})
-	p.PressKey(&core.Key{Name: core.KeyBackspace})
+	p.PressKey(&core.Key{Name: core.LeftKey})
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
 	assert.Equal(t, "b", p.Value)
 }
 
@@ -75,8 +75,8 @@ func TestTextPromptValidate(t *testing.T) {
 		},
 	})
 
-	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.StateError, p.State)
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
 	assert.Equal(t, "invalid value: 123", p.Error)
 }
 
@@ -85,13 +85,13 @@ func TestTextPromptPlaceholderCompletion(t *testing.T) {
 
 	p.Placeholder = "foo"
 	p.Value = ""
-	p.PressKey(&core.Key{Name: core.KeyTab})
+	p.PressKey(&core.Key{Name: core.TabKey})
 	assert.Equal(t, "foo", p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 
 	p.Placeholder = "foo"
 	p.Value = "bar"
-	p.PressKey(&core.Key{Name: core.KeyTab})
+	p.PressKey(&core.Key{Name: core.TabKey})
 	assert.Equal(t, "bar", p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 }

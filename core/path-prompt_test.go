@@ -32,7 +32,7 @@ func TestPathChangeValue(t *testing.T) {
 	assert.Equal(t, "/go-clack/", p.Value)
 	p.PressKey(&core.Key{Char: "a"})
 	assert.Equal(t, "/go-clack/a", p.Value)
-	p.PressKey(&core.Key{Name: core.KeyBackspace})
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
 	assert.Equal(t, "/go-clack/", p.Value)
 }
 
@@ -42,7 +42,7 @@ func TestPathChangeHint(t *testing.T) {
 	assert.Equal(t, "/", p.Hint)
 	p.PressKey(&core.Key{Char: "/"})
 	assert.Equal(t, "confirm-prompt.go", p.Hint)
-	p.PressKey(&core.Key{Name: core.KeyBackspace})
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
 	assert.Equal(t, "/", p.Hint)
 }
 
@@ -53,21 +53,21 @@ func TestPathTabComplete(t *testing.T) {
 	assert.Equal(t, -1, p.HintIndex)
 	assert.Equal(t, "/", p.Hint)
 
-	p.PressKey(&core.Key{Name: core.KeyTab})
+	p.PressKey(&core.Key{Name: core.TabKey})
 	assert.Equal(t, 0, len(p.HintOptions))
 	assert.Equal(t, -1, p.HintIndex)
 	assert.NotEqual(t, "", p.Hint)
 	assert.NotEqual(t, "/", p.Hint)
 
-	p.PressKey(&core.Key{Name: core.KeyTab})
+	p.PressKey(&core.Key{Name: core.TabKey})
 	assert.GreaterOrEqual(t, len(p.HintOptions), 1)
 	assert.Equal(t, 0, p.HintIndex)
 
-	p.PressKey(&core.Key{Name: core.KeyTab})
+	p.PressKey(&core.Key{Name: core.TabKey})
 	assert.GreaterOrEqual(t, len(p.HintOptions), 1)
 	assert.Equal(t, 1, p.HintIndex)
 
-	p.PressKey(&core.Key{Name: core.KeyTab})
+	p.PressKey(&core.Key{Name: core.TabKey})
 	assert.GreaterOrEqual(t, len(p.HintOptions), 1)
 	assert.Equal(t, 2, p.HintIndex)
 }
@@ -78,13 +78,13 @@ func TestPathComplete(t *testing.T) {
 	assert.Equal(t, "/", p.Hint)
 
 	expected := p.Value + p.Hint
-	p.PressKey(&core.Key{Name: core.KeyRight})
+	p.PressKey(&core.Key{Name: core.RightKey})
 	assert.Equal(t, expected, p.Value)
 	assert.NotEqual(t, "", p.Hint)
 	assert.NotEqual(t, "/", p.Hint)
 
 	expected = p.Value + p.Hint
-	p.PressKey(&core.Key{Name: core.KeyRight})
+	p.PressKey(&core.Key{Name: core.RightKey})
 	assert.Equal(t, expected, p.Value)
 }
 
@@ -114,7 +114,7 @@ func TestValidatePath(t *testing.T) {
 		},
 	})
 
-	p.PressKey(&core.Key{Name: core.KeyEnter})
-	assert.Equal(t, core.StateError, p.State)
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
 	assert.Equal(t, "invalid path: /folder", p.Error)
 }

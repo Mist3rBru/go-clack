@@ -37,6 +37,9 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 			CursorIndex:  len(params.InitialValue),
 			Validate:     params.Validate,
 			Render: func(_p *Prompt[string]) string {
+				if params.Render == nil {
+					return ErrMissingRender.Error()
+				}
 				return params.Render(p)
 			},
 		}),
@@ -51,12 +54,12 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	}
 	p.changeHint()
 
-	p.On(EventKey, func(args ...any) {
+	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
 		p.TrackKeyValue(key, &p.Value)
-		if key.Name == KeyRight && p.CursorIndex >= len(p.Value) {
+		if key.Name == RightKey && p.CursorIndex >= len(p.Value) {
 			p.completeValue()
-		} else if key.Name == KeyTab {
+		} else if key.Name == TabKey {
 			p.tabComplete()
 		} else {
 			p.changeHint()

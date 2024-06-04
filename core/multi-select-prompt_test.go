@@ -21,24 +21,24 @@ func TestChangeMultiSelectCursor(t *testing.T) {
 	p := newMultiSelectPrompt()
 
 	assert.Equal(t, 0, p.CursorIndex)
-	p.PressKey(&core.Key{Name: core.KeyDown})
+	p.PressKey(&core.Key{Name: core.DownKey})
 	assert.Equal(t, 1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: core.KeyRight})
+	p.PressKey(&core.Key{Name: core.RightKey})
 	assert.Equal(t, 2, p.CursorIndex)
-	p.PressKey(&core.Key{Name: core.KeyUp})
+	p.PressKey(&core.Key{Name: core.UpKey})
 	assert.Equal(t, 1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: core.KeyLeft})
+	p.PressKey(&core.Key{Name: core.LeftKey})
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.PressKey(&core.Key{Name: core.KeyEnd})
+	p.PressKey(&core.Key{Name: core.EndKey})
 	assert.Equal(t, len(p.Options)-1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: core.KeyHome})
+	p.PressKey(&core.Key{Name: core.HomeKey})
 	assert.Equal(t, 0, p.CursorIndex)
 
 	p.CursorIndex = 0
-	p.PressKey(&core.Key{Name: core.KeyUp})
+	p.PressKey(&core.Key{Name: core.UpKey})
 	assert.Equal(t, len(p.Options)-1, p.CursorIndex)
-	p.PressKey(&core.Key{Name: core.KeyDown})
+	p.PressKey(&core.Key{Name: core.DownKey})
 	assert.Equal(t, 0, p.CursorIndex)
 }
 
@@ -46,9 +46,9 @@ func TestChangeMultiSelectValue(t *testing.T) {
 	p := newMultiSelectPrompt()
 
 	assert.Equal(t, []string(nil), p.Value)
-	p.PressKey(&core.Key{Name: core.KeySpace})
+	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{p.Options[0].Value}, p.Value)
-	p.PressKey(&core.Key{Name: core.KeySpace})
+	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{}, p.Value)
 
 	expected := make([]string, len(p.Options))
@@ -62,7 +62,7 @@ func TestChangeMultiSelectValue(t *testing.T) {
 
 	p.Value = append([]string{}, expected...)
 	p.CursorIndex = 1
-	p.PressKey(&core.Key{Name: core.KeySpace})
+	p.PressKey(&core.Key{Name: core.SpaceKey})
 	expected = append([]string{expected[0]}, expected[2:]...)
 	assert.Equal(t, expected, p.Value)
 }

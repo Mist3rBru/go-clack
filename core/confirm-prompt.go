@@ -29,16 +29,19 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			Render: func(_p *Prompt[bool]) string {
+				if params.Render == nil {
+					return ErrMissingRender.Error()
+				}
 				return params.Render(p)
 			},
 		}),
 		Active:   params.Active,
 		Inactive: params.Inactive,
 	}
-	p.On(EventKey, func(args ...any) {
+	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
-		case KeyUp, KeyDown, KeyLeft, KeyRight:
+		case UpKey, DownKey, LeftKey, RightKey:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, 2)
 			p.Value = !p.Value
 		}

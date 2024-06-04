@@ -3,6 +3,6 @@ default: run
 run:
 	@go run playground/main.go
 test:
-	@go test ./core -cover
+	@go test ./core ./prompts -cover
 format:
 	@gofmt -w .

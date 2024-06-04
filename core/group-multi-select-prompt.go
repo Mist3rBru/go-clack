@@ -52,24 +52,27 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			Render: func(_p *Prompt[[]TValue]) string {
+				if params.Render == nil {
+					return ErrMissingRender.Error()
+				}
 				return params.Render(p)
 			},
 		}),
 		Options: options,
 	}
 
-	p.On(EventKey, func(args ...any) {
+	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
 		switch key.Name {
-		case KeyUp, KeyLeft:
+		case UpKey, LeftKey:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
-		case KeyDown, KeyRight:
+		case DownKey, RightKey:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
-		case KeyHome:
+		case HomeKey:
 			p.CursorIndex = 0
-		case KeyEnd:
+		case EndKey:
 			p.CursorIndex = len(p.Options) - 1
-		case KeySpace:
+		case SpaceKey:
 			p.toggleOption()
 		}
 	})
