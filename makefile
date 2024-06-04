@@ -5,6 +5,6 @@ run:
 test:
 	@go test ./core ./prompts -cover
 snap:
-	@UPDATE_SNAPSHOTS=true go test ./core ./prompts -cover
+	@UPDATE_SNAPSHOTS=true go test ./core ./prompts
 format:
 	@gofmt -w .
