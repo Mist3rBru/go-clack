@@ -215,9 +215,9 @@ func (p *Prompt[TValue]) write(str string) {
 func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 	_, maxRows, err := term.GetSize(int(p.output.Fd()))
 	if err != nil {
-		maxRows = 5
+		maxRows = 10
 	}
-	maxItems := min(maxRows-usedLines, len(lines))
+	maxItems := max(min(maxRows-usedLines, len(lines)), 0)
 
 	slidingWindowLocation := 0
 	if p.CursorIndex >= maxItems-3 {
@@ -240,7 +240,7 @@ func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 		}
 	}
 
-	return strings.Join(result, "\r\n")
+	return strings.Join(result, "\n")
 }
 
 type LineOption string

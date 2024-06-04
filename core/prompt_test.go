@@ -192,31 +192,38 @@ func TestTrackState(t *testing.T) {
 
 func TestLimitLines(t *testing.T) {
 	p := newPrompt()
-	lines := make([]string, 10)
+	lines := make([]string, 20)
 	for i := range lines {
 		lines[i] = fmt.Sprint(i)
 	}
 
 	p.CursorIndex = 0
 	frame := p.LimitLines(lines, 0)
-	startLines := lines[0:5]
+	startLines := lines[0:10]
 	startLines[len(startLines)-1] = "..."
-	expected := strings.Join(startLines, "\r\n")
+	expected := strings.Join(startLines, "\n")
 	assert.Equal(t, expected, frame)
 
-	p.CursorIndex = 5
+	p.CursorIndex = 10
 	frame = p.LimitLines(lines, 0)
-	midLines := lines[3:8]
+	midLines := lines[3:13]
 	midLines[0] = "..."
 	midLines[len(midLines)-1] = "..."
-	expected = strings.Join(midLines, "\r\n")
+	expected = strings.Join(midLines, "\n")
 	assert.Equal(t, expected, frame)
 
-	p.CursorIndex = 9
+	p.CursorIndex = 20
 	frame = p.LimitLines(lines, 0)
-	lasLines := lines[5:10]
+	lasLines := lines[10:20]
 	lasLines[0] = "..."
-	expected = strings.Join(lasLines, "\r\n")
+	expected = strings.Join(lasLines, "\n")
+	assert.Equal(t, expected, frame)
+
+	p.CursorIndex = 0
+	frame = p.LimitLines(lines, 3)
+	startLines = lines[0:7]
+	startLines[len(startLines)-1] = "..."
+	expected = strings.Join(startLines, "\n")
 	assert.Equal(t, expected, frame)
 }
 

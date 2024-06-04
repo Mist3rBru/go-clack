@@ -3,6 +3,7 @@ module github.com/Mist3rBru/go-clack
 go 1.22.1
 
 require (
+	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/term v0.20.0
 )

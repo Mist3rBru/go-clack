@@ -6,4 +6,5 @@ var (
 	TextTestingPrompt     *core.TextPrompt     = nil
 	PasswordTestingPrompt *core.PasswordPrompt = nil
 	PathTestingPrompt     *core.PathPrompt     = nil
+	SelectTestingPrompt   any                  = nil
 )
