@@ -18,7 +18,6 @@ type SelectParams[TValue comparable] struct {
 	Message      string
 	InitialValue TValue
 	Options      []SelectOption[TValue]
-	Validate     func(value string) error
 }
 
 func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
@@ -38,15 +37,22 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 			switch p.State {
 			case core.SubmitState, core.CancelState:
 			default:
-				var lines []string
+				var radioOptions []string
 				for i, option := range params.Options {
+					var radio, label, hint string
 					if i == p.CursorIndex {
-						lines = append(lines, opt[TValue](option, "active"))
+						radio = utils.Color["green"](utils.S_RADIO_ACTIVE)
+						label = option.Label
+						if option.Hint != "" {
+							hint = utils.Color["dim"]("(" + option.Hint + ")")
+						}
 					} else {
-						lines = append(lines, opt[TValue](option, "inactive"))
+						radio = utils.Color["dim"](utils.S_RADIO_INACTIVE)
+						label = utils.Color["dim"](option.Label)
 					}
+					radioOptions = append(radioOptions, strings.Join([]string{radio, label, hint}, " "))
 				}
-				value = p.LimitLines(lines, 3)
+				value = p.LimitLines(radioOptions, 3)
 			}
 
 			return utils.ApplyTheme(utils.ThemeParams[TValue]{
@@ -59,19 +65,4 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 	})
 	test.SelectTestingPrompt = p
 	return p.Run()
-}
-
-func opt[TValue comparable](option SelectOption[TValue], state string) string {
-	if state == "active" {
-		radio := utils.Color["green"](utils.S_RADIO_ACTIVE)
-		if option.Hint == "" {
-			return strings.Join([]string{radio, option.Label}, " ")
-		}
-		hint := utils.Color["dim"]("(" + option.Hint + ")")
-		return strings.Join([]string{radio, option.Label, hint}, " ")
-	}
-
-	radio := utils.Color["dim"](utils.S_RADIO_INACTIVE)
-	label := utils.Color["dim"](option.Label)
-	return strings.Join([]string{radio, label}, " ")
 }

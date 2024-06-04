@@ -15,6 +15,12 @@ type SelectOption[TValue comparable] struct {
 	Value TValue
 }
 
+type MultiSelectOption[TValue comparable] struct {
+	Label      string
+	Value      TValue
+	IsSelected bool
+}
+
 type Event string
 
 const (

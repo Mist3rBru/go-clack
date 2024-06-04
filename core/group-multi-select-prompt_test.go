@@ -8,13 +8,13 @@ import (
 )
 
 func newGroupMultiSelectPrompt() *core.GroupMultiSelectPrompt[string] {
-	options := make(map[string][]core.SelectOption[string])
-	options["foo"] = []core.SelectOption[string]{
+	options := make(map[string][]core.MultiSelectOption[string])
+	options["foo"] = []core.MultiSelectOption[string]{
 		{Value: "a"},
 		{Value: "b"},
 		{Value: "c"},
 	}
-	options["bar"] = []core.SelectOption[string]{
+	options["bar"] = []core.MultiSelectOption[string]{
 		{Value: "x"},
 		{Value: "y"},
 		{Value: "z"},
@@ -72,47 +72,16 @@ func TestSelectGroupMultiSelectGroupOption(t *testing.T) {
 	assert.Equal(t, []string(nil), p.Value)
 
 	p.PressKey(&core.Key{Name: core.SpaceKey})
-	expected := []string{}
-	for i := 1; i < len(p.Options); i++ {
-		if p.Options[i].IsGroup {
-			break
-		}
-		expected = append(expected, p.Options[i].Value)
+	for _, option := range p.Options[0].Options {
+		assert.Equal(t, true, option.IsSelected, option.Value)
 	}
-	assert.Equal(t, expected, p.Value)
+	assert.Equal(t, len(p.Options[0].Options), len(p.Value))
 
 	p.PressKey(&core.Key{Name: core.SpaceKey})
-	assert.Equal(t, []string{}, p.Value)
-
-	expected = []string{}
-	p.Value = []string{}
-	for i, option := range p.Options {
-		if option.IsGroup {
-			p.CursorIndex = i
-			p.PressKey(&core.Key{Name: core.SpaceKey})
-		} else {
-			expected = append(expected, option.Value)
-		}
+	for _, option := range p.Options[0].Options {
+		assert.Equal(t, false, option.IsSelected)
 	}
-	assert.Equal(t, expected, p.Value)
-}
-
-func TestGroupMultiSelectIsSelected(t *testing.T) {
-	p := newGroupMultiSelectPrompt()
-
-	i, isSelected := p.IsSelected(p.Options[0])
-	assert.Equal(t, -1, i)
-	assert.Equal(t, false, isSelected)
-
-	p.Value = []string{p.Options[1].Value}
-	i, isSelected = p.IsSelected(p.Options[1])
-	assert.Equal(t, 0, i)
-	assert.Equal(t, true, isSelected)
-
-	p.Value = []string{p.Options[1].Value, p.Options[2].Value}
-	i, isSelected = p.IsSelected(p.Options[2])
-	assert.Equal(t, 1, i)
-	assert.Equal(t, true, isSelected)
+	assert.Equal(t, 0, len(p.Value))
 }
 
 func TestGroupMultiSelectIsGroupSelected(t *testing.T) {
@@ -122,13 +91,8 @@ func TestGroupMultiSelectIsGroupSelected(t *testing.T) {
 	isSelected := p.IsGroupSelected(group)
 	assert.Equal(t, false, isSelected)
 
-	p.Value = []string{p.Options[1].Value}
-	isSelected = p.IsGroupSelected(group)
-	assert.Equal(t, false, isSelected)
-
-	p.Value = []string{}
 	for _, option := range group.Options {
-		p.Value = append(p.Value, option.Value)
+		option.IsSelected = true
 	}
 	isSelected = p.IsGroupSelected(group)
 	assert.Equal(t, true, isSelected)

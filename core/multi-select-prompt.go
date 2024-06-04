@@ -8,24 +8,37 @@ import (
 
 type MultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
-	Options []SelectOption[TValue]
+	Options []*MultiSelectOption[TValue]
 }
 
 type MultiSelectPromptParams[TValue comparable] struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue []TValue
-	Options      []SelectOption[TValue]
+	Options      []*MultiSelectOption[TValue]
+	Validate     func(value []TValue) error
 	Render       func(p *MultiSelectPrompt[TValue]) string
 }
 
 func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TValue]) *MultiSelectPrompt[TValue] {
+	var initialValue []TValue
+	if len(params.InitialValue) > 0 {
+		initialValue = params.InitialValue
+	} else {
+		for _, option := range params.Options {
+			if option.IsSelected {
+				initialValue = append(initialValue, option.Value)
+			}
+		}
+	}
+
 	var p *MultiSelectPrompt[TValue]
 	p = &MultiSelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:        params.Input,
 			Output:       params.Output,
-			InitialValue: params.InitialValue,
+			InitialValue: initialValue,
+			Validate:     params.Validate,
 			Render: func(_p *Prompt[[]TValue]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()
@@ -48,30 +61,32 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			p.CursorIndex = len(p.Options) - 1
 		case SpaceKey:
 			option := p.Options[p.CursorIndex]
-			if i, isSelected := p.IsSelected(option); isSelected {
-				p.Value = append(p.Value[0:i], p.Value[i+1:]...)
+			if option.IsSelected {
+				option.IsSelected = false
+				p.Value = []TValue{}
+				for _, _option := range p.Options {
+					if _option.IsSelected {
+						p.Value = append(p.Value, _option.Value)
+					}
+				}
 			} else {
+				option.IsSelected = true
 				p.Value = append(p.Value, option.Value)
 			}
 		case "a":
 			if len(p.Value) == len(p.Options) {
 				p.Value = []TValue{}
-				break
-			}
-			p.Value = []TValue{}
-			for _, option := range p.Options {
-				p.Value = append(p.Value, option.Value)
+				for _, option := range p.Options {
+					option.IsSelected = false
+				}
+			} else {
+				p.Value = make([]TValue, len(p.Options))
+				for i, option := range p.Options {
+					option.IsSelected = true
+					p.Value[i] = option.Value
+				}
 			}
 		}
 	})
 	return p
-}
-
-func (p *MultiSelectPrompt[TValue]) IsSelected(option SelectOption[TValue]) (int, bool) {
-	for i, value := range p.Value {
-		if value == option.Value {
-			return i, true
-		}
-	}
-	return -1, false
 }

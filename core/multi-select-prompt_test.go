@@ -9,7 +9,7 @@ import (
 
 func newMultiSelectPrompt() *core.MultiSelectPrompt[string] {
 	return core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
-		Options: []core.SelectOption[string]{
+		Options: []*core.MultiSelectOption[string]{
 			{Value: "a"},
 			{Value: "b"},
 			{Value: "c"},
@@ -48,6 +48,7 @@ func TestChangeMultiSelectValue(t *testing.T) {
 	assert.Equal(t, []string(nil), p.Value)
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{p.Options[0].Value}, p.Value)
+	assert.Equal(t, true, p.Options[0].IsSelected)
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{}, p.Value)
 
@@ -60,27 +61,11 @@ func TestChangeMultiSelectValue(t *testing.T) {
 	p.PressKey(&core.Key{Name: "a"})
 	assert.Equal(t, []string{}, p.Value)
 
-	p.Value = append([]string{}, expected...)
+	for _, option := range p.Options {
+		option.IsSelected = true
+	}
 	p.CursorIndex = 1
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	expected = append([]string{expected[0]}, expected[2:]...)
 	assert.Equal(t, expected, p.Value)
-}
-
-func TestMultiSelectIsSelected(t *testing.T) {
-	p := newMultiSelectPrompt()
-
-	i, isSelected := p.IsSelected(p.Options[0])
-	assert.Equal(t, -1, i)
-	assert.Equal(t, false, isSelected)
-
-	p.Value = []string{p.Options[0].Value}
-	i, isSelected = p.IsSelected(p.Options[0])
-	assert.Equal(t, 0, i)
-	assert.Equal(t, true, isSelected)
-
-	p.Value = []string{p.Options[0].Value, p.Options[1].Value}
-	i, isSelected = p.IsSelected(p.Options[1])
-	assert.Equal(t, 1, i)
-	assert.Equal(t, true, isSelected)
 }

@@ -7,8 +7,7 @@ import (
 )
 
 type GroupSelectOption[TValue comparable] struct {
-	Label   string
-	Value   TValue
+	MultiSelectOption[TValue]
 	IsGroup bool
 	Options []*GroupSelectOption[TValue]
 }
@@ -21,7 +20,7 @@ type GroupMultiSelectPrompt[TValue comparable] struct {
 type GroupMultiSelectPromptParams[TValue comparable] struct {
 	Input        *os.File
 	Output       *os.File
-	Options      map[string][]SelectOption[TValue]
+	Options      map[string][]MultiSelectOption[TValue]
 	InitialValue []TValue
 	Render       func(p *GroupMultiSelectPrompt[TValue]) string
 }
@@ -30,18 +29,34 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 	options := []*GroupSelectOption[TValue]{}
 	for groupName, groupOptions := range params.Options {
 		group := &GroupSelectOption[TValue]{
-			Label:   groupName,
+			MultiSelectOption: MultiSelectOption[TValue]{
+				Label: groupName,
+			},
 			IsGroup: true,
+			Options: []*GroupSelectOption[TValue]{},
 		}
 		options = append(options, group)
 		for _, groupOption := range groupOptions {
 			option := &GroupSelectOption[TValue]{
-				Label:   groupOption.Label,
-				Value:   groupOption.Value,
-				IsGroup: false,
+				MultiSelectOption: MultiSelectOption[TValue]{
+					Label:      groupOption.Label,
+					Value:      groupOption.Value,
+					IsSelected: groupOption.IsSelected,
+				},
 			}
 			group.Options = append(group.Options, option)
 			options = append(options, option)
+		}
+	}
+
+	var initialValue []TValue
+	if len(params.InitialValue) > 0 {
+		initialValue = params.InitialValue
+	} else {
+		for _, option := range options {
+			if option.IsSelected {
+				initialValue = append(initialValue, option.Value)
+			}
 		}
 	}
 
@@ -50,7 +65,7 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:        params.Input,
 			Output:       params.Output,
-			InitialValue: params.InitialValue,
+			InitialValue: initialValue,
 			Render: func(_p *Prompt[[]TValue]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()
@@ -80,25 +95,13 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 }
 
 func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupSelectOption[TValue]) bool {
-	counter := 0
 	for _, option := range group.Options {
-		for _, v := range p.Value {
-			if option.Value == v {
-				counter++
-				break
-			}
+		if !option.IsSelected {
+			return false
 		}
-	}
-	return counter == len(group.Options)
-}
 
-func (p *GroupMultiSelectPrompt[TValue]) IsSelected(option *GroupSelectOption[TValue]) (int, bool) {
-	for i, v := range p.Value {
-		if v == option.Value {
-			return i, true
-		}
 	}
-	return -1, false
+	return true
 }
 
 func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
@@ -106,21 +109,33 @@ func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
 	if option.IsGroup {
 		if p.IsGroupSelected(option) {
 			for _, option := range option.Options {
-				if i, isSelected := p.IsSelected(option); isSelected {
-					p.Value = append(p.Value[0:i], p.Value[i+1:]...)
+				option.IsSelected = false
+			}
+			p.Value = []TValue{}
+			for _, option := range option.Options {
+				if option.IsSelected {
+					p.Value = append(p.Value, option.Value)
 				}
 			}
 		} else {
 			for _, option := range option.Options {
-				if _, IsSelected := p.IsSelected(option); !IsSelected {
+				if !option.IsSelected {
+					option.IsSelected = true
 					p.Value = append(p.Value, option.Value)
 				}
 			}
 		}
 	} else {
-		if i, IsSelected := p.IsSelected(option); IsSelected {
-			p.Value = append(p.Value[0:i], p.Value[i+1:]...)
+		if option.IsSelected {
+			option.IsSelected = false
+			p.Value = []TValue{}
+			for _, _option := range p.Options {
+				if _option.IsSelected {
+					p.Value = append(p.Value, _option.Value)
+				}
+			}
 		} else {
+			option.IsSelected = true
 			p.Value = append(p.Value, option.Value)
 		}
 	}
