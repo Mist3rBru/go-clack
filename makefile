@@ -3,8 +3,8 @@ default: run
 run:
 	@go run playground/main.go
 test:
-	@go test ./core -cover; go test -p 1 ./prompts -cover
+	@go test ./core ./prompts -cover
 snap:
-	@UPDATE_SNAPSHOTS=true go test -p 1 ./prompts
+	@UPDATE_SNAPSHOTS=true go test ./prompts
 format:
 	@gofmt -w .

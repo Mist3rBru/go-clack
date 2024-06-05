@@ -6,9 +6,10 @@ var (
 	TextTestingPrompt             *core.TextPrompt       = nil
 	PasswordTestingPrompt         *core.PasswordPrompt   = nil
 	PathTestingPrompt             *core.PathPrompt       = nil
+	ConfirmTestingPrompt          *core.ConfirmPrompt    = nil
+	SelectPathTestingPrompt       *core.SelectPathPrompt = nil
 	SelectTestingPrompt           any                    = nil
 	MultiSelectTestingPrompt      any                    = nil
 	GroupMultiSelectTestingPrompt any                    = nil
-	ConfirmTestingPrompt          *core.ConfirmPrompt    = nil
-	SelectPathTestingPrompt       *core.SelectPathPrompt = nil
+	SelectKeyTestingPrompt        any                    = nil
 )
