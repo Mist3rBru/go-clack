@@ -1,7 +1,6 @@
 package core_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -103,16 +102,4 @@ func TestExitRootDirectory(t *testing.T) {
 	assert.Equal(t, 0, p.CurrentOption.Depth)
 	assert.Equal(t, p.Root, p.CurrentOption)
 	assert.NotEqual(t, pastChildrenLength, len(p.Root.Children))
-}
-
-func TestValidateSelectPathValue(t *testing.T) {
-	p := core.NewSelectPathPrompt(core.SelectPathPromptParams{
-		Validate: func(path string) error {
-			return fmt.Errorf("invalid path: %s", path)
-		},
-	})
-
-	p.PressKey(&core.Key{Name: core.EnterKey})
-	assert.Equal(t, core.ErrorState, p.State)
-	assert.Equal(t, fmt.Sprintf("invalid path: %s", p.CurrentOption.Path), p.Error)
 }

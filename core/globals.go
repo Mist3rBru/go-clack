@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"os"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
@@ -67,3 +68,18 @@ const (
 	EndKey       KeyName = "End"
 	BackspaceKey KeyName = "Backspace"
 )
+
+type FileSystem interface {
+	Getwd() (string, error)
+	ReadDir(name string) ([]os.DirEntry, error)
+}
+
+type OSFileSystem struct{}
+
+func (fs OSFileSystem) Getwd() (string, error) {
+	return os.Getwd()
+}
+
+func (fs OSFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
+	return os.ReadDir(name)
+}

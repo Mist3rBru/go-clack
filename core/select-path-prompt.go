@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"os"
 	"path"
 
@@ -24,6 +23,7 @@ type SelectPathPrompt struct {
 	CurrentOption *PathNode
 	Value         string
 	OnlyShowDir   bool
+	FileSystem    FileSystem
 }
 
 type SelectPathPromptParams struct {
@@ -31,23 +31,21 @@ type SelectPathPromptParams struct {
 	Output       *os.File
 	InitialValue string
 	OnlyShowDir  bool
-	Validate     func(path string) error
+	FileSystem   FileSystem
 	Render       func(p *SelectPathPrompt) string
 }
 
 func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
+	if params.FileSystem == nil {
+		params.FileSystem = OSFileSystem{}
+	}
+
 	var p *SelectPathPrompt
 	p = &SelectPathPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
 			Input:       params.Input,
 			Output:      params.Output,
 			CursorIndex: 1,
-			Validate: func(value string) error {
-				if params.Validate == nil {
-					return nil
-				}
-				return params.Validate(p.CurrentOption.Path)
-			},
 			Render: func(_p *Prompt[string]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()
@@ -56,8 +54,9 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 			},
 		}),
 		OnlyShowDir: params.OnlyShowDir,
+		FileSystem:  params.FileSystem,
 	}
-	if cwd, err := os.Getwd(); err == nil && params.InitialValue == "" {
+	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialValue == "" {
 		params.InitialValue = cwd
 	}
 	p.Root = p.createRoot(params.InitialValue)
@@ -114,13 +113,13 @@ func (p *SelectPathPrompt) cursorIndex() int {
 	return -1
 }
 
-func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
+func (p *SelectPathPrompt) mapNode(node *PathNode) []*PathNode {
 	if node.Children == nil {
-		return nil, fmt.Errorf("node is not a directory: %s", node.Path)
+		return nil
 	}
-	entries, err := os.ReadDir(node.Path)
+	entries, err := p.FileSystem.ReadDir(node.Path)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	children := []*PathNode{}
 	for i, entry := range entries {
@@ -139,7 +138,7 @@ func (p *SelectPathPrompt) mapNode(node *PathNode) ([]*PathNode, error) {
 		}
 		children = append(children, child)
 	}
-	return children, nil
+	return children
 }
 
 func (p *SelectPathPrompt) createRoot(cwd string) *PathNode {
@@ -150,7 +149,7 @@ func (p *SelectPathPrompt) createRoot(cwd string) *PathNode {
 		Name:     cwd,
 		Children: []*PathNode{},
 	}
-	root.Children, _ = p.mapNode(root)
+	root.Children = p.mapNode(root)
 	return root
 }
 
@@ -174,8 +173,8 @@ func (p *SelectPathPrompt) exitChildren() {
 }
 
 func (p *SelectPathPrompt) enterChildren() {
-	children, err := p.mapNode(p.CurrentOption)
-	if err != nil || len(children) == 0 {
+	children := p.mapNode(p.CurrentOption)
+	if len(children) == 0 {
 		return
 	}
 	p.CurrentOption.Children = children
