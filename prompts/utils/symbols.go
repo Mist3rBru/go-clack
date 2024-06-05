@@ -2,15 +2,15 @@ package utils
 
 import (
 	"github.com/Mist3rBru/go-clack/core"
-	core_utils "github.com/Mist3rBru/go-clack/core/utils"
+	thirdparty "github.com/Mist3rBru/go-clack/third_party"
 )
 
 var (
-	Color = core_utils.CreateColors()
+	Color = thirdparty.CreateColors()
 )
 
 func s(c, fallback string) string {
-	if IsUnicodeSupported() {
+	if thirdparty.IsUnicodeSupported() {
 		return c
 	}
 	return fallback

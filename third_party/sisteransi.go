@@ -1,4 +1,5 @@
-package utils
+// Forked from https://github.com/terkelg/sisteransi/blob/master/src/index.js
+package thirdparty
 
 import (
 	"fmt"
@@ -45,4 +46,12 @@ func ShowCursor() string {
 
 func Restore() string {
 	return fmt.Sprintf("%s8", CSI)
+}
+
+func EraseCurrentLine() string {
+	return "\x1b[K"
+}
+
+func EraseDown() string {
+	return "\x1b[J"
 }

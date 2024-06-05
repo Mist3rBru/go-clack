@@ -1,5 +1,5 @@
-// Imported from https://github.com/alexeyraspopov/picocolors/blob/main/picocolors.js
-package utils
+// Forked from https://github.com/alexeyraspopov/picocolors/blob/main/picocolors.js
+package thirdparty
 
 import (
 	"os"

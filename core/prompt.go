@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/third_party"
 
 	"golang.org/x/term"
 )
@@ -497,7 +498,7 @@ func (p *Prompt[TValue]) render() {
 	}
 
 	if p.State == InitialState {
-		p.write(utils.HideCursor())
+		p.write(thirdparty.HideCursor())
 		p.write(frame)
 		p.Frame = frame
 		return
@@ -512,19 +513,19 @@ func (p *Prompt[TValue]) render() {
 	prevFrameLines := strings.Split((p.Frame), "\n")
 
 	// Move to first diff line
-	p.write(utils.MoveCursor(-(len(prevFrameLines) - 1), -999))
-	p.write(utils.MoveCursor(diffLineIndex, 0))
+	p.write(thirdparty.MoveCursor(-(len(prevFrameLines) - 1), -999))
+	p.write(thirdparty.MoveCursor(diffLineIndex, 0))
 
 	if len(diff) == 1 {
-		p.write(utils.EraseCurrentLine())
+		p.write(thirdparty.EraseCurrentLine())
 		lines := strings.Split(frame, "\n")
 		p.write(lines[diffLineIndex])
 		p.Frame = frame
-		p.write(utils.MoveCursorDown(len(lines) - diffLineIndex - 1))
+		p.write(thirdparty.MoveCursorDown(len(lines) - diffLineIndex - 1))
 		return
 	}
 
-	p.write(utils.EraseDown())
+	p.write(thirdparty.EraseDown())
 	lines := strings.Split(frame, "\n")
 	newLines := lines[diffLineIndex:]
 	p.write(strings.Join(newLines, "\n"))
@@ -542,7 +543,7 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 
 	done := make(chan struct{})
 	closeCb := func(args ...any) {
-		p.write(utils.ShowCursor())
+		p.write(thirdparty.ShowCursor())
 		p.write("\r\n")
 		close(done)
 	}

@@ -4,11 +4,11 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/third_party"
 )
 
 var (
-	color = utils.CreateColors()
+	color = thirdparty.CreateColors()
 )
 
 type SelectOption[TValue comparable] struct {

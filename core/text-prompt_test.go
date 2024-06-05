@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
-	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/third_party"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var color = utils.CreateColors()
+var color = thirdparty.CreateColors()
 
 func newTextPrompt() *core.TextPrompt {
 	return core.NewTextPrompt(core.TextPromptParams{

@@ -1,5 +1,5 @@
-// Imported from https://github.com/sindresorhus/is-unicode-supported/blob/main/index.js
-package utils
+// Forked from https://github.com/sindresorhus/is-unicode-supported/blob/main/index.js
+package thirdparty
 
 import (
 	"os"
