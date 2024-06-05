@@ -17,7 +17,7 @@ const message = "test message"
 
 func TestTextInitialState(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -29,7 +29,7 @@ func TestTextInitialState(t *testing.T) {
 
 func TestTextInitialStateWithPlaceholder(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message, Placeholder: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -41,7 +41,7 @@ func TestTextInitialStateWithPlaceholder(t *testing.T) {
 
 func TestTextInitialStateWithInitialValue(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message, InitialValue: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -55,7 +55,7 @@ func TestTextErrorState(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message, InitialValue: "foo", Validate: func(value string) error {
 		return fmt.Errorf("invalid value: %s", value)
 	}})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -70,7 +70,7 @@ func TestTextErrorState(t *testing.T) {
 
 func TestTextCancelState(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -84,7 +84,7 @@ func TestTextCancelState(t *testing.T) {
 
 func TestTextCancelStateWithValue(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message, InitialValue: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -98,7 +98,7 @@ func TestTextCancelStateWithValue(t *testing.T) {
 
 func TestTextSubmitState(t *testing.T) {
 	go prompts.Text(prompts.TextParams{Message: message, InitialValue: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.TextTestingPrompt
 	p.PressKey(&core.Key{Name: core.EnterKey})

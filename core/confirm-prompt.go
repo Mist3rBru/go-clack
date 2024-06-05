@@ -22,6 +22,12 @@ type ConfirmPromptParams struct {
 }
 
 func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
+	if params.Active == "" {
+		params.Active = "yes"
+	}
+	if params.Inactive == "" {
+		params.Inactive = "no"
+	}
 	var p *ConfirmPrompt
 	p = &ConfirmPrompt{
 		Prompt: *NewPrompt(PromptParams[bool]{

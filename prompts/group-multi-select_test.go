@@ -31,7 +31,7 @@ func runGroupMultiSelect() {
 
 func TestGroupMultiSelectInitialState(t *testing.T) {
 	go runGroupMultiSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -40,7 +40,7 @@ func TestGroupMultiSelectInitialState(t *testing.T) {
 
 func TestGroupMultiSelectCancelState(t *testing.T) {
 	go runGroupMultiSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.SpaceKey})
@@ -52,7 +52,7 @@ func TestGroupMultiSelectCancelState(t *testing.T) {
 
 func TestGroupMultiSelectSubmitState(t *testing.T) {
 	go runGroupMultiSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.SpaceKey})
@@ -84,7 +84,7 @@ func TestGroupMultiSelectWithLongList(t *testing.T) {
 		Message: message,
 		Options: options,
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -93,7 +93,7 @@ func TestGroupMultiSelectWithLongList(t *testing.T) {
 
 func TestGroupMultiSelectMultiValue(t *testing.T) {
 	go runGroupMultiSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.SpaceKey})

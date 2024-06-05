@@ -15,7 +15,7 @@ import (
 
 func TestPasswordInitialState(t *testing.T) {
 	go prompts.Password(prompts.PasswordParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PasswordTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -27,7 +27,7 @@ func TestPasswordInitialState(t *testing.T) {
 
 func TestPasswordInitialStateWithInitialValue(t *testing.T) {
 	go prompts.Password(prompts.PasswordParams{Message: message, InitialValue: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PasswordTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -41,7 +41,7 @@ func TestPasswordErrorState(t *testing.T) {
 	go prompts.Password(prompts.PasswordParams{Message: message, InitialValue: "foo", Validate: func(value string) error {
 		return fmt.Errorf("invalid value: %s", value)
 	}})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PasswordTestingPrompt
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -56,7 +56,7 @@ func TestPasswordErrorState(t *testing.T) {
 
 func TestPasswordCancelState(t *testing.T) {
 	go prompts.Password(prompts.PasswordParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PasswordTestingPrompt
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -70,7 +70,7 @@ func TestPasswordCancelState(t *testing.T) {
 
 func TestPasswordCancelStateWithValue(t *testing.T) {
 	go prompts.Password(prompts.PasswordParams{Message: message, InitialValue: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PasswordTestingPrompt
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -84,7 +84,7 @@ func TestPasswordCancelStateWithValue(t *testing.T) {
 
 func TestPasswordSubmitState(t *testing.T) {
 	go prompts.Password(prompts.PasswordParams{Message: message, InitialValue: "foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PasswordTestingPrompt
 	p.PressKey(&core.Key{Name: core.EnterKey})

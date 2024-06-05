@@ -9,4 +9,5 @@ var (
 	SelectTestingPrompt           any                  = nil
 	MultiSelectTestingPrompt      any                  = nil
 	GroupMultiSelectTestingPrompt any                  = nil
+	ConfirmTestingPrompt          *core.ConfirmPrompt  = nil
 )

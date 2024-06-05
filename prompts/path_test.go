@@ -15,7 +15,7 @@ import (
 
 func TestPathInitialState(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -27,7 +27,7 @@ func TestPathInitialState(t *testing.T) {
 
 func TestPathInitialStateWithInitialValue(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message, InitialValue: "/foo"})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	title := utils.SymbolState(core.InitialState) + " " + message
@@ -41,7 +41,7 @@ func TestPathErrorState(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message, InitialValue: "/foo", Validate: func(value string) error {
 		return fmt.Errorf("invalid value: %s", value)
 	}})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -56,7 +56,7 @@ func TestPathErrorState(t *testing.T) {
 
 func TestPathCancelState(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	p.Value = ""
@@ -71,7 +71,7 @@ func TestPathCancelState(t *testing.T) {
 
 func TestPathCancelStateWithValue(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -85,7 +85,7 @@ func TestPathCancelStateWithValue(t *testing.T) {
 
 func TestPathSubmitState(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -99,7 +99,7 @@ func TestPathSubmitState(t *testing.T) {
 
 func TestPathValueWithOptions(t *testing.T) {
 	go prompts.Path(prompts.PathParams{Message: message})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.PathTestingPrompt
 	p.PressKey(&core.Key{Name: core.TabKey})

@@ -31,7 +31,7 @@ func TestMultiSelectInitialState(t *testing.T) {
 			{Label: "c"},
 		},
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -47,7 +47,7 @@ func TestMultiSelectWithHint(t *testing.T) {
 			{Label: "c", Hint: "a"},
 		},
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -56,7 +56,7 @@ func TestMultiSelectWithHint(t *testing.T) {
 
 func TestMultiSelectCancelState(t *testing.T) {
 	go runMultiSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -67,7 +67,7 @@ func TestMultiSelectCancelState(t *testing.T) {
 
 func TestMultiSelectSubmitState(t *testing.T) {
 	go runMultiSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -94,7 +94,7 @@ func TestMultiSelectWithLongList(t *testing.T) {
 			{Label: "c"},
 		},
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -113,7 +113,7 @@ func TestMultiSelectMultiValue(t *testing.T) {
 			{Label: "c"},
 		},
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 	p.CursorIndex = 1
 	p.PressKey(&core.Key{Name: core.DownKey})

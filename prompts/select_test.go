@@ -24,7 +24,7 @@ func runSelect() {
 
 func TestSelectInitialState(t *testing.T) {
 	go runSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -40,7 +40,7 @@ func TestSelectWithHint(t *testing.T) {
 			{Label: "c", Hint: "a"},
 		},
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
@@ -49,7 +49,7 @@ func TestSelectWithHint(t *testing.T) {
 
 func TestSelectCancelState(t *testing.T) {
 	go runSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.CancelKey})
@@ -60,7 +60,7 @@ func TestSelectCancelState(t *testing.T) {
 
 func TestSelectSubmitState(t *testing.T) {
 	go runSelect()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 
 	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -87,7 +87,7 @@ func TestSelectWithLongList(t *testing.T) {
 			{Label: "c"},
 		},
 	})
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(time.Millisecond)
 	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
