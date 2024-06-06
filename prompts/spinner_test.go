@@ -12,16 +12,19 @@ import (
 )
 
 type MockTimer struct {
-	mu      sync.Mutex
-	waiters []chan struct{}
+	mu          sync.Mutex
+	waiters     []chan struct{}
+	autoResolve bool
 }
 
 func (t *MockTimer) Sleep(duration time.Duration) {
-	waiter := make(chan struct{})
-	t.mu.Lock()
-	t.waiters = append(t.waiters, waiter)
-	t.mu.Unlock()
-	<-waiter
+	if !t.autoResolve {
+		waiter := make(chan struct{})
+		t.mu.Lock()
+		t.waiters = append(t.waiters, waiter)
+		t.mu.Unlock()
+		<-waiter
+	}
 }
 
 func (m *MockTimer) ResolveAll() {
@@ -43,6 +46,15 @@ func (w *MockWriter) Write(data []byte) (int, error) {
 	w.Data = append(w.Data, string(data))
 	w.mu.Unlock()
 	return 0, nil
+}
+
+func (w *MockWriter) HaveBeenCalledWith(str string) string {
+	for _, data := range w.Data {
+		if data == str {
+			return data
+		}
+	}
+	return ""
 }
 
 func runSpinner() (*prompts.SpinnerController, *MockTimer, *MockWriter) {
