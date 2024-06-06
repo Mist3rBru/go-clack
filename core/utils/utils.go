@@ -39,16 +39,13 @@ func StrLength(str string) int {
 	if len(str) == 0 {
 		return 0
 	}
-	ansiRegex := regexp.MustCompile(`[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))`)
+	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`)
 	parsedStr := ansiRegex.ReplaceAllString(str, "")
 	length := 0
 
-	for i := 0; i < len(parsedStr); i++ {
-		r := rune(parsedStr[i])
-		if isControlCharacter(r) || isCombiningCharacter(r) {
+	for _, r := range parsedStr {
+		if isControlCharacter(r) || isCombiningCharacter(r) || isSurrogatePair(r) {
 			continue
-		} else if isSurrogatePair(r) {
-			i++
 		}
 		length++
 	}

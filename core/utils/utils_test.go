@@ -22,4 +22,6 @@ func TestStrLength(t *testing.T) {
 	assert.Equal(t, 5, utils.StrLength(color["cyan"]("| foo")))
 	assert.Equal(t, 5, utils.StrLength(color["gray"]("|")+" "+color["dim"]("foo")))
 	assert.Equal(t, 1, utils.StrLength(color["green"]("◆")))
+	assert.Equal(t, 5, utils.StrLength(color["green"]("◇")+" "+"Foo"))
+	assert.Equal(t, 5, utils.StrLength(color["green"]("o")+" "+"Foo"))
 }
