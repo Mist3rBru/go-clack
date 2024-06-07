@@ -45,11 +45,11 @@ var (
 
 func SymbolState(state core.State) string {
 	switch state {
-	case "error":
+	case core.ErrorState:
 		return picocolors.Yellow(S_STEP_ERROR)
-	case "cancel":
+	case core.CancelState:
 		return picocolors.Red(S_STEP_CANCEL)
-	case "submit":
+	case core.SubmitState:
 		return picocolors.Green(S_STEP_SUBMIT)
 	default:
 		return picocolors.Cyan(S_STEP_ACTIVE)

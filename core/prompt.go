@@ -62,7 +62,7 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 		output: params.Output,
 		rl:     bufio.NewReader(params.Input),
 
-		State:       "initial",
+		State:       InitialState,
 		Value:       params.InitialValue,
 		CursorIndex: params.CursorIndex,
 
