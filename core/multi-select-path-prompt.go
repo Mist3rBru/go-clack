@@ -3,12 +3,13 @@ package core
 import (
 	"os"
 	"path"
+	"sort"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 )
 
-type SelectPathPrompt struct {
-	Prompt[string]
+type MultiSelectPathPrompt struct {
+	Prompt[[]string]
 	Root          *PathNode
 	CurrentLayer  []*PathNode
 	CurrentOption *PathNode
@@ -16,27 +17,31 @@ type SelectPathPrompt struct {
 	FileSystem    FileSystem
 }
 
-type SelectPathPromptParams struct {
+type MultiSelectPathPromptParams struct {
 	Input        *os.File
 	Output       *os.File
-	InitialValue string
+	InitialValue []string
+	InitialPath  string
 	OnlyShowDir  bool
 	FileSystem   FileSystem
-	Render       func(p *SelectPathPrompt) string
+	Validate     func(value []string) error
+	Render       func(p *MultiSelectPathPrompt) string
 }
 
-func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
+func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPathPrompt {
 	if params.FileSystem == nil {
 		params.FileSystem = OSFileSystem{}
 	}
 
-	var p *SelectPathPrompt
-	p = &SelectPathPrompt{
-		Prompt: *NewPrompt(PromptParams[string]{
-			Input:       params.Input,
-			Output:      params.Output,
-			CursorIndex: 1,
-			Render: func(_p *Prompt[string]) string {
+	var p *MultiSelectPathPrompt
+	p = &MultiSelectPathPrompt{
+		Prompt: *NewPrompt(PromptParams[[]string]{
+			Input:        params.Input,
+			Output:       params.Output,
+			InitialValue: params.InitialValue,
+			Validate:     params.Validate,
+			CursorIndex:  1,
+			Render: func(_p *Prompt[[]string]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()
 				}
@@ -46,16 +51,16 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 		OnlyShowDir: params.OnlyShowDir,
 		FileSystem:  params.FileSystem,
 	}
-	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialValue == "" {
-		params.InitialValue = cwd
+	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialPath == "" {
+		params.InitialPath = cwd
 	}
-	p.Root = NewPathNode(params.InitialValue, PathNodeOptions{
+	p.Root = NewPathNode(params.InitialPath, PathNodeOptions{
 		OnlyShowDir: p.OnlyShowDir,
 		FileSystem:  p.FileSystem,
 	})
 	p.CurrentLayer = p.Root.Children
 	p.CurrentOption = p.Root.Children[0]
-	p.Value = p.CurrentOption.Path
+	p.mapSelectedChildren(append([]*PathNode{p.Root}, p.Root.Children...))
 
 	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
@@ -72,14 +77,34 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 			p.CurrentOption = p.CurrentLayer[0]
 		case EndKey:
 			p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
+		case SpaceKey:
+			if p.CurrentOption.IsSelected {
+				p.CurrentOption.IsSelected = false
+				value := []string{}
+				for _, v := range p.Value {
+					if v != p.CurrentOption.Path {
+						value = append(value, v)
+					}
+				}
+				p.Value = value
+			} else {
+				p.CurrentOption.IsSelected = true
+				p.Value = append(p.Value, p.CurrentOption.Path)
+			}
 		}
-		p.Value = p.CurrentOption.Path
-		p.CursorIndex = p.cursorIndex()
+		if key.Name != SpaceKey {
+			p.CursorIndex = p.cursorIndex()
+		}
+	})
+	p.On(FinalizeEvent, func(args ...any) {
+		sort.Slice(p.Value, func(i, j int) bool {
+			return p.Value[i] < p.Value[j]
+		})
 	})
 	return p
 }
 
-func (p *SelectPathPrompt) Options() []*PathNode {
+func (p *MultiSelectPathPrompt) Options() []*PathNode {
 	options := []*PathNode{}
 
 	var traverse func(node *PathNode)
@@ -97,7 +122,7 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 	return options
 }
 
-func (p *SelectPathPrompt) cursorIndex() int {
+func (p *MultiSelectPathPrompt) cursorIndex() int {
 	for i, option := range p.Options() {
 		if option.Path == p.CurrentOption.Path {
 			return i
@@ -106,7 +131,7 @@ func (p *SelectPathPrompt) cursorIndex() int {
 	return -1
 }
 
-func (p *SelectPathPrompt) exitChildren() {
+func (p *MultiSelectPathPrompt) exitChildren() {
 	if p.CurrentOption.Path == p.Root.Path {
 		p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
@@ -114,6 +139,7 @@ func (p *SelectPathPrompt) exitChildren() {
 		})
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
+		p.mapSelectedChildren(p.Root.Children)
 		return
 	}
 	if p.CurrentOption.Parent.Path == p.Root.Path {
@@ -128,12 +154,24 @@ func (p *SelectPathPrompt) exitChildren() {
 	}
 }
 
-func (p *SelectPathPrompt) enterChildren() {
+func (p *MultiSelectPathPrompt) enterChildren() {
 	children := p.CurrentOption.MapChildren()
 	if len(children) == 0 {
 		return
 	}
+	p.mapSelectedChildren(children)
 	p.CurrentOption.Children = children
 	p.CurrentOption = children[0]
 	p.CurrentLayer = children
+}
+
+func (p *MultiSelectPathPrompt) mapSelectedChildren(children []*PathNode) {
+	for _, child := range children {
+		for _, path := range p.Value {
+			if child.Path == path {
+				child.IsSelected = true
+				break
+			}
+		}
+	}
 }

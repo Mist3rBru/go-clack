@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"os"
+	"path"
 )
 
 type SelectOption[TValue comparable] struct {
@@ -76,4 +77,72 @@ func (fs OSFileSystem) Getwd() (string, error) {
 
 func (fs OSFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
 	return os.ReadDir(name)
+}
+
+type PathNode struct {
+	Index    int
+	Depth    int
+	Path     string
+	Name     string
+	Parent   *PathNode
+	Children []*PathNode
+
+	IsSelected bool
+
+	FileSystem  FileSystem
+	OnlyShowDir bool
+}
+
+type PathNodeOptions struct {
+	OnlyShowDir bool
+	FileSystem  FileSystem
+}
+
+func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
+	root := &PathNode{
+		Index:    0,
+		Depth:    0,
+		Path:     rootPath,
+		Name:     rootPath,
+		Children: []*PathNode{},
+
+		OnlyShowDir: options.OnlyShowDir,
+		FileSystem:  options.FileSystem,
+	}
+	root.Children = root.MapChildren()
+	return root
+}
+
+func (p *PathNode) MapChildren() []*PathNode {
+	if p.Children == nil {
+		return nil
+	}
+	if len(p.Children) > 0 {
+		return p.Children
+	}
+	entries, err := p.FileSystem.ReadDir(p.Path)
+	if err != nil {
+		return nil
+	}
+	children := []*PathNode{}
+	for i, entry := range entries {
+		if p.OnlyShowDir && !entry.IsDir() {
+			continue
+		}
+		child := &PathNode{
+			Index:  i,
+			Depth:  p.Depth + 1,
+			Path:   path.Join(p.Path, entry.Name()),
+			Name:   entry.Name(),
+			Parent: p,
+
+			FileSystem:  p.FileSystem,
+			OnlyShowDir: p.OnlyShowDir,
+		}
+		if entry.IsDir() {
+			child.Children = []*PathNode{}
+		}
+		children = append(children, child)
+	}
+	return children
 }

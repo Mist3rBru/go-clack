@@ -51,6 +51,7 @@ func TestChangeMultiSelectValue(t *testing.T) {
 	assert.Equal(t, true, p.Options[0].IsSelected)
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{}, p.Value)
+	assert.Equal(t, false, p.Options[0].IsSelected)
 
 	expected := make([]string, len(p.Options))
 	for i, option := range p.Options {

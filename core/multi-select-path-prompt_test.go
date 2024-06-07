@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newSelectPathPrompt() *core.SelectPathPrompt {
-	return core.NewSelectPathPrompt(core.SelectPathPromptParams{})
+func newMultiSelectPathPrompt() *core.MultiSelectPathPrompt {
+	return core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{})
 }
 
-func TestSelectPathChangeCursor(t *testing.T) {
-	p := newSelectPathPrompt()
+func TestMultiSelectPathChangeCursor(t *testing.T) {
+	p := newMultiSelectPathPrompt()
 
 	assert.Equal(t, 1, p.CursorIndex)
 	p.PressKey(&core.Key{Name: core.DownKey})
@@ -32,20 +32,31 @@ func TestSelectPathChangeCursor(t *testing.T) {
 	assert.Equal(t, 1, p.CursorIndex)
 }
 
-func TestSelectPathChangeValue(t *testing.T) {
-	p := newSelectPathPrompt()
+func TestMultiSelectPathChangeValue(t *testing.T) {
+	p := newMultiSelectPathPrompt()
+	options := p.Options()
 
-	assert.Equal(t, p.CurrentLayer[0].Path, p.Value)
-	p.PressKey(&core.Key{Name: core.DownKey})
-	assert.Equal(t, p.CurrentLayer[1].Path, p.Value)
-	p.PressKey(&core.Key{Name: core.DownKey})
-	assert.Equal(t, p.CurrentLayer[2].Path, p.Value)
-	p.PressKey(&core.Key{Name: core.UpKey})
-	assert.Equal(t, p.CurrentLayer[1].Path, p.Value)
+	assert.Equal(t, []string(nil), p.Value)
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Equal(t, []string{options[1].Path}, p.Value)
+	assert.Equal(t, true, options[1].IsSelected)
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Equal(t, []string{}, p.Value)
+	assert.Equal(t, false, options[1].IsSelected)
+
+	p.CurrentOption = options[1]
+	for i := 0; i < 3; i++ {
+		p.PressKey(&core.Key{Name: core.SpaceKey})
+		p.PressKey(&core.Key{Name: core.DownKey})
+	}
+	p.CurrentOption = options[2]
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	expected := append([]string{options[1].Path}, options[3].Path)
+	assert.Equal(t, expected, p.Value)
 }
 
-func TestSelectPathEnterDirectory(t *testing.T) {
-	p := newSelectPathPrompt()
+func TestMultiSelectPathEnterDirectory(t *testing.T) {
+	p := newMultiSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
 		if node.Children != nil {
@@ -59,8 +70,8 @@ func TestSelectPathEnterDirectory(t *testing.T) {
 	assert.Equal(t, pastOption, p.CurrentOption.Parent)
 }
 
-func TestSelectPathEnterNonDirectory(t *testing.T) {
-	p := newSelectPathPrompt()
+func TestMultiSelectPathEnterNonDirectory(t *testing.T) {
+	p := newMultiSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
 		if node.Children == nil {
@@ -74,8 +85,8 @@ func TestSelectPathEnterNonDirectory(t *testing.T) {
 	assert.Equal(t, pastOption, p.CurrentOption)
 }
 
-func TestSelectPathExitDirectory(t *testing.T) {
-	p := newSelectPathPrompt()
+func TestMultiSelectPathExitDirectory(t *testing.T) {
+	p := newMultiSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
 		if node.Children != nil {
@@ -90,8 +101,8 @@ func TestSelectPathExitDirectory(t *testing.T) {
 	assert.Equal(t, pastOption, p.CurrentOption)
 }
 
-func TestSelectPathExitRootDirectory(t *testing.T) {
-	p := newSelectPathPrompt()
+func TestMultiSelectPathExitRootDirectory(t *testing.T) {
+	p := newMultiSelectPathPrompt()
 
 	p.PressKey(&core.Key{Name: core.LeftKey})
 	assert.Equal(t, 0, p.CurrentOption.Depth)
