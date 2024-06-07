@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 func write(msg string) {
@@ -12,33 +13,33 @@ func write(msg string) {
 }
 
 func Intro(msg string) {
-	write(fmt.Sprintf("%s %s\n", utils.Color["gray"](utils.S_BAR_START), msg))
+	write(fmt.Sprintf("%s %s\n", picocolors.Gray(utils.S_BAR_START), msg))
 }
 
 func Cancel(msg string) {
-	write(fmt.Sprintf("%s %s\n\n", utils.Color["gray"](utils.S_BAR_END), utils.Color["red"](msg)))
+	write(fmt.Sprintf("%s %s\n\n", picocolors.Gray(utils.S_BAR_END), picocolors.Red(msg)))
 }
 
 func Outro(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n\n", utils.Color["gray"](utils.S_BAR), utils.Color["gray"](utils.S_BAR_END), msg))
+	write(fmt.Sprintf("%s\n%s %s\n\n", picocolors.Gray(utils.S_BAR), picocolors.Gray(utils.S_BAR_END), msg))
 }
 
 func Info(msg string) {
-	write(fmt.Sprintf("%s %s\n", utils.Color["blue"](utils.S_INFO), msg))
+	write(fmt.Sprintf("%s %s\n", picocolors.Blue(utils.S_INFO), msg))
 }
 
 func Success(msg string) {
-	write(fmt.Sprintf("%s %s\n", utils.Color["green"](utils.S_SUCCESS), msg))
+	write(fmt.Sprintf("%s %s\n", picocolors.Green(utils.S_SUCCESS), msg))
 }
 
 func Step(msg string) {
-	write(fmt.Sprintf("%s %s\n", utils.Color["green"](utils.S_STEP_SUBMIT), msg))
+	write(fmt.Sprintf("%s %s\n", picocolors.Green(utils.S_STEP_SUBMIT), msg))
 }
 
 func Warn(msg string) {
-	write(fmt.Sprintf("%s %s\n", utils.Color["yellow"](utils.S_WARN), msg))
+	write(fmt.Sprintf("%s %s\n", picocolors.Yellow(utils.S_WARN), msg))
 }
 
 func Error(msg string) {
-	write(fmt.Sprintf("%s %s\n", utils.Color["red"](utils.S_ERROR), msg))
+	write(fmt.Sprintf("%s %s\n", picocolors.Red(utils.S_ERROR), msg))
 }

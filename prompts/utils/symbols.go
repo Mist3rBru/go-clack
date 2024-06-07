@@ -2,15 +2,12 @@ package utils
 
 import (
 	"github.com/Mist3rBru/go-clack/core"
-	thirdparty "github.com/Mist3rBru/go-clack/third_party"
-)
-
-var (
-	Color = thirdparty.CreateColors()
+	isunicodesupported "github.com/Mist3rBru/go-clack/third_party/is-unicode-supported"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 func s(c, fallback string) string {
-	if thirdparty.IsUnicodeSupported() {
+	if isunicodesupported.IsUnicodeSupported() {
 		return c
 	}
 	return fallback
@@ -49,12 +46,12 @@ var (
 func SymbolState(state core.State) string {
 	switch state {
 	case "error":
-		return Color["yellow"](S_STEP_ERROR)
+		return picocolors.Yellow(S_STEP_ERROR)
 	case "cancel":
-		return Color["red"](S_STEP_CANCEL)
+		return picocolors.Red(S_STEP_CANCEL)
 	case "submit":
-		return Color["green"](S_STEP_SUBMIT)
+		return picocolors.Green(S_STEP_SUBMIT)
 	default:
-		return Color["cyan"](S_STEP_ACTIVE)
+		return picocolors.Cyan(S_STEP_ACTIVE)
 	}
 }

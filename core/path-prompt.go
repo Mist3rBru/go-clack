@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type PathPrompt struct {
@@ -119,15 +120,15 @@ func (p *PathPrompt) ValueWithCursor() string {
 	if p.CursorIndex >= len(p.Value) {
 		value = p.Value
 		if p.Hint == "" {
-			hint = color["inverse"](" ")
+			hint = picocolors.Inverse(" ")
 		} else {
-			hint = color["inverse"](string(p.Hint[0])) + color["dim"](p.Hint[1:])
+			hint = picocolors.Inverse(string(p.Hint[0])) + picocolors.Dim(p.Hint[1:])
 		}
 	} else {
 		s1 := p.Value[0:p.CursorIndex]
 		s2 := p.Value[p.CursorIndex:]
-		value = s1 + color["inverse"](string(s2[0])) + s2[1:]
-		hint = color["dim"](p.Hint)
+		value = s1 + picocolors.Inverse(string(s2[0])) + s2[1:]
+		hint = picocolors.Dim(p.Hint)
 	}
 	return value + hint
 }

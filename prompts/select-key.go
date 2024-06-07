@@ -6,6 +6,7 @@ import (
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type SelectKeyOption[TValue comparable] struct {
@@ -38,7 +39,7 @@ func SelectKey[TValue comparable](params SelectKeyParams[TValue]) (TValue, error
 			default:
 				keyOptions := make([]string, len(params.Options))
 				for i, option := range params.Options {
-					key := utils.Color["cyan"]("[" + option.Key + "]")
+					key := picocolors.Cyan("[" + option.Key + "]")
 					label := option.Label
 					keyOptions[i] = fmt.Sprintf("%s %s", key, label)
 				}

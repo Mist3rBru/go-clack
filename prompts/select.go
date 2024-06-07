@@ -6,6 +6,7 @@ import (
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type SelectOption[TValue comparable] struct {
@@ -41,14 +42,14 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 				for i, option := range params.Options {
 					var radio, label, hint string
 					if i == p.CursorIndex {
-						radio = utils.Color["green"](utils.S_RADIO_ACTIVE)
+						radio = picocolors.Green(utils.S_RADIO_ACTIVE)
 						label = option.Label
 						if option.Hint != "" {
-							hint = utils.Color["dim"]("(" + option.Hint + ")")
+							hint = picocolors.Dim("(" + option.Hint + ")")
 						}
 					} else {
-						radio = utils.Color["dim"](utils.S_RADIO_INACTIVE)
-						label = utils.Color["dim"](option.Label)
+						radio = picocolors.Dim(utils.S_RADIO_INACTIVE)
+						label = picocolors.Dim(option.Label)
 					}
 					radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
 				}

@@ -1,5 +1,5 @@
 // Forked from https://github.com/terkelg/sisteransi/blob/master/src/index.js
-package thirdparty
+package sisteransi
 
 import (
 	"fmt"

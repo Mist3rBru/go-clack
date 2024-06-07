@@ -7,6 +7,7 @@ import (
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type FileSystem = core.FileSystem
@@ -40,12 +41,12 @@ func SelectPath(params SelectPathParams) (string, error) {
 						}
 					}
 					if i == p.CursorIndex {
-						radio = utils.Color["green"](utils.S_RADIO_ACTIVE)
+						radio = picocolors.Green(utils.S_RADIO_ACTIVE)
 						label = option.Name
 					} else {
-						radio = utils.Color["dim"](utils.S_RADIO_INACTIVE)
-						label = utils.Color["dim"](option.Name)
-						dir = utils.Color["dim"](dir)
+						radio = picocolors.Dim(utils.S_RADIO_INACTIVE)
+						label = picocolors.Dim(option.Name)
+						dir = picocolors.Dim(dir)
 					}
 					depth := strings.Repeat(" ", option.Depth)
 					radioOptions[i] = fmt.Sprintf("%s%s %s %s", depth, radio, label, dir)

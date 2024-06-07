@@ -3,6 +3,8 @@ package core
 import (
 	"os"
 	"strings"
+
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type PasswordPrompt struct {
@@ -45,10 +47,9 @@ func (p *PasswordPrompt) ValueWithMask() string {
 }
 
 func (p *PasswordPrompt) ValueWithMaskAndCursor() string {
-	inverse := color["inverse"]
 	maskedValue := strings.Repeat("*", len(p.Value))
 	if p.CursorIndex == len(p.Value) {
-		return maskedValue + inverse(" ")
+		return maskedValue + picocolors.Inverse(" ")
 	}
-	return maskedValue[0:p.CursorIndex] + inverse(string(maskedValue[p.CursorIndex])) + maskedValue[p.CursorIndex+1:]
+	return maskedValue[0:p.CursorIndex] + picocolors.Inverse(string(maskedValue[p.CursorIndex])) + maskedValue[p.CursorIndex+1:]
 }

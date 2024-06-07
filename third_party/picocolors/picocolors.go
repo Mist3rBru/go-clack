@@ -1,5 +1,5 @@
 // Forked from https://github.com/alexeyraspopov/picocolors/blob/main/picocolors.js
-package thirdparty
+package picocolors
 
 import (
 	"os"
@@ -85,7 +85,7 @@ func replaceClose(input, close, replace string, index int) string {
 	return result + input[cursor:]
 }
 
-func CreateColors() map[string]func(input string) string {
+func createColors() map[string]func(input string) string {
 	init := func(open, close, replace string) func(input string) string {
 		if isColorSupported() {
 			return formatter(open, close, replace)
@@ -123,3 +123,32 @@ func CreateColors() map[string]func(input string) string {
 
 	return colors
 }
+
+var (
+	Color         = createColors()
+	Reset         = Color["reset"]
+	Bold          = Color["bold"]
+	Dim           = Color["dim"]
+	Italic        = Color["italic"]
+	Underline     = Color["underline"]
+	Inverse       = Color["inverse"]
+	Hidden        = Color["hidden"]
+	Strikethrough = Color["strikethrough"]
+	Black         = Color["black"]
+	Red           = Color["red"]
+	Green         = Color["green"]
+	Yellow        = Color["yellow"]
+	Blue          = Color["blue"]
+	Magenta       = Color["magenta"]
+	Cyan          = Color["cyan"]
+	White         = Color["white"]
+	Gray          = Color["gray"]
+	BgBlack       = Color["bgBlack"]
+	BgRed         = Color["bgRed"]
+	BgGreen       = Color["bgGreen"]
+	BgYellow      = Color["bgYellow"]
+	BgBlue        = Color["bgBlue"]
+	BgMagenta     = Color["bgMagenta"]
+	BgCyan        = Color["bgCyan"]
+	BgWhite       = Color["bgWhite"]
+)

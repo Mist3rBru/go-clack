@@ -1,5 +1,5 @@
 // Forked from https://github.com/sindresorhus/is-unicode-supported/blob/main/index.js
-package thirdparty
+package isunicodesupported
 
 import (
 	"os"

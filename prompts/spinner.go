@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/Mist3rBru/go-clack/prompts/utils"
-	thirdparty "github.com/Mist3rBru/go-clack/third_party"
+	isunicodesupported "github.com/Mist3rBru/go-clack/third_party/is-unicode-supported"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
+	"github.com/Mist3rBru/go-clack/third_party/sisteransi"
 )
 
 type Timer interface {
@@ -60,7 +62,7 @@ func Spinner(ctx context.Context, options SpinnerOptions) (*SpinnerController, e
 	const dotsInterval float32 = 0.125
 	var dotsTimer float32
 
-	if thirdparty.IsUnicodeSupported() {
+	if isunicodesupported.IsUnicodeSupported() {
 		frames = []string{"◒", "◐", "◓", "◑"}
 		frameInterval = 80
 	} else {
@@ -73,14 +75,14 @@ func Spinner(ctx context.Context, options SpinnerOptions) (*SpinnerController, e
 	}
 
 	clearPrevMessage := func() {
-		write(thirdparty.MoveCursor(-len(strings.Split(prevMessage, "\n"))+1, -999))
-		write(thirdparty.EraseDown())
+		write(sisteransi.MoveCursor(-len(strings.Split(prevMessage, "\n"))+1, -999))
+		write(sisteransi.EraseDown())
 	}
 
 	return &SpinnerController{
 		Start: func(msg string) {
-			write(thirdparty.HideCursor())
-			write(utils.Color["gray"](utils.S_BAR) + "\n")
+			write(sisteransi.HideCursor())
+			write(picocolors.Gray(utils.S_BAR) + "\n")
 
 			frameIndex = 0
 			dotsTimer = 0
@@ -94,7 +96,7 @@ func Spinner(ctx context.Context, options SpinnerOptions) (*SpinnerController, e
 					default:
 						clearPrevMessage()
 						prevMessage = message
-						frame := utils.Color["magenta"](frames[frameIndex])
+						frame := picocolors.Magenta(frames[frameIndex])
 						loadingDots := strings.Repeat(".", min(int(math.Floor(float64(dotsTimer))), 3))
 						write(fmt.Sprintf("%s %s%s", frame, message, loadingDots))
 						if frameIndex+1 < len(frames) {
@@ -121,16 +123,16 @@ func Spinner(ctx context.Context, options SpinnerOptions) (*SpinnerController, e
 			var step string
 			switch code {
 			case 0:
-				step = utils.Color["green"](utils.S_STEP_SUBMIT)
+				step = picocolors.Green(utils.S_STEP_SUBMIT)
 			case 1:
-				step = utils.Color["red"](utils.S_STEP_CANCEL)
+				step = picocolors.Red(utils.S_STEP_CANCEL)
 			default:
-				step = utils.Color["red"](utils.S_STEP_ERROR)
+				step = picocolors.Red(utils.S_STEP_ERROR)
 			}
 			if msg != "" {
 				message = parseMessage(msg)
 			}
-			write(thirdparty.ShowCursor())
+			write(sisteransi.ShowCursor())
 			write(fmt.Sprintf("%s %s\n", step, message))
 		},
 	}, nil

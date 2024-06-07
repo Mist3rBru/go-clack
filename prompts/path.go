@@ -4,6 +4,7 @@ import (
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type PathParams struct {
@@ -28,9 +29,9 @@ func Path(params PathParams) (string, error) {
 					hintOptions += " "
 				}
 				if i == p.HintIndex {
-					hintOptions += utils.Color["cyan"](hintOption)
+					hintOptions += picocolors.Cyan(hintOption)
 				} else {
-					hintOptions += utils.Color["dim"](hintOption)
+					hintOptions += picocolors.Dim(hintOption)
 				}
 			}
 			valueWithCursorAndOptions := p.ValueWithCursor() + hintOptions

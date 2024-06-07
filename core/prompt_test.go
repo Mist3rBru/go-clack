@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -383,7 +384,7 @@ func TestFormatLinesWithStyleCallback(t *testing.T) {
 func TestFormatLinesWithBlackLine(t *testing.T) {
 	p := newPrompt()
 
-	lines := []string{color["inverse"](" ")}
+	lines := []string{picocolors.Inverse(" ")}
 	width := 80
 	frame := p.FormatLines(lines, core.FormatLinesOptions{
 		Default: core.FormatLineOptions{

@@ -9,7 +9,8 @@ import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
-	"github.com/Mist3rBru/go-clack/third_party"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
+	"github.com/Mist3rBru/go-clack/third_party/sisteransi"
 
 	"golang.org/x/term"
 )
@@ -235,7 +236,7 @@ func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 		isTopLimit := i == 0 && shouldRenderTopEllipsis
 		isBottomLimit := i == maxItems-1 && shouldRenderBottomEllipsis
 		if isTopLimit || isBottomLimit {
-			result = append(result, color["dim"]("..."))
+			result = append(result, picocolors.Dim("..."))
 		} else {
 			result = append(result, line)
 		}
@@ -498,7 +499,7 @@ func (p *Prompt[TValue]) render() {
 	}
 
 	if p.State == InitialState {
-		p.write(thirdparty.HideCursor())
+		p.write(sisteransi.HideCursor())
 		p.write(frame)
 		p.Frame = frame
 		return
@@ -513,19 +514,19 @@ func (p *Prompt[TValue]) render() {
 	prevFrameLines := strings.Split((p.Frame), "\n")
 
 	// Move to first diff line
-	p.write(thirdparty.MoveCursor(-(len(prevFrameLines) - 1), -999))
-	p.write(thirdparty.MoveCursor(diffLineIndex, 0))
+	p.write(sisteransi.MoveCursor(-(len(prevFrameLines) - 1), -999))
+	p.write(sisteransi.MoveCursor(diffLineIndex, 0))
 
 	if len(diff) == 1 {
-		p.write(thirdparty.EraseCurrentLine())
+		p.write(sisteransi.EraseCurrentLine())
 		lines := strings.Split(frame, "\n")
 		p.write(lines[diffLineIndex])
 		p.Frame = frame
-		p.write(thirdparty.MoveCursorDown(len(lines) - diffLineIndex - 1))
+		p.write(sisteransi.MoveCursorDown(len(lines) - diffLineIndex - 1))
 		return
 	}
 
-	p.write(thirdparty.EraseDown())
+	p.write(sisteransi.EraseDown())
 	lines := strings.Split(frame, "\n")
 	newLines := lines[diffLineIndex:]
 	p.write(strings.Join(newLines, "\n"))
@@ -543,7 +544,7 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 
 	done := make(chan struct{})
 	closeCb := func(args ...any) {
-		p.write(thirdparty.ShowCursor())
+		p.write(sisteransi.ShowCursor())
 		p.write("\r\n")
 		close(done)
 	}

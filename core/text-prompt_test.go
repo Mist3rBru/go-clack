@@ -5,12 +5,10 @@ import (
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
-	"github.com/Mist3rBru/go-clack/third_party"
+	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 
 	"github.com/stretchr/testify/assert"
 )
-
-var color = thirdparty.CreateColors()
 
 func newTextPrompt() *core.TextPrompt {
 	return core.NewTextPrompt(core.TextPromptParams{
@@ -47,8 +45,7 @@ func TestTextPromptValueTrack(t *testing.T) {
 
 func TestTextPromptValueWithCursor(t *testing.T) {
 	p := newTextPrompt()
-	inverse := color["inverse"]
-	cursor := inverse(" ")
+	cursor := picocolors.Inverse(" ")
 
 	expected := cursor
 	assert.Equal(t, expected, p.ValueWithCursor())
@@ -59,11 +56,11 @@ func TestTextPromptValueWithCursor(t *testing.T) {
 	assert.Equal(t, expected, p.ValueWithCursor())
 
 	p.CursorIndex = len(p.Value) - 1
-	expected = "fo" + inverse("o")
+	expected = "fo" + picocolors.Inverse("o")
 	assert.Equal(t, expected, p.ValueWithCursor())
 
 	p.CursorIndex = 0
-	expected = inverse("f") + "oo"
+	expected = picocolors.Inverse("f") + "oo"
 	assert.Equal(t, expected, p.ValueWithCursor())
 }
 
