@@ -25,21 +25,21 @@ func Outro(msg string) {
 }
 
 func Info(msg string) {
-	write(fmt.Sprintf("%s %s\n", picocolors.Blue(utils.S_INFO), msg))
+	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Blue(utils.S_INFO), msg))
 }
 
 func Success(msg string) {
-	write(fmt.Sprintf("%s %s\n", picocolors.Green(utils.S_SUCCESS), msg))
+	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Green(utils.S_SUCCESS), msg))
 }
 
 func Step(msg string) {
-	write(fmt.Sprintf("%s %s\n", picocolors.Green(utils.S_STEP_SUBMIT), msg))
+	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Green(utils.S_STEP_SUBMIT), msg))
 }
 
 func Warn(msg string) {
-	write(fmt.Sprintf("%s %s\n", picocolors.Yellow(utils.S_WARN), msg))
+	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Yellow(utils.S_WARN), msg))
 }
 
 func Error(msg string) {
-	write(fmt.Sprintf("%s %s\n", picocolors.Red(utils.S_ERROR), msg))
+	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Red(utils.S_ERROR), msg))
 }
