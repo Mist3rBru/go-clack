@@ -125,12 +125,12 @@ func (p *PathNode) MapChildren() []*PathNode {
 		return nil
 	}
 	children := []*PathNode{}
-	for i, entry := range entries {
+	for _, entry := range entries {
 		if p.OnlyShowDir && !entry.IsDir() {
 			continue
 		}
 		child := &PathNode{
-			Index:  i,
+			Index:  len(children),
 			Depth:  p.Depth + 1,
 			Path:   path.Join(p.Path, entry.Name()),
 			Name:   entry.Name(),
