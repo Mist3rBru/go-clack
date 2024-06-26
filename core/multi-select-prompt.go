@@ -24,6 +24,13 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 	var initialValue []TValue
 	if len(params.InitialValue) > 0 {
 		initialValue = params.InitialValue
+		for _, value := range params.InitialValue {
+			for _, option := range params.Options {
+				if option.Value == value {
+					option.IsSelected = true
+				}
+			}
+		}
 	} else {
 		for _, option := range params.Options {
 			if option.IsSelected {
@@ -63,12 +70,13 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			option := p.Options[p.CursorIndex]
 			if option.IsSelected {
 				option.IsSelected = false
-				p.Value = []TValue{}
-				for _, _option := range p.Options {
-					if _option.IsSelected {
-						p.Value = append(p.Value, _option.Value)
+				value := []TValue{}
+				for _, v := range p.Value {
+					if v != option.Value {
+						value = append(value, v)
 					}
 				}
+				p.Value = value
 			} else {
 				option.IsSelected = true
 				p.Value = append(p.Value, option.Value)

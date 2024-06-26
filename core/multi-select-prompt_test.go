@@ -64,9 +64,53 @@ func TestChangeMultiSelectValue(t *testing.T) {
 
 	for _, option := range p.Options {
 		option.IsSelected = true
+		p.Value = append(p.Value, option.Value)
 	}
 	p.CursorIndex = 1
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	expected = append([]string{expected[0]}, expected[2:]...)
 	assert.Equal(t, expected, p.Value)
+}
+
+func TestMultiSelectInitialValue(t *testing.T) {
+	initialValue := []string{"a", "c"}
+	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
+		Options: []*core.MultiSelectOption[string]{
+			{Value: "a"},
+			{Value: "b"},
+			{Value: "c"},
+		},
+		InitialValue: initialValue,
+	})
+
+	assert.Equal(t, initialValue, p.Value)
+
+	for _, value := range p.Value {
+		for _, option := range p.Options {
+			if option.Value == value {
+				assert.True(t, option.IsSelected, option.Value)
+			}
+		}
+	}
+}
+
+func TestMultiSelectInitialSelectedOptions(t *testing.T) {
+	initialValue := []string{"a", "c"}
+	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
+		Options: []*core.MultiSelectOption[string]{
+			{Value: "a", IsSelected: true},
+			{Value: "b"},
+			{Value: "c", IsSelected: true},
+		},
+	})
+
+	assert.Equal(t, initialValue, p.Value)
+
+	for _, value := range p.Value {
+		for _, option := range p.Options {
+			if option.Value == value {
+				assert.True(t, option.IsSelected, option.Value)
+			}
+		}
+	}
 }
