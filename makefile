@@ -21,3 +21,5 @@ snap:
 format:
 	gofmt -w .
 ci: test format
+changelog:
+	git-chglog -o CHANGELOG.md
