@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -113,4 +114,13 @@ func TestMultiSelectPathExitRootDirectory(t *testing.T) {
 	assert.Equal(t, 0, p.CurrentOption.Depth)
 	assert.Equal(t, p.Root, p.CurrentOption)
 	assert.NotEqual(t, pastChildrenLength, len(p.Root.Children))
+}
+
+func TestMultiSelectPathExitToSelectedDirectory(t *testing.T) {
+	p := newMultiSelectPathPrompt()
+	p.Value = []string{filepath.Dir(p.Root.Path)}
+
+	p.PressKey(&core.Key{Name: core.LeftKey})
+	p.PressKey(&core.Key{Name: core.LeftKey})
+	assert.True(t, p.CurrentOption.IsSelected)
 }

@@ -60,7 +60,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 	})
 	p.CurrentLayer = p.Root.Children
 	p.CurrentOption = p.Root.Children[0]
-	p.mapSelectedChildren(append([]*PathNode{p.Root}, p.Root.Children...))
+	p.mapSelectedOptions(p.Root)
 
 	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)
@@ -139,7 +139,7 @@ func (p *MultiSelectPathPrompt) exitChildren() {
 		})
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
-		p.mapSelectedChildren(p.Root.Children)
+		p.mapSelectedOptions(p.Root)
 		return
 	}
 	if p.CurrentOption.Parent.Path == p.Root.Path {
@@ -159,19 +159,28 @@ func (p *MultiSelectPathPrompt) enterChildren() {
 	if len(children) == 0 {
 		return
 	}
-	p.mapSelectedChildren(children)
 	p.CurrentOption.Children = children
+	p.mapSelectedOptions(p.CurrentOption)
 	p.CurrentOption = children[0]
 	p.CurrentLayer = children
 }
 
-func (p *MultiSelectPathPrompt) mapSelectedChildren(children []*PathNode) {
-	for _, child := range children {
+func (p *MultiSelectPathPrompt) mapSelectedOptions(node *PathNode) {
+	var traverse func(node *PathNode)
+	traverse = func(node *PathNode) {
 		for _, path := range p.Value {
-			if child.Path == path {
-				child.IsSelected = true
+			if path == node.Path {
+				node.IsSelected = true
 				break
 			}
 		}
+		if node.Children == nil {
+			return
+		}
+		for _, child := range node.Children {
+			traverse(child)
+		}
 	}
+
+	traverse(node)
 }
