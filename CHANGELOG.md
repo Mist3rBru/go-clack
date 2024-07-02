@@ -1,12 +1,31 @@
 
+<a name="v0.1.6"></a>
+## [v0.1.6](https://github.com/Mist3rBru/go-clack/compare/v0.1.5...v0.1.6) (2024-07-02)
+
+### Chore
+
+* add CHANGELOG
+
+### Fix
+
+* **prompts:** useless Spinner's error
+
+
 <a name="v0.1.5"></a>
-## [v0.1.5](https://github.com/Mist3rBru/go-clack/compare/v0.1.3...v0.1.5) (2024-06-26)
+## [v0.1.5](https://github.com/Mist3rBru/go-clack/compare/v0.1.4...v0.1.5) (2024-06-26)
+
+### Fix
+
+* **core:** MultiSelectPathPrompt initial value
+* **core:** MultiSelectPrompt initial value
+
+
+<a name="v0.1.4"></a>
+## [v0.1.4](https://github.com/Mist3rBru/go-clack/compare/v0.1.3...v0.1.4) (2024-06-23)
 
 ### Fix
 
 * Path.OnlyShowDir mapping
-* **core:** MultiSelectPathPrompt initial value
-* **core:** MultiSelectPrompt initial value
 
 
 <a name="v0.1.3"></a>
