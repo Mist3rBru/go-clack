@@ -60,7 +60,7 @@ func (w *MockWriter) HaveBeenCalledWith(str string) string {
 func runSpinner() (*prompts.SpinnerController, *MockTimer, *MockWriter) {
 	timer := &MockTimer{}
 	writer := &MockWriter{}
-	s, _ := prompts.Spinner(context.TODO(), prompts.SpinnerOptions{
+	s := prompts.Spinner(context.TODO(), prompts.SpinnerOptions{
 		Timer:  timer,
 		Output: writer,
 	})

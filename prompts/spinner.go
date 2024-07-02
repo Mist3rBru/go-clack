@@ -37,7 +37,7 @@ type SpinnerController struct {
 	Message func(msg string)
 }
 
-func Spinner(ctx context.Context, options SpinnerOptions) (*SpinnerController, error) {
+func Spinner(ctx context.Context, options SpinnerOptions) *SpinnerController {
 	_ctx, cancel := context.WithCancel(ctx)
 
 	var timer Timer
@@ -135,7 +135,7 @@ func Spinner(ctx context.Context, options SpinnerOptions) (*SpinnerController, e
 			write(sisteransi.ShowCursor())
 			write(fmt.Sprintf("%s %s\n", step, message))
 		},
-	}, nil
+	}
 }
 
 func parseMessage(msg string) string {

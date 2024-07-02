@@ -8,15 +8,12 @@ type Task struct {
 	Disabled bool
 }
 
-func Tasks(ctx context.Context, tasks []Task, options SpinnerOptions) error {
+func Tasks(ctx context.Context, tasks []Task, options SpinnerOptions) {
 	for _, task := range tasks {
 		if task.Disabled {
 			continue
 		}
-		s, err := Spinner(ctx, options)
-		if err != nil {
-			return err
-		}
+		s := Spinner(ctx, options)
 		s.Start(task.Title)
 		result, err := task.Task(s.Message)
 		if err == nil {
@@ -25,6 +22,4 @@ func Tasks(ctx context.Context, tasks []Task, options SpinnerOptions) error {
 			s.Stop(err.Error(), 1)
 		}
 	}
-
-	return nil
 }
