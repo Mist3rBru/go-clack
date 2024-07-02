@@ -2,11 +2,11 @@
 
 Effortlessly build beautiful command-line apps 🪄 [Try the demo](https://stackblitz.com/edit/clack-prompts?file=index.js)
 
-![clack-prompt](https://github.com/Mist3rBru/go-clack/blob/main/.github/assets/clack-demo.gif)
+![clack-prompt](https://github.com/Mist3rBru/go-clack/blob/master/.github/assets/clack-demo.gif)
 
 ---
 
-`go-clack/prompts` is an opinionated, pre-styled wrapper around [`go-clack/core`](https://www.npmjs.com/package/go-clack/core).
+`go-clack/prompts` is an opinionated, pre-styled wrapper around [`go-clack/core`](https://github.com/Mist3rBru/go-clack/blob/master/core/README.md).
 
 - 🤏 80% smaller than other options
 - 💎 Beautiful, minimal UI
@@ -17,7 +17,7 @@ Effortlessly build beautiful command-line apps 🪄 [Try the demo](https://stack
 
 ### Setup
 
-The `intro` and `outro` functions will print a message to begin or end a prompt session, respectively.
+The `Intro` and `Outro` functions will print a message to begin or end a prompt session, respectively.
 
 ```go
 prompts.Intro("create-my-app")
@@ -81,7 +81,6 @@ The `Path` component accepts a file or directory path.
 ```go
 path, err := prompts.Path(prompts.PathParams{
   Message: "Enter the file path:",
-  Placeholder: "/path/to/file",
   Validate: func(value string) error {
     if !fileExists(value) {
       return errors.New("File does not exist!")
@@ -110,10 +109,10 @@ The `Select` component allows the user to choose a single option from a list.
 project, err := prompts.Select(prompts.SelectParams{
   Message: "Pick a project type:",
   Options: []prompts.SelectOption[string]{
-			{Label: "TypeScript", Value: "ts"},
-			{Label: "JavaScript", Value: "js"},
-			{Label: "CoffeeScript", Value: "coffee", Hint: "oh no"},
-		},
+    {Label: "TypeScript", Value: "ts"},
+    {Label: "JavaScript", Value: "js"},
+    {Label: "CoffeeScript", Value: "coffee", Hint: "oh no"},
+  },
 })
 ```
 
