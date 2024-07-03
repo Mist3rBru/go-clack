@@ -127,3 +127,48 @@ func TestGroupMultiSelectDisabledGroups(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	cupaloy.SnapshotT(t, p.Frame)
 }
+
+func TestGroupMultiSelectSpacedGroups(t *testing.T) {
+	go prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
+		SpacedGroups: true,
+		Message:      message,
+		Options: map[string][]prompts.MultiSelectOption[string]{
+			"1": {
+				{Label: "a"},
+				{Label: "b"},
+			},
+			"2": {
+				{Label: "x"},
+				{Label: "y"},
+			},
+		},
+	})
+	time.Sleep(time.Millisecond)
+	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestGroupMultiSelectDisabledAndSpacedGroups(t *testing.T) {
+	go prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
+		DisabledGroups: true,
+		SpacedGroups:   true,
+		Message:        message,
+		Options: map[string][]prompts.MultiSelectOption[string]{
+			"1": {
+				{Label: "a"},
+				{Label: "b"},
+			},
+			"2": {
+				{Label: "x"},
+				{Label: "y"},
+			},
+		},
+	})
+	time.Sleep(time.Millisecond)
+	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	cupaloy.SnapshotT(t, p.Frame)
+}

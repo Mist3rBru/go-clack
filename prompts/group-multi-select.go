@@ -12,6 +12,7 @@ type GroupMultiSelectParams[TValue comparable] struct {
 	Options        map[string][]MultiSelectOption[TValue]
 	InitialValue   []TValue
 	DisabledGroups bool
+	SpacedGroups   bool
 	Required       bool
 	Validate       func(value []TValue) error
 }
@@ -55,6 +56,9 @@ func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) 
 				for i, option := range p.Options {
 					if option.IsGroup {
 						radioOptions[i] = groupOption(option, p.IsGroupSelected(option), i == p.CursorIndex, p.DisabledGroups)
+						if params.SpacedGroups && i > 0 {
+							radioOptions[i] = "\n" + radioOptions[i]
+						}
 					} else {
 						radioOptions[i] = " " + groupOption(option, option.IsSelected, i == p.CursorIndex, false)
 					}
