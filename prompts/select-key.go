@@ -21,9 +21,9 @@ type SelectKeyParams[TValue comparable] struct {
 }
 
 func SelectKey[TValue comparable](params SelectKeyParams[TValue]) (TValue, error) {
-	var options []core.SelectKeyOption[TValue]
+	var options []*core.SelectKeyOption[TValue]
 	for _, option := range params.Options {
-		options = append(options, core.SelectKeyOption[TValue]{
+		options = append(options, &core.SelectKeyOption[TValue]{
 			Label: option.Label,
 			Value: option.Value,
 			Key:   option.Key,

@@ -41,7 +41,7 @@ func TestPathChangeHint(t *testing.T) {
 
 	assert.Equal(t, "/", p.Hint)
 	p.PressKey(&core.Key{Char: "/"})
-	assert.Equal(t, "confirm-prompt.go", p.Hint)
+	assert.Equal(t, "README.md", p.Hint)
 	p.PressKey(&core.Key{Name: core.BackspaceKey})
 	assert.Equal(t, "/", p.Hint)
 }

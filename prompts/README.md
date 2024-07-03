@@ -108,7 +108,7 @@ The `Select` component allows the user to choose a single option from a list.
 ```go
 project, err := prompts.Select(prompts.SelectParams{
   Message: "Pick a project type:",
-  Options: []prompts.SelectOption[string]{
+  Options: []*prompts.SelectOption[string]{
     {Label: "TypeScript", Value: "ts"},
     {Label: "JavaScript", Value: "js"},
     {Label: "CoffeeScript", Value: "coffee", Hint: "oh no"},
@@ -121,9 +121,9 @@ project, err := prompts.Select(prompts.SelectParams{
 The `MultiSelect`component allows the user to choose multiple options from a list.
 
 ```go
-additionalTools, err := prompts.MultiSelect(prompts.MultiSelectParams{
+additionalTools, err := prompts.MultiSelect(prompts.MultiSelectParams[string]{
   Message: "Select additional tools:",
-  Options: []prompts.MultiSelectOption[string]{
+  Options: []*prompts.MultiSelectOption[string]{
     {Value: "eslint", Label: "ESLint", Hint: "recommended"},
     {Value: "prettier", Label: "Prettier"},
     {Value: "gh-action", Label: "GitHub Action"},
@@ -136,7 +136,7 @@ additionalTools, err := prompts.MultiSelect(prompts.MultiSelectParams{
 The `GroupMultiSelect` component allows the user to choose multiple options from grouped lists.
 
 ```go
-groupChoices, err := prompts.GroupMultiSelect(prompts.GroupMultiSelectParams{
+groupChoices, err := prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
   Message: "Select additional tools:",
   Options: map[string][]prompts.MultiSelectOption[string]{
     "Group 1": {

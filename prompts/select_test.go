@@ -14,7 +14,7 @@ import (
 func runSelect() {
 	prompts.Select(prompts.SelectParams[string]{
 		Message: message,
-		Options: []prompts.SelectOption[string]{
+		Options: []*prompts.SelectOption[string]{
 			{Label: "a"},
 			{Label: "b"},
 			{Label: "c"},
@@ -34,7 +34,7 @@ func TestSelectInitialState(t *testing.T) {
 func TestSelectWithHint(t *testing.T) {
 	go prompts.Select(prompts.SelectParams[string]{
 		Message: message,
-		Options: []prompts.SelectOption[string]{
+		Options: []*prompts.SelectOption[string]{
 			{Label: "a", Hint: "b"},
 			{Label: "b", Hint: "c"},
 			{Label: "c", Hint: "a"},
@@ -72,7 +72,7 @@ func TestSelectSubmitState(t *testing.T) {
 func TestSelectWithLongList(t *testing.T) {
 	go prompts.Select(prompts.SelectParams[string]{
 		Message: message,
-		Options: []prompts.SelectOption[string]{
+		Options: []*prompts.SelectOption[string]{
 			{Label: "a"},
 			{Label: "b"},
 			{Label: "c"},

@@ -14,7 +14,7 @@ import (
 func runMultiSelect() {
 	prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
-		Options: []prompts.MultiSelectOption[string]{
+		Options: []*prompts.MultiSelectOption[string]{
 			{Label: "a", IsSelected: true},
 			{Label: "b", IsSelected: true},
 			{Label: "c"},
@@ -25,7 +25,7 @@ func runMultiSelect() {
 func TestMultiSelectInitialState(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
-		Options: []prompts.MultiSelectOption[string]{
+		Options: []*prompts.MultiSelectOption[string]{
 			{Label: "a"},
 			{Label: "b"},
 			{Label: "c"},
@@ -41,7 +41,7 @@ func TestMultiSelectInitialState(t *testing.T) {
 func TestMultiSelectWithHint(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
-		Options: []prompts.MultiSelectOption[string]{
+		Options: []*prompts.MultiSelectOption[string]{
 			{Label: "a", Hint: "b"},
 			{Label: "b", Hint: "c"},
 			{Label: "c", Hint: "a"},
@@ -79,7 +79,7 @@ func TestMultiSelectSubmitState(t *testing.T) {
 func TestMultiSelectWithLongList(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
-		Options: []prompts.MultiSelectOption[string]{
+		Options: []*prompts.MultiSelectOption[string]{
 			{Label: "a"},
 			{Label: "b"},
 			{Label: "c"},
@@ -104,7 +104,7 @@ func TestMultiSelectWithLongList(t *testing.T) {
 func TestMultiSelectMultiValue(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
-		Options: []prompts.MultiSelectOption[string]{
+		Options: []*prompts.MultiSelectOption[string]{
 			{Label: "a", IsSelected: true},
 			{Label: "b", IsSelected: true},
 			{Label: "c"},

@@ -97,3 +97,22 @@ func TestGroupMultiSelectIsGroupSelected(t *testing.T) {
 	isSelected = p.IsGroupSelected(group)
 	assert.Equal(t, true, isSelected)
 }
+
+func TestLabelAsGroupMultiSelectValue(t *testing.T) {
+	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
+		Options: map[string][]core.MultiSelectOption[string]{
+			"group": {
+				{Label: "foo"},
+				{Label: "bar"},
+				{Label: "baz"},
+			},
+		},
+	})
+
+	p.PressKey(&core.Key{Name: core.DownKey})
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Equal(t, []string{"foo"}, p.Value)
+	p.PressKey(&core.Key{Name: core.DownKey})
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Equal(t, []string{"foo", "bar"}, p.Value)
+}

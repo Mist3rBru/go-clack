@@ -8,23 +8,25 @@ import (
 
 type SelectPrompt[TValue comparable] struct {
 	Prompt[TValue]
-	Options []SelectOption[TValue]
+	Options []*SelectOption[TValue]
 }
 
 type SelectPromptParams[TValue comparable] struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue TValue
-	Options      []SelectOption[TValue]
+	Options      []*SelectOption[TValue]
 	Render       func(p *SelectPrompt[TValue]) string
 }
 
 func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *SelectPrompt[TValue] {
 	startIndex := 0
 	for i, option := range params.Options {
+		if value, ok := any(option.Value).(string); ok && value == "" {
+			option.Value = any(option.Label).(TValue)
+		}
 		if option.Value == params.InitialValue {
 			startIndex = i
-			break
 		}
 	}
 	var p *SelectPrompt[TValue]

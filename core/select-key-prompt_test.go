@@ -9,7 +9,7 @@ import (
 
 func newSelectKeyPrompt() *core.SelectKeyPrompt[string] {
 	return core.NewSelectKeyPrompt(core.SelectKeyPromptParams[string]{
-		Options: []core.SelectKeyOption[string]{
+		Options: []*core.SelectKeyOption[string]{
 			{
 				Key:   "a",
 				Value: "a",
@@ -36,5 +36,18 @@ func TestSelectKeyPromptKey(t *testing.T) {
 	p.State = core.ActiveState
 	p.PressKey(&core.Key{Name: "a"})
 	assert.Equal(t, core.SubmitState, p.State)
+	assert.Equal(t, "a", p.Value)
+}
+
+func TestKeyAsSelectValue(t *testing.T) {
+	p := core.NewSelectKeyPrompt(core.SelectKeyPromptParams[string]{
+		Options: []*core.SelectKeyOption[string]{
+			{Key: "a", Label: "foo"},
+			{Key: "b", Label: "bar"},
+			{Key: "c", Label: "baz"},
+		},
+	})
+
+	p.PressKey(&core.Key{Name: "a"})
 	assert.Equal(t, "a", p.Value)
 }

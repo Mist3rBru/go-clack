@@ -44,6 +44,9 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 					IsSelected: groupOption.IsSelected,
 				},
 			}
+			if value, ok := any(option.Value).(string); ok && value == "" {
+				option.Value = any(option.Label).(TValue)
+			}
 			group.Options[i] = option
 			options = append(options, option)
 		}

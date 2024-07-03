@@ -18,7 +18,7 @@ type MultiSelectOption[TValue comparable] struct {
 
 type MultiSelectParams[TValue comparable] struct {
 	Message      string
-	Options      []MultiSelectOption[TValue]
+	Options      []*MultiSelectOption[TValue]
 	InitialValue []TValue
 	Validate     func(value []TValue) error
 }

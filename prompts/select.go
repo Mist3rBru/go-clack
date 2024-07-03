@@ -18,13 +18,13 @@ type SelectOption[TValue comparable] struct {
 type SelectParams[TValue comparable] struct {
 	Message      string
 	InitialValue TValue
-	Options      []SelectOption[TValue]
+	Options      []*SelectOption[TValue]
 }
 
 func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
-	var options []core.SelectOption[TValue]
+	var options []*core.SelectOption[TValue]
 	for _, option := range params.Options {
-		options = append(options, core.SelectOption[TValue]{
+		options = append(options, &core.SelectOption[TValue]{
 			Label: option.Label,
 			Value: option.Value,
 		})

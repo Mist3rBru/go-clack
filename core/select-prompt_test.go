@@ -9,7 +9,7 @@ import (
 
 func newSelectPrompt() *core.SelectPrompt[string] {
 	return core.NewSelectPrompt(core.SelectPromptParams[string]{
-		Options: []core.SelectOption[string]{
+		Options: []*core.SelectOption[string]{
 			{Value: "a"},
 			{Value: "b"},
 			{Value: "c"},
@@ -52,4 +52,18 @@ func TestChangeSelectValue(t *testing.T) {
 	assert.Equal(t, p.Options[2].Value, p.Value)
 	p.PressKey(&core.Key{Name: core.UpKey})
 	assert.Equal(t, p.Options[1].Value, p.Value)
+}
+
+func TestLabelAsSelectValue(t *testing.T) {
+	p := core.NewSelectPrompt(core.SelectPromptParams[string]{
+		Options: []*core.SelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+	})
+
+	assert.Equal(t, "foo", p.Value)
+	p.PressKey(&core.Key{Name: core.DownKey})
+	assert.Equal(t, "bar", p.Value)
 }

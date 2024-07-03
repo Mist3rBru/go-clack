@@ -21,6 +21,12 @@ type MultiSelectPromptParams[TValue comparable] struct {
 }
 
 func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TValue]) *MultiSelectPrompt[TValue] {
+	for _, option := range params.Options {
+		if value, ok := any(option.Value).(string); ok && value == "" {
+			option.Value = any(option.Label).(TValue)
+		}
+	}
+	
 	var initialValue []TValue
 	if len(params.InitialValue) > 0 {
 		initialValue = params.InitialValue
