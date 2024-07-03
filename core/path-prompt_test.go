@@ -123,7 +123,7 @@ func TestPathRequiredValue(t *testing.T) {
 	p := core.NewPathPrompt(core.PathPromptParams{
 		Required: true,
 	})
-	
+
 	p.Value = ""
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)

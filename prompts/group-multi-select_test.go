@@ -12,20 +12,20 @@ import (
 )
 
 func runGroupMultiSelect() {
-	options := make(map[string][]prompts.MultiSelectOption[string])
-	options["1"] = []prompts.MultiSelectOption[string]{
-		{Label: "a"},
-		{Label: "b"},
-		{Label: "c"},
-	}
-	options["2"] = []prompts.MultiSelectOption[string]{
-		{Label: "x"},
-		{Label: "y"},
-		{Label: "z"},
-	}
 	prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
 		Message: message,
-		Options: options,
+		Options: map[string][]prompts.MultiSelectOption[string]{
+			"1": {
+				{Label: "a"},
+				{Label: "b"},
+				{Label: "c"},
+			},
+			"2": {
+				{Label: "x"},
+				{Label: "y"},
+				{Label: "z"},
+			},
+		},
 	})
 }
 
@@ -63,26 +63,26 @@ func TestGroupMultiSelectSubmitState(t *testing.T) {
 }
 
 func TestGroupMultiSelectWithLongList(t *testing.T) {
-	options := make(map[string][]prompts.MultiSelectOption[string])
-	options["1"] = []prompts.MultiSelectOption[string]{
-		{Label: "a"},
-		{Label: "b"},
-		{Label: "c"},
-		{Label: "d"},
-		{Label: "e"},
-		{Label: "f"},
-	}
-	options["2"] = []prompts.MultiSelectOption[string]{
-		{Label: "u"},
-		{Label: "v"},
-		{Label: "w"},
-		{Label: "x"},
-		{Label: "y"},
-		{Label: "z"},
-	}
 	go prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
 		Message: message,
-		Options: options,
+		Options: map[string][]prompts.MultiSelectOption[string]{
+			"1": {
+				{Label: "a"},
+				{Label: "b"},
+				{Label: "c"},
+				{Label: "d"},
+				{Label: "e"},
+				{Label: "f"},
+			},
+			"2": {
+				{Label: "u"},
+				{Label: "v"},
+				{Label: "w"},
+				{Label: "x"},
+				{Label: "y"},
+				{Label: "z"},
+			},
+		},
 	})
 	time.Sleep(time.Millisecond)
 	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
@@ -103,5 +103,27 @@ func TestGroupMultiSelectMultiValue(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 
 	assert.Equal(t, core.ActiveState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestGroupMultiSelectDisabledGroups(t *testing.T) {
+	go prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
+		DisabledGroups: true,
+		Message:        message,
+		Options: map[string][]prompts.MultiSelectOption[string]{
+			"1": {
+				{Label: "a"},
+				{Label: "b"},
+			},
+			"2": {
+				{Label: "x"},
+				{Label: "y"},
+			},
+		},
+	})
+	time.Sleep(time.Millisecond)
+	p := test.GroupMultiSelectTestingPrompt.(*core.GroupMultiSelectPrompt[string])
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
 	cupaloy.SnapshotT(t, p.Frame)
 }

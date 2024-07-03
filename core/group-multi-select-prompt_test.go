@@ -132,3 +132,31 @@ func TestGroupMultiSelectRequiredValue(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)
 }
+
+func TestGroupMultiSelectDisabledGroups(t *testing.T) {
+	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
+		DisabledGroups: true,
+		Options: map[string][]core.MultiSelectOption[string]{
+			"foo": {
+				{Value: "a"},
+				{Value: "b"},
+			},
+			"bar": {
+				{Value: "x"},
+				{Value: "y"},
+			},
+		},
+	})
+
+	assert.Equal(t, 1, p.CursorIndex)
+	p.PressKey(&core.Key{Name: core.DownKey})
+	assert.Equal(t, 2, p.CursorIndex)
+	p.PressKey(&core.Key{Name: core.DownKey})
+	assert.Equal(t, 4, p.CursorIndex)
+	p.PressKey(&core.Key{Name: core.DownKey})
+	assert.Equal(t, 5, p.CursorIndex)
+	p.PressKey(&core.Key{Name: core.DownKey})
+	assert.Equal(t, 1, p.CursorIndex)
+	p.PressKey(&core.Key{Name: core.UpKey})
+	assert.Equal(t, 5, p.CursorIndex)
+}

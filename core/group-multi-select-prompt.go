@@ -15,17 +15,19 @@ type GroupMultiSelectOption[TValue comparable] struct {
 
 type GroupMultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
-	Options []*GroupMultiSelectOption[TValue]
+	Options        []*GroupMultiSelectOption[TValue]
+	DisabledGroups bool
 }
 
 type GroupMultiSelectPromptParams[TValue comparable] struct {
-	Input        *os.File
-	Output       *os.File
-	Options      map[string][]MultiSelectOption[TValue]
-	InitialValue []TValue
-	Required     bool
-	Validate     func(value []TValue) error
-	Render       func(p *GroupMultiSelectPrompt[TValue]) string
+	Input          *os.File
+	Output         *os.File
+	Options        map[string][]MultiSelectOption[TValue]
+	InitialValue   []TValue
+	DisabledGroups bool
+	Required       bool
+	Validate       func(value []TValue) error
+	Render         func(p *GroupMultiSelectPrompt[TValue]) string
 }
 
 func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptParams[TValue]) *GroupMultiSelectPrompt[TValue] {
@@ -89,7 +91,12 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 				return params.Render(p)
 			},
 		}),
-		Options: options,
+		Options:        options,
+		DisabledGroups: params.DisabledGroups,
+	}
+
+	if p.DisabledGroups {
+		p.CursorIndex = 1
 	}
 
 	p.On(KeyEvent, func(args ...any) {
@@ -97,8 +104,14 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 		switch key.Name {
 		case UpKey, LeftKey:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
+			if p.DisabledGroups && p.Options[p.CursorIndex].IsGroup {
+				p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
+			}
 		case DownKey, RightKey:
 			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
+			if p.DisabledGroups && p.Options[p.CursorIndex].IsGroup {
+				p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
+			}
 		case HomeKey:
 			p.CursorIndex = 0
 		case EndKey:
@@ -111,6 +124,9 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 }
 
 func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupMultiSelectOption[TValue]) bool {
+	if p.DisabledGroups {
+		return false
+	}
 	for _, option := range group.Options {
 		if !option.IsSelected {
 			return false

@@ -1,8 +1,6 @@
 package prompts
 
 import (
-	"strings"
-
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
@@ -10,11 +8,12 @@ import (
 )
 
 type GroupMultiSelectParams[TValue comparable] struct {
-	Message      string
-	Options      map[string][]MultiSelectOption[TValue]
-	InitialValue []TValue
-	Required     bool
-	Validate     func(value []TValue) error
+	Message        string
+	Options        map[string][]MultiSelectOption[TValue]
+	InitialValue   []TValue
+	DisabledGroups bool
+	Required       bool
+	Validate       func(value []TValue) error
 }
 
 func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) ([]TValue, error) {
@@ -31,10 +30,11 @@ func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) 
 	}
 
 	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[TValue]{
-		InitialValue: params.InitialValue,
-		Options:      groups,
-		Required:     params.Required,
-		Validate:     params.Validate,
+		InitialValue:   params.InitialValue,
+		Options:        groups,
+		DisabledGroups: params.DisabledGroups,
+		Required:       params.Required,
+		Validate:       params.Validate,
 		Render: func(p *core.GroupMultiSelectPrompt[TValue]) string {
 			var value string
 
@@ -54,9 +54,9 @@ func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) 
 				radioOptions := make([]string, len(p.Options))
 				for i, option := range p.Options {
 					if option.IsGroup {
-						radioOptions[i] = groupOption[TValue](option, p.IsGroupSelected(option), i == p.CursorIndex)
+						radioOptions[i] = groupOption(option, p.IsGroupSelected(option), i == p.CursorIndex, p.DisabledGroups)
 					} else {
-						radioOptions[i] = " " + groupOption[TValue](option, option.IsSelected, i == p.CursorIndex)
+						radioOptions[i] = " " + groupOption(option, option.IsSelected, i == p.CursorIndex, false)
 					}
 				}
 				value = p.LimitLines(radioOptions, 3)
@@ -74,7 +74,7 @@ func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) 
 	return p.Run()
 }
 
-func groupOption[TValue comparable](option *core.GroupMultiSelectOption[TValue], isSelected, isActive bool) string {
+func groupOption[TValue comparable](option *core.GroupMultiSelectOption[TValue], isSelected, isActive, isDisabled bool) string {
 	var radio, label string
 
 	if isSelected && isActive {
@@ -91,5 +91,9 @@ func groupOption[TValue comparable](option *core.GroupMultiSelectOption[TValue],
 		label = picocolors.Dim(option.Label)
 	}
 
-	return strings.Join([]string{radio, label}, " ")
+	if isDisabled {
+		return label
+	}
+
+	return radio + " " + label
 }
