@@ -1,20 +1,39 @@
 
+<a name="v0.1.7"></a>
+## [v0.1.7](https://github.com/Mist3rBru/go-clack/compare/v0.1.6...v0.1.7) (2024-07-03)
+
+### 🚀 Features
+
+* add label as value to prompts
+* **prompts:** add multi line support to log functions
+
+### 📖 Documentation
+
+* fix typos
+* add readme
+
+### 🏡 Chore
+
+* add code examples
+* update changelog
+
+
 <a name="v0.1.6"></a>
 ## [v0.1.6](https://github.com/Mist3rBru/go-clack/compare/v0.1.5...v0.1.6) (2024-07-02)
 
-### Chore
-
-* add CHANGELOG
-
-### Fix
+### 🩹 Fixes
 
 * **prompts:** useless Spinner's error
+
+### 🏡 Chore
+
+* add CHANGELOG
 
 
 <a name="v0.1.5"></a>
 ## [v0.1.5](https://github.com/Mist3rBru/go-clack/compare/v0.1.4...v0.1.5) (2024-06-26)
 
-### Fix
+### 🩹 Fixes
 
 * **core:** MultiSelectPathPrompt initial value
 * **core:** MultiSelectPrompt initial value
@@ -23,7 +42,7 @@
 <a name="v0.1.4"></a>
 ## [v0.1.4](https://github.com/Mist3rBru/go-clack/compare/v0.1.3...v0.1.4) (2024-06-23)
 
-### Fix
+### 🩹 Fixes
 
 * Path.OnlyShowDir mapping
 
@@ -31,7 +50,7 @@
 <a name="v0.1.3"></a>
 ## [v0.1.3](https://github.com/Mist3rBru/go-clack/compare/v0.1.2...v0.1.3) (2024-06-13)
 
-### Fix
+### 🩹 Fixes
 
 * **prompts:** add bar to log messages
 
@@ -43,12 +62,12 @@
 <a name="v0.1.1"></a>
 ## [v0.1.1](https://github.com/Mist3rBru/go-clack/compare/v0.1.0...v0.1.1) (2024-06-07)
 
-### Feat
+### 🚀 Features
 
 * **core:** add MultiSelectPathPrompt
 * **prompts:** add MultiSelectPath prompt
 
-### Refactor
+### 🛠️ Refactors
 
 * change arbitrary prompt state to prompt state contants
 * move third_party packages to thid_party/package folder
@@ -57,13 +76,7 @@
 <a name="v0.1.0"></a>
 ## v0.1.0 (2024-06-06)
 
-### Chore
-
-* update makefile to support test loop
-* adapt to github import
-* add config files
-
-### Feat
+### 🚀 Features
 
 * add multi select prompt
 * add confirm prompt
@@ -104,7 +117,7 @@
 * **prompts:** add Spinner prompt
 * **prompts:** add Tasks prompt
 
-### Fix
+### 🩹 Fixes
 
 * extra whitespace on format lines
 * format blank line with cursor
@@ -114,7 +127,14 @@
 * close callback
 * read reader buffer
 
-### Refactor
+### 🧪 Tests
+
+* add test coverage 70%
+* add test coverage of 50%
+* add text prompt tests
+* add base prompt tests
+
+### 🛠️ Refactors
 
 * prepare for external tests
 * rename Valeu param to InitialValue
@@ -129,10 +149,9 @@
 * remove default constructors
 * **core:** add IsSelected to MultiSelectOption
 
-### Test
+### 🏡 Chore
 
-* add test coverage 70%
-* add test coverage of 50%
-* add text prompt tests
-* add base prompt tests
+* update makefile to support test loop
+* adapt to github import
+* add config files
 

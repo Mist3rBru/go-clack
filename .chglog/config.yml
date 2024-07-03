@@ -4,19 +4,26 @@ info:
   title: CHANGELOG
   repository_url: https://github.com/Mist3rBru/go-clack
 options:
+  sort: 'date'
   commits:
-    # filters:
-    #   Type:
-    #     - feat
-    #     - fix
-    #     - perf
-    #     - refactor
+    sort_by: Scope
   commit_groups:
-    # title_maps:
-    #   feat: Features
-    #   fix: Bug Fixes
-    #   perf: Performance Improvements
-    #   refactor: Code Refactoring
+    group_by: Type
+    sort_by: Custom
+    title_order:
+      - feat
+      - fix
+      - test
+      - refactor
+      - docs
+      - chore
+    title_maps:
+      feat: 🚀 Features
+      fix: 🩹 Fixes
+      test: 🧪 Tests
+      refactor: 🛠️ Refactors
+      docs: 📖 Documentation
+      chore: 🏡 Chore
   header:
     pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
     pattern_maps:
