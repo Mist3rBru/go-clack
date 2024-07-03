@@ -3,43 +3,117 @@ package prompts
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
-func write(msg string) {
-	os.Stdout.WriteString(msg)
+type MessageLineOptions = core.FormatLineOptions
+type MessageOptions = core.FormatLinesOptions
+
+func Message(msg string, options MessageOptions) {
+	p := &core.Prompt[string]{}
+	formattedMsg := p.FormatLines(strings.Split(msg, "\n"), options)
+	os.Stdout.WriteString(fmt.Sprintf("%s\r\n%s\r\n", picocolors.Gray(utils.S_BAR), formattedMsg))
+}
+
+func styleMsg(msg string, style func(msg string) string) string {
+	parts := strings.Split(msg, "\n")
+	styledParts := make([]string, len(parts))
+	for i, part := range parts {
+		styledParts[i] = style(part)
+	}
+	return strings.Join(styledParts, "\n")
 }
 
 func Intro(msg string) {
-	write(fmt.Sprintf("%s %s\n", picocolors.Gray(utils.S_BAR_START), msg))
+	p := &core.Prompt[string]{}
+	formattedMsg := p.FormatLines(strings.Split(msg, "\n"), MessageOptions{
+		FirstLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR_START),
+		},
+		NewLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+	})
+	os.Stdout.WriteString(fmt.Sprintf("\r\n%s\r\n%s\r\n", formattedMsg, picocolors.Gray(utils.S_BAR)))
 }
 
 func Cancel(msg string) {
-	write(fmt.Sprintf("%s %s\n\n", picocolors.Gray(utils.S_BAR_END), picocolors.Red(msg)))
+	Message(styleMsg(msg, picocolors.Red), MessageOptions{
+		Default: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+		LastLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR_END),
+		},
+	})
 }
 
 func Outro(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n\n", picocolors.Gray(utils.S_BAR), picocolors.Gray(utils.S_BAR_END), msg))
+	Message("\n"+msg, MessageOptions{
+		Default: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+		LastLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR_END),
+		},
+	})
 }
 
 func Info(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Blue(utils.S_INFO), msg))
+	Message(msg, MessageOptions{
+		FirstLine: MessageLineOptions{
+			Start: picocolors.Blue(utils.S_INFO),
+		},
+		NewLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+	})
 }
 
 func Success(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Green(utils.S_SUCCESS), msg))
+	Message(msg, MessageOptions{
+		FirstLine: MessageLineOptions{
+			Start: picocolors.Green(utils.S_SUCCESS),
+		},
+		NewLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+	})
 }
 
 func Step(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Green(utils.S_STEP_SUBMIT), msg))
+	Message(msg, MessageOptions{
+		FirstLine: MessageLineOptions{
+			Start: picocolors.Green(utils.S_STEP_SUBMIT),
+		},
+		NewLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+	})
 }
 
 func Warn(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Yellow(utils.S_WARN), msg))
+	Message(msg, MessageOptions{
+		FirstLine: MessageLineOptions{
+			Start: picocolors.Yellow(utils.S_WARN),
+		},
+		NewLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+	})
 }
 
 func Error(msg string) {
-	write(fmt.Sprintf("%s\n%s %s\n", picocolors.Gray(utils.S_BAR), picocolors.Red(utils.S_ERROR), msg))
+	Message(msg, MessageOptions{
+		FirstLine: MessageLineOptions{
+			Start: picocolors.Red(utils.S_ERROR),
+		},
+		NewLine: MessageLineOptions{
+			Start: picocolors.Gray(utils.S_BAR),
+		},
+	})
 }

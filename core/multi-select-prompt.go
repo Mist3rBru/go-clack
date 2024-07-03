@@ -26,7 +26,7 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			option.Value = any(option.Label).(TValue)
 		}
 	}
-	
+
 	var initialValue []TValue
 	if len(params.InitialValue) > 0 {
 		initialValue = params.InitialValue
