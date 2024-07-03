@@ -1,4 +1,18 @@
 
+<a name="v0.1.8"></a>
+## [v0.1.8](https://github.com/Mist3rBru/go-clack/compare/v0.1.7...v0.1.8) (2024-07-03)
+
+### 🚀 Features
+
+* add DisabledGroups option to GroupMultiSelectPrompt
+* add required option to prompts
+* **prompts:** add SpacedGroups option to GroupMultiSelect
+
+### 🏡 Chore
+
+* update changelog
+
+
 <a name="v0.1.7"></a>
 ## [v0.1.7](https://github.com/Mist3rBru/go-clack/compare/v0.1.6...v0.1.7) (2024-07-03)
 
