@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"os"
 	"path"
 	"sort"
@@ -24,6 +25,7 @@ type MultiSelectPathPromptParams struct {
 	InitialPath  string
 	OnlyShowDir  bool
 	FileSystem   FileSystem
+	Required     bool
 	Validate     func(value []string) error
 	Render       func(p *MultiSelectPathPrompt) string
 }
@@ -39,8 +41,17 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
-			Validate:     params.Validate,
-			CursorIndex:  1,
+			Validate: func(value []string) error {
+				var err error
+				if params.Validate != nil {
+					err = params.Validate(value)
+				}
+				if err == nil && params.Required && len(p.Value) == 0 {
+					err = errors.New("Please select at least one option. Press `space` to select")
+				}
+				return err
+			},
+			CursorIndex: 1,
 			Render: func(_p *Prompt[[]string]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()

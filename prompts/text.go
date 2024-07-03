@@ -10,6 +10,7 @@ type TextParams struct {
 	Message      string
 	Placeholder  string
 	InitialValue string
+	Required     bool
 	Validate     func(value string) error
 }
 
@@ -17,6 +18,7 @@ func Text(params TextParams) (string, error) {
 	p := core.NewTextPrompt(core.TextPromptParams{
 		InitialValue: params.InitialValue,
 		Placeholder:  params.Placeholder,
+		Required:     params.Required,
 		Validate:     params.Validate,
 		Render: func(p *core.TextPrompt) string {
 			return utils.ApplyTheme(utils.ThemeParams[string]{

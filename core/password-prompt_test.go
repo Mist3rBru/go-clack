@@ -73,3 +73,12 @@ func TestValidatePassword(t *testing.T) {
 	assert.Equal(t, core.ErrorState, p.State)
 	assert.Equal(t, "invalid password: 123", p.Error)
 }
+
+func TestPasswordRequiredValue(t *testing.T) {
+	p := core.NewPasswordPrompt(core.PasswordPromptParams{
+		Required: true,
+	})
+
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+}

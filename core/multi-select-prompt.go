@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"os"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
@@ -16,6 +17,7 @@ type MultiSelectPromptParams[TValue comparable] struct {
 	Output       *os.File
 	InitialValue []TValue
 	Options      []*MultiSelectOption[TValue]
+	Required     bool
 	Validate     func(value []TValue) error
 	Render       func(p *MultiSelectPrompt[TValue]) string
 }
@@ -51,7 +53,16 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: initialValue,
-			Validate:     params.Validate,
+			Validate: func(value []TValue) error {
+				var err error
+				if params.Validate != nil {
+					err = params.Validate(value)
+				}
+				if err == nil && params.Required && len(p.Value) == 0 {
+					err = errors.New("Please select at least one option. Press `space` to select")
+				}
+				return err
+			},
 			Render: func(_p *Prompt[[]TValue]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()

@@ -124,3 +124,12 @@ func TestMultiSelectPathExitToSelectedDirectory(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.LeftKey})
 	assert.True(t, p.CurrentOption.IsSelected)
 }
+
+func TestMultiSelectPathRequiredValue(t *testing.T) {
+	p := core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{
+		Required: true,
+	})
+
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+}

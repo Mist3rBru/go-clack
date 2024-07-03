@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"os"
 	"regexp"
 	"strings"
@@ -23,6 +24,7 @@ type PathPromptParams struct {
 	Output       *os.File
 	InitialValue string
 	OnlyShowDir  bool
+	Required     bool
 	Validate     func(value string) error
 	Render       func(p *PathPrompt) string
 }
@@ -35,7 +37,16 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate:     params.Validate,
+			Validate: func(value string) error {
+				var err error
+				if params.Validate != nil {
+					err = params.Validate(value)
+				}
+				if err == nil && params.Required && p.Value == "" {
+					err = errors.New("Path does not exist! Please enter a valid path.")
+				}
+				return err
+			},
 			Render: func(_p *Prompt[string]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()

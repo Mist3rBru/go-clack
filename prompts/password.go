@@ -9,12 +9,14 @@ import (
 type PasswordParams struct {
 	Message      string
 	InitialValue string
+	Required     bool
 	Validate     func(value string) error
 }
 
 func Password(params PasswordParams) (string, error) {
 	p := core.NewPasswordPrompt(core.PasswordPromptParams{
 		InitialValue: params.InitialValue,
+		Required:     params.Required,
 		Validate:     params.Validate,
 		Render: func(p *core.PasswordPrompt) string {
 			return utils.ApplyTheme(utils.ThemeParams[string]{

@@ -20,6 +20,7 @@ type MultiSelectParams[TValue comparable] struct {
 	Message      string
 	Options      []*MultiSelectOption[TValue]
 	InitialValue []TValue
+	Required     bool
 	Validate     func(value []TValue) error
 }
 
@@ -36,6 +37,7 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[TValue]{
 		InitialValue: params.InitialValue,
 		Options:      options,
+		Required:     params.Required,
 		Validate:     params.Validate,
 		Render: func(p *core.MultiSelectPrompt[TValue]) string {
 			var value string

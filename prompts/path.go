@@ -11,6 +11,7 @@ type PathParams struct {
 	Message      string
 	InitialValue string
 	OnlyShowDir  bool
+	Required     bool
 	Validate     func(value string) error
 }
 
@@ -18,6 +19,7 @@ func Path(params PathParams) (string, error) {
 	p := core.NewPathPrompt(core.PathPromptParams{
 		InitialValue: params.InitialValue,
 		OnlyShowDir:  params.OnlyShowDir,
+		Required:     params.Required,
 		Validate:     params.Validate,
 		Render: func(p *core.PathPrompt) string {
 			var hintOptions string

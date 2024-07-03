@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"os"
 
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
@@ -16,6 +17,7 @@ type TextPromptParams struct {
 	Output       *os.File
 	InitialValue string
 	Placeholder  string
+	Required     bool
 	Validate     func(value string) error
 	Render       func(p *TextPrompt) string
 }
@@ -28,7 +30,16 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate:     params.Validate,
+			Validate: func(value string) error {
+				var err error
+				if params.Validate != nil {
+					err = params.Validate(value)
+				}
+				if err == nil && params.Required && p.Value == "" {
+					err = errors.New("Value is required! Please enter a value.")
+				}
+				return err
+			},
 			Render: func(_p *Prompt[string]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()

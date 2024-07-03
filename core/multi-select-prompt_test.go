@@ -130,3 +130,17 @@ func TestLabelAsMultiSelectValue(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{"foo", "bar"}, p.Value)
 }
+
+func TestMultiSelectRequiredValue(t *testing.T) {
+	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
+		Required: true,
+		Options: []*core.MultiSelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+	})
+
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+}

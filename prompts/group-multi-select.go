@@ -13,6 +13,7 @@ type GroupMultiSelectParams[TValue comparable] struct {
 	Message      string
 	Options      map[string][]MultiSelectOption[TValue]
 	InitialValue []TValue
+	Required     bool
 	Validate     func(value []TValue) error
 }
 
@@ -32,6 +33,8 @@ func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) 
 	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[TValue]{
 		InitialValue: params.InitialValue,
 		Options:      groups,
+		Required:     params.Required,
+		Validate:     params.Validate,
 		Render: func(p *core.GroupMultiSelectPrompt[TValue]) string {
 			var value string
 

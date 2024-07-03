@@ -92,3 +92,12 @@ func TestTextPromptPlaceholderCompletion(t *testing.T) {
 	assert.Equal(t, "bar", p.Value)
 	assert.Equal(t, 3, p.CursorIndex)
 }
+
+func TestTextRequiredValue(t *testing.T) {
+	p := core.NewTextPrompt(core.TextPromptParams{
+		Required: true,
+	})
+
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+}

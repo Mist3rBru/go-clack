@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -15,6 +16,7 @@ type PasswordPromptParams struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue string
+	Required     bool
 	Validate     func(value string) error
 	Render       func(p *PasswordPrompt) string
 }
@@ -27,7 +29,16 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate:     params.Validate,
+			Validate: func(value string) error {
+				var err error
+				if params.Validate != nil {
+					err = params.Validate(value)
+				}
+				if err == nil && params.Required && p.Value == "" {
+					err = errors.New("Password is required! Please enter a value.")
+				}
+				return err
+			},
 			Render: func(_p *Prompt[string]) string {
 				if params.Render == nil {
 					return ErrMissingRender.Error()

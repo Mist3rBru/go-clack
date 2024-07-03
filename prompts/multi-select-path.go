@@ -14,6 +14,7 @@ type MultiSelectPathParams struct {
 	Message      string
 	InitialValue []string
 	InitialPath  string
+	Required     bool
 	Validate     func(value []string) error
 	OnlyShowDir  bool
 	FileSystem   FileSystem
@@ -23,9 +24,10 @@ func MultiSelectPath(params MultiSelectPathParams) ([]string, error) {
 	p := core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{
 		InitialValue: params.InitialValue,
 		InitialPath:  params.InitialPath,
-		Validate:     params.Validate,
 		OnlyShowDir:  params.OnlyShowDir,
 		FileSystem:   params.FileSystem,
+		Required:     params.Required,
+		Validate:     params.Validate,
 		Render: func(p *core.MultiSelectPathPrompt) string {
 			var value string
 			switch p.State {
