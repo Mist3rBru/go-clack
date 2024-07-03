@@ -3,7 +3,9 @@ SHELL=/bin/bash
 packages = ./core ./prompts
 
 run:
-	@go run playground/main.go
+	@go run ./examples
+play:
+	@go run ./playground
 test:
 	@until [ $$RET -eq 0 ]; do \
 		go test $(packages) -cover ; \
