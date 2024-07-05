@@ -34,15 +34,13 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 		params.FileSystem = OSFileSystem{}
 	}
 
-	var p *SelectPathPrompt
-	p = &SelectPathPrompt{
+	var p SelectPathPrompt
+	p = SelectPathPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
 			Input:       params.Input,
 			Output:      params.Output,
 			CursorIndex: 1,
-			Render: func(_p *Prompt[string]) string {
-				return params.Render(p)
-			},
+			Render:      WrapRender[string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
 		FileSystem:  params.FileSystem,
@@ -77,7 +75,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 		p.Value = p.CurrentOption.Path
 		p.CursorIndex = p.cursorIndex()
 	})
-	return p
+	return &p
 }
 
 func (p *SelectPathPrompt) Options() []*PathNode {

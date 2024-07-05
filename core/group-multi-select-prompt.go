@@ -74,8 +74,8 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 		}
 	}
 
-	var p *GroupMultiSelectPrompt[TValue]
-	p = &GroupMultiSelectPrompt[TValue]{
+	var p GroupMultiSelectPrompt[TValue]
+	p = GroupMultiSelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:        params.Input,
 			Output:       params.Output,
@@ -90,9 +90,7 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 				}
 				return err
 			},
-			Render: func(_p *Prompt[[]TValue]) string {
-				return params.Render(p)
-			},
+			Render: WrapRender[[]TValue](&p, params.Render),
 		}),
 		Options:        options,
 		DisabledGroups: params.DisabledGroups,
@@ -124,7 +122,7 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 			p.toggleOption()
 		}
 	})
-	return p
+	return &p
 }
 
 func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupMultiSelectOption[TValue]) bool {

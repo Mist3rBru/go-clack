@@ -40,8 +40,8 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 		params.FileSystem = OSFileSystem{}
 	}
 
-	var p *MultiSelectPathPrompt
-	p = &MultiSelectPathPrompt{
+	var p MultiSelectPathPrompt
+	p = MultiSelectPathPrompt{
 		Prompt: *NewPrompt(PromptParams[[]string]{
 			Input:        params.Input,
 			Output:       params.Output,
@@ -57,9 +57,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 				return err
 			},
 			CursorIndex: 1,
-			Render: func(_p *Prompt[[]string]) string {
-				return params.Render(p)
-			},
+			Render:      WrapRender[[]string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
 		Required:    params.Required,
@@ -115,7 +113,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 			return p.Value[i] < p.Value[j]
 		})
 	})
-	return p
+	return &p
 }
 
 func (p *MultiSelectPathPrompt) Options() []*PathNode {

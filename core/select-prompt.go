@@ -34,16 +34,14 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 			startIndex = i
 		}
 	}
-	var p *SelectPrompt[TValue]
-	p = &SelectPrompt[TValue]{
+	var p SelectPrompt[TValue]
+	p = SelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[TValue]{
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: params.Options[startIndex].Value,
 			CursorIndex:  startIndex,
-			Render: func(_p *Prompt[TValue]) string {
-				return params.Render(p)
-			},
+			Render:       WrapRender[TValue](&p, params.Render),
 		}),
 		Options: params.Options,
 	}
@@ -61,5 +59,5 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 		}
 		p.Value = p.Options[p.CursorIndex].Value
 	})
-	return p
+	return &p
 }

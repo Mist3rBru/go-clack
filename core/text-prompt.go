@@ -28,8 +28,8 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 	v := validator.NewValidator("TextPrompt")
 	v.ValidateRender(params.Render)
 
-	var p *TextPrompt
-	p = &TextPrompt{
+	var p TextPrompt
+	p = TextPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
 			Input:        params.Input,
 			Output:       params.Output,
@@ -45,9 +45,7 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 				}
 				return err
 			},
-			Render: func(_p *Prompt[string]) string {
-				return params.Render(p)
-			},
+			Render: WrapRender[string](&p, params.Render),
 		}),
 		Placeholder: params.Placeholder,
 		Required:    params.Required,
@@ -62,7 +60,7 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			p.TrackKeyValue(key, &p.Value)
 		}
 	})
-	return p
+	return &p
 }
 
 func (p *TextPrompt) ValueWithCursor() string {

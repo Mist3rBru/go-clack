@@ -27,8 +27,8 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 	v := validator.NewValidator("PasswordPrompt")
 	v.ValidateRender(params.Render)
 
-	var p *PasswordPrompt
-	p = &PasswordPrompt{
+	var p PasswordPrompt
+	p = PasswordPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
 			Input:        params.Input,
 			Output:       params.Output,
@@ -44,16 +44,14 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 				}
 				return err
 			},
-			Render: func(_p *Prompt[string]) string {
-				return params.Render(p)
-			},
+			Render: WrapRender[string](&p, params.Render),
 		}),
 		Required: params.Required,
 	}
 	p.On(KeyEvent, func(args ...any) {
 		p.TrackKeyValue(args[0].(*Key), &p.Value)
 	})
-	return p
+	return &p
 }
 
 func (p *PasswordPrompt) ValueWithMask() string {

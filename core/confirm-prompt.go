@@ -32,15 +32,13 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 	if params.Inactive == "" {
 		params.Inactive = "no"
 	}
-	var p *ConfirmPrompt
-	p = &ConfirmPrompt{
+	var p ConfirmPrompt
+	p = ConfirmPrompt{
 		Prompt: *NewPrompt(PromptParams[bool]{
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
-			Render: func(_p *Prompt[bool]) string {
-				return params.Render(p)
-			},
+			Render:       WrapRender[bool](&p, params.Render),
 		}),
 		Active:   params.Active,
 		Inactive: params.Inactive,
@@ -53,5 +51,5 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 			p.Value = !p.Value
 		}
 	})
-	return p
+	return &p
 }

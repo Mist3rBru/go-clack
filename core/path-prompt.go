@@ -35,8 +35,8 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	v := validator.NewValidator("PathPrompt")
 	v.ValidateRender(params.Render)
 
-	var p *PathPrompt
-	p = &PathPrompt{
+	var p PathPrompt
+	p = PathPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
 			Input:        params.Input,
 			Output:       params.Output,
@@ -52,9 +52,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 				}
 				return err
 			},
-			Render: func(_p *Prompt[string]) string {
-				return params.Render(p)
-			},
+			Render: WrapRender[string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,
@@ -79,7 +77,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 		}
 	})
 
-	return p
+	return &p
 }
 
 func (p *PathPrompt) mapHintOptions() []string {

@@ -35,14 +35,12 @@ func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *Selec
 		}
 	}
 
-	var p *SelectKeyPrompt[TValue]
-	p = &SelectKeyPrompt[TValue]{
+	var p SelectKeyPrompt[TValue]
+	p = SelectKeyPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[TValue]{
 			Input:  params.Input,
 			Output: params.Output,
-			Render: func(_p *Prompt[TValue]) string {
-				return params.Render(p)
-			},
+			Render: WrapRender[TValue](&p, params.Render),
 		}),
 		Options: params.Options,
 	}
@@ -60,5 +58,5 @@ func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *Selec
 			key.Name = ""
 		}
 	})
-	return p
+	return &p
 }

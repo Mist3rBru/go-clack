@@ -52,8 +52,8 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 		}
 	}
 
-	var p *MultiSelectPrompt[TValue]
-	p = &MultiSelectPrompt[TValue]{
+	var p MultiSelectPrompt[TValue]
+	p = MultiSelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:        params.Input,
 			Output:       params.Output,
@@ -68,9 +68,7 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 				}
 				return err
 			},
-			Render: func(_p *Prompt[[]TValue]) string {
-				return params.Render(p)
-			},
+			Render: WrapRender[[]TValue](&p, params.Render),
 		}),
 		Options: params.Options,
 	}
@@ -115,5 +113,5 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			}
 		}
 	})
-	return p
+	return &p
 }
