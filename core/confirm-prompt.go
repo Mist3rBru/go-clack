@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type ConfirmPrompt struct {
@@ -22,6 +23,9 @@ type ConfirmPromptParams struct {
 }
 
 func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
+	v := validator.NewValidator("ConfirmPrompt")
+	v.ValidateRender(params.Render)
+
 	if params.Active == "" {
 		params.Active = "yes"
 	}
@@ -35,9 +39,6 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			Render: func(_p *Prompt[bool]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),

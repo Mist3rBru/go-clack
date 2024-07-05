@@ -14,6 +14,7 @@ func newSelectPrompt() *core.SelectPrompt[string] {
 			{Value: "b"},
 			{Value: "c"},
 		},
+		Render: func(p *core.SelectPrompt[string]) string { return "" },
 	})
 }
 
@@ -61,6 +62,7 @@ func TestLabelAsSelectValue(t *testing.T) {
 			{Label: "bar"},
 			{Label: "baz"},
 		},
+		Render: func(p *core.SelectPrompt[string]) string { return "" },
 	})
 
 	assert.Equal(t, "foo", p.Value)

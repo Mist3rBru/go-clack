@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type MultiSelectPrompt[TValue comparable] struct {
@@ -23,6 +24,10 @@ type MultiSelectPromptParams[TValue comparable] struct {
 }
 
 func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TValue]) *MultiSelectPrompt[TValue] {
+	v := validator.NewValidator("MultiSelectPrompt")
+	v.ValidateRender(params.Render)
+	v.ValidateOptions(len(params.Options))
+
 	for _, option := range params.Options {
 		if value, ok := any(option.Value).(string); ok && value == "" {
 			option.Value = any(option.Label).(TValue)
@@ -64,9 +69,6 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 				return err
 			},
 			Render: func(_p *Prompt[[]TValue]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),

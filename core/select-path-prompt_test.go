@@ -8,7 +8,9 @@ import (
 )
 
 func newSelectPathPrompt() *core.SelectPathPrompt {
-	return core.NewSelectPathPrompt(core.SelectPathPromptParams{})
+	return core.NewSelectPathPrompt(core.SelectPathPromptParams{
+		Render: func(p *core.SelectPathPrompt) string { return "" },
+	})
 }
 
 func TestSelectPathChangeCursor(t *testing.T) {

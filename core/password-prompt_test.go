@@ -9,12 +9,15 @@ import (
 )
 
 func newPasswordPrompt() *core.PasswordPrompt {
-	return core.NewPasswordPrompt(core.PasswordPromptParams{})
+	return core.NewPasswordPrompt(core.PasswordPromptParams{
+		Render: func(p *core.PasswordPrompt) string { return "" },
+	})
 }
 
 func TestPasswordPromptInitialValue(t *testing.T) {
 	p := core.NewPasswordPrompt(core.PasswordPromptParams{
 		InitialValue: "foo",
+		Render:       func(p *core.PasswordPrompt) string { return "" },
 	})
 
 	assert.Equal(t, "foo", p.Value)
@@ -67,6 +70,7 @@ func TestValidatePassword(t *testing.T) {
 		Validate: func(value string) error {
 			return fmt.Errorf("invalid password: %s", value)
 		},
+		Render: func(p *core.PasswordPrompt) string { return "" },
 	})
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -75,9 +79,8 @@ func TestValidatePassword(t *testing.T) {
 }
 
 func TestPasswordRequiredValue(t *testing.T) {
-	p := core.NewPasswordPrompt(core.PasswordPromptParams{
-		Required: true,
-	})
+	p := newPasswordPrompt()
+	p.Required = true
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)

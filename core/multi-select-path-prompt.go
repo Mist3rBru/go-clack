@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type MultiSelectPathPrompt struct {
@@ -15,6 +16,7 @@ type MultiSelectPathPrompt struct {
 	CurrentLayer  []*PathNode
 	CurrentOption *PathNode
 	OnlyShowDir   bool
+	Required      bool
 	FileSystem    FileSystem
 }
 
@@ -24,13 +26,16 @@ type MultiSelectPathPromptParams struct {
 	InitialValue []string
 	InitialPath  string
 	OnlyShowDir  bool
-	FileSystem   FileSystem
 	Required     bool
+	FileSystem   FileSystem
 	Validate     func(value []string) error
 	Render       func(p *MultiSelectPathPrompt) string
 }
 
 func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPathPrompt {
+	v := validator.NewValidator("MultiSelectPathPrompt")
+	v.ValidateRender(params.Render)
+
 	if params.FileSystem == nil {
 		params.FileSystem = OSFileSystem{}
 	}
@@ -46,20 +51,18 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 				if params.Validate != nil {
 					err = params.Validate(value)
 				}
-				if err == nil && params.Required && len(p.Value) == 0 {
+				if err == nil && p.Required && len(p.Value) == 0 {
 					err = errors.New("Please select at least one option. Press `space` to select")
 				}
 				return err
 			},
 			CursorIndex: 1,
 			Render: func(_p *Prompt[[]string]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),
 		OnlyShowDir: params.OnlyShowDir,
+		Required:    params.Required,
 		FileSystem:  params.FileSystem,
 	}
 	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialPath == "" {

@@ -2,6 +2,8 @@ package core
 
 import (
 	"os"
+
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type SelectKeyOption[TValue any] struct {
@@ -23,6 +25,10 @@ type SelectKeyPromptParams[TValue any] struct {
 }
 
 func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *SelectKeyPrompt[TValue] {
+	v := validator.NewValidator("SelectKeyPrompt")
+	v.ValidateRender(params.Render)
+	v.ValidateOptions(len(params.Options))
+
 	for _, option := range params.Options {
 		if value, ok := any(option.Value).(string); ok && value == "" {
 			option.Value = any(option.Key).(TValue)
@@ -35,9 +41,6 @@ func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *Selec
 			Input:  params.Input,
 			Output: params.Output,
 			Render: func(_p *Prompt[TValue]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),

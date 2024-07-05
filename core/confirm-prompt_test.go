@@ -9,8 +9,9 @@ import (
 
 func newConfirmPrompt() *core.ConfirmPrompt {
 	return core.NewConfirmPrompt(core.ConfirmPromptParams{
-		Active:   "Yes",
-		Inactive: "No",
+		Render: func(p *core.ConfirmPrompt) string {
+			return ""
+		},
 	})
 }
 

@@ -5,11 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type PasswordPrompt struct {
 	Prompt[string]
+	Required bool
 }
 
 type PasswordPromptParams struct {
@@ -22,6 +24,9 @@ type PasswordPromptParams struct {
 }
 
 func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
+	v := validator.NewValidator("PasswordPrompt")
+	v.ValidateRender(params.Render)
+
 	var p *PasswordPrompt
 	p = &PasswordPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
@@ -34,18 +39,16 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 				if params.Validate != nil {
 					err = params.Validate(value)
 				}
-				if err == nil && params.Required && p.Value == "" {
+				if err == nil && p.Required && p.Value == "" {
 					err = errors.New("Password is required! Please enter a value.")
 				}
 				return err
 			},
 			Render: func(_p *Prompt[string]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),
+		Required: params.Required,
 	}
 	p.On(KeyEvent, func(args ...any) {
 		p.TrackKeyValue(args[0].(*Key), &p.Value)

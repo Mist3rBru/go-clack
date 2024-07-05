@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type GroupMultiSelectOption[TValue comparable] struct {
@@ -17,6 +18,7 @@ type GroupMultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
 	Options        []*GroupMultiSelectOption[TValue]
 	DisabledGroups bool
+	Required       bool
 }
 
 type GroupMultiSelectPromptParams[TValue comparable] struct {
@@ -31,6 +33,10 @@ type GroupMultiSelectPromptParams[TValue comparable] struct {
 }
 
 func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptParams[TValue]) *GroupMultiSelectPrompt[TValue] {
+	v := validator.NewValidator("GroupMultiSelectPrompt")
+	v.ValidateRender(params.Render)
+	v.ValidateOptions(len(params.Options))
+
 	options := []*GroupMultiSelectOption[TValue]{}
 	for groupName, groupOptions := range params.Options {
 		group := &GroupMultiSelectOption[TValue]{
@@ -79,20 +85,18 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 				if params.Validate != nil {
 					err = params.Validate(value)
 				}
-				if err == nil && params.Required && len(p.Value) == 0 {
+				if err == nil && p.Required && len(p.Value) == 0 {
 					err = errors.New("Please select at least one option. Press `space` to select")
 				}
 				return err
 			},
 			Render: func(_p *Prompt[[]TValue]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),
 		Options:        options,
 		DisabledGroups: params.DisabledGroups,
+		Required:       params.Required,
 	}
 
 	if p.DisabledGroups {

@@ -7,12 +7,14 @@ import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type PathPrompt struct {
 	Prompt[string]
 	OnlyShowDir bool
+	Required    bool
 	Placeholder string
 	Hint        string
 	HintOptions []string
@@ -30,6 +32,9 @@ type PathPromptParams struct {
 }
 
 func NewPathPrompt(params PathPromptParams) *PathPrompt {
+	v := validator.NewValidator("PathPrompt")
+	v.ValidateRender(params.Render)
+
 	var p *PathPrompt
 	p = &PathPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
@@ -42,20 +47,18 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 				if params.Validate != nil {
 					err = params.Validate(value)
 				}
-				if err == nil && params.Required && p.Value == "" {
+				if err == nil && p.Required && p.Value == "" {
 					err = errors.New("Path does not exist! Please enter a valid path.")
 				}
 				return err
 			},
 			Render: func(_p *Prompt[string]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,
+		Required:    params.Required,
 	}
 	if cwd, err := os.Getwd(); err == nil && params.InitialValue == "" {
 		p.Prompt.Value = cwd

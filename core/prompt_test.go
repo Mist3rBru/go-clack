@@ -12,7 +12,9 @@ import (
 )
 
 func newPrompt() *core.Prompt[string] {
-	return core.NewPrompt(core.PromptParams[string]{})
+	return core.NewPrompt(core.PromptParams[string]{
+		Render: func(p *core.Prompt[string]) string { return "" },
+	})
 }
 
 const testEvent = core.Event("test")

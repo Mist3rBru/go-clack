@@ -9,7 +9,9 @@ import (
 )
 
 func newMultiSelectPathPrompt() *core.MultiSelectPathPrompt {
-	return core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{})
+	return core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{
+		Render: func(p *core.MultiSelectPathPrompt) string { return "" },
+	})
 }
 
 func TestMultiSelectPathChangeCursor(t *testing.T) {
@@ -126,9 +128,8 @@ func TestMultiSelectPathExitToSelectedDirectory(t *testing.T) {
 }
 
 func TestMultiSelectPathRequiredValue(t *testing.T) {
-	p := core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{
-		Required: true,
-	})
+	p := newMultiSelectPathPrompt()
+	p.Required = true
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)

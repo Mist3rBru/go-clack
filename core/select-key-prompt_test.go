@@ -19,6 +19,7 @@ func newSelectKeyPrompt() *core.SelectKeyPrompt[string] {
 				Value: "enter",
 			},
 		},
+		Render: func(p *core.SelectKeyPrompt[string]) string { return "" },
 	})
 }
 
@@ -46,6 +47,7 @@ func TestKeyAsSelectValue(t *testing.T) {
 			{Key: "b", Label: "bar"},
 			{Key: "c", Label: "baz"},
 		},
+		Render: func(p *core.SelectKeyPrompt[string]) string { return "" },
 	})
 
 	p.PressKey(&core.Key{Name: "a"})

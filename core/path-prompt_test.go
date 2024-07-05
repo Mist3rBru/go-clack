@@ -10,7 +10,9 @@ import (
 )
 
 func newPathPrompt() *core.PathPrompt {
-	return core.NewPathPrompt(core.PathPromptParams{})
+	return core.NewPathPrompt(core.PathPromptParams{
+		Render: func(p *core.PathPrompt) string { return "" },
+	})
 }
 
 func TestPathDefaultValue(t *testing.T) {
@@ -112,6 +114,7 @@ func TestValidatePath(t *testing.T) {
 		Validate: func(value string) error {
 			return fmt.Errorf("invalid path: %s", value)
 		},
+		Render: func(p *core.PathPrompt) string { return "" },
 	})
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -120,9 +123,8 @@ func TestValidatePath(t *testing.T) {
 }
 
 func TestPathRequiredValue(t *testing.T) {
-	p := core.NewPathPrompt(core.PathPromptParams{
-		Required: true,
-	})
+	p := newPathPrompt()
+	p.Required = true
 
 	p.Value = ""
 	p.PressKey(&core.Key{Name: core.EnterKey})

@@ -12,15 +12,14 @@ import (
 
 func newTextPrompt() *core.TextPrompt {
 	return core.NewTextPrompt(core.TextPromptParams{
-		Render: func(p *core.TextPrompt) string {
-			return p.Value
-		},
+		Render: func(p *core.TextPrompt) string { return "" },
 	})
 }
 
 func TestTextPromptInitialValue(t *testing.T) {
 	p := core.NewTextPrompt(core.TextPromptParams{
 		InitialValue: "foo",
+		Render:       func(p *core.TextPrompt) string { return "" },
 	})
 
 	assert.Equal(t, "foo", p.Value)
@@ -70,6 +69,7 @@ func TestTextPromptValidate(t *testing.T) {
 		Validate: func(value string) error {
 			return fmt.Errorf("invalid value: %s", value)
 		},
+		Render: func(p *core.TextPrompt) string { return "" },
 	})
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
@@ -94,9 +94,8 @@ func TestTextPromptPlaceholderCompletion(t *testing.T) {
 }
 
 func TestTextRequiredValue(t *testing.T) {
-	p := core.NewTextPrompt(core.TextPromptParams{
-		Required: true,
-	})
+	p := newTextPrompt()
+	p.Required = true
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)

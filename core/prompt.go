@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 	"github.com/Mist3rBru/go-clack/third_party/sisteransi"
 
@@ -44,6 +45,9 @@ type PromptParams[TValue any] struct {
 }
 
 func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
+	v := validator.NewValidator("Prompt")
+	v.ValidateRender(params.Render)
+
 	if params.Input == nil {
 		params.Input = os.Stdin
 	}

@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type SelectPathPrompt struct {
@@ -26,6 +27,9 @@ type SelectPathPromptParams struct {
 }
 
 func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
+	v := validator.NewValidator("SelectPathPrompt")
+	v.ValidateRender(params.Render)
+
 	if params.FileSystem == nil {
 		params.FileSystem = OSFileSystem{}
 	}
@@ -37,9 +41,6 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 			Output:      params.Output,
 			CursorIndex: 1,
 			Render: func(_p *Prompt[string]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),

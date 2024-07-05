@@ -10,16 +10,19 @@ import (
 func newGroupMultiSelectPrompt() *core.GroupMultiSelectPrompt[string] {
 	return core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
 		Options: map[string][]core.MultiSelectOption[string]{
-			"foo": {
+			"g1": {
 				{Value: "a"},
 				{Value: "b"},
 				{Value: "c"},
 			},
-			"bar": {
+			"g2": {
 				{Value: "x"},
 				{Value: "y"},
 				{Value: "z"},
 			},
+		},
+		Render: func(p *core.GroupMultiSelectPrompt[string]) string {
+			return ""
 		},
 	})
 }
@@ -99,35 +102,19 @@ func TestGroupMultiSelectIsGroupSelected(t *testing.T) {
 }
 
 func TestLabelAsGroupMultiSelectValue(t *testing.T) {
-	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
-		Options: map[string][]core.MultiSelectOption[string]{
-			"group": {
-				{Label: "foo"},
-				{Label: "bar"},
-				{Label: "baz"},
-			},
-		},
-	})
+	p := newGroupMultiSelectPrompt()
 
 	p.PressKey(&core.Key{Name: core.DownKey})
 	p.PressKey(&core.Key{Name: core.SpaceKey})
-	assert.Equal(t, []string{"foo"}, p.Value)
+	assert.Equal(t, []string{p.Options[1].Value}, p.Value)
 	p.PressKey(&core.Key{Name: core.DownKey})
 	p.PressKey(&core.Key{Name: core.SpaceKey})
-	assert.Equal(t, []string{"foo", "bar"}, p.Value)
+	assert.Equal(t, []string{p.Options[1].Value, p.Options[2].Value}, p.Value)
 }
 
 func TestGroupMultiSelectRequiredValue(t *testing.T) {
-	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
-		Required: true,
-		Options: map[string][]core.MultiSelectOption[string]{
-			"foo": {
-				{Value: "a"},
-				{Value: "b"},
-				{Value: "c"},
-			},
-		},
-	})
+	p := newGroupMultiSelectPrompt()
+	p.Required = true
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)
@@ -146,6 +133,7 @@ func TestGroupMultiSelectDisabledGroups(t *testing.T) {
 				{Value: "y"},
 			},
 		},
+		Render: func(p *core.GroupMultiSelectPrompt[string]) string { return "" },
 	})
 
 	assert.Equal(t, 1, p.CursorIndex)

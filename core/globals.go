@@ -37,8 +37,7 @@ const (
 )
 
 var (
-	ErrMissingRender error = errors.New("missing render function error")
-	ErrCancelPrompt  error = errors.New("prompt canceled error")
+	ErrCancelPrompt error = errors.New("prompt canceled error")
 )
 
 type KeyName string

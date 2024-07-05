@@ -4,12 +4,14 @@ import (
 	"errors"
 	"os"
 
+	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 type TextPrompt struct {
 	Prompt[string]
 	Placeholder string
+	Required    bool
 }
 
 type TextPromptParams struct {
@@ -23,6 +25,9 @@ type TextPromptParams struct {
 }
 
 func NewTextPrompt(params TextPromptParams) *TextPrompt {
+	v := validator.NewValidator("TextPrompt")
+	v.ValidateRender(params.Render)
+
 	var p *TextPrompt
 	p = &TextPrompt{
 		Prompt: *NewPrompt(PromptParams[string]{
@@ -35,19 +40,17 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 				if params.Validate != nil {
 					err = params.Validate(value)
 				}
-				if err == nil && params.Required && p.Value == "" {
+				if err == nil && p.Required && p.Value == "" {
 					err = errors.New("Value is required! Please enter a value.")
 				}
 				return err
 			},
 			Render: func(_p *Prompt[string]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),
 		Placeholder: params.Placeholder,
+		Required:    params.Required,
 	}
 	p.On(KeyEvent, func(args ...any) {
 		key := args[0].(*Key)

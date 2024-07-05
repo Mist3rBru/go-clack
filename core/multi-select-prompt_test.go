@@ -14,6 +14,7 @@ func newMultiSelectPrompt() *core.MultiSelectPrompt[string] {
 			{Value: "b"},
 			{Value: "c"},
 		},
+		Render: func(p *core.MultiSelectPrompt[string]) string { return "" },
 	})
 }
 
@@ -81,6 +82,7 @@ func TestMultiSelectInitialValue(t *testing.T) {
 			{Value: "c"},
 		},
 		InitialValue: initialValue,
+		Render:       func(p *core.MultiSelectPrompt[string]) string { return "" },
 	})
 
 	assert.Equal(t, initialValue, p.Value)
@@ -102,6 +104,7 @@ func TestMultiSelectInitialSelectedOptions(t *testing.T) {
 			{Value: "b"},
 			{Value: "c", IsSelected: true},
 		},
+		Render: func(p *core.MultiSelectPrompt[string]) string { return "" },
 	})
 
 	assert.Equal(t, initialValue, p.Value)
@@ -122,6 +125,7 @@ func TestLabelAsMultiSelectValue(t *testing.T) {
 			{Label: "bar"},
 			{Label: "baz"},
 		},
+		Render: func(p *core.MultiSelectPrompt[string]) string { return "" },
 	})
 
 	p.PressKey(&core.Key{Name: core.SpaceKey})
@@ -132,14 +136,8 @@ func TestLabelAsMultiSelectValue(t *testing.T) {
 }
 
 func TestMultiSelectRequiredValue(t *testing.T) {
-	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
-		Required: true,
-		Options: []*core.MultiSelectOption[string]{
-			{Label: "foo"},
-			{Label: "bar"},
-			{Label: "baz"},
-		},
-	})
+	p := newMultiSelectPathPrompt()
+	p.Required = true
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)

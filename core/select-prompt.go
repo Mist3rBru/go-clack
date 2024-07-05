@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
+	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
 type SelectPrompt[TValue comparable] struct {
@@ -20,6 +21,10 @@ type SelectPromptParams[TValue comparable] struct {
 }
 
 func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *SelectPrompt[TValue] {
+	v := validator.NewValidator("SelectPrompt")
+	v.ValidateRender(params.Render)
+	v.ValidateOptions(len(params.Options))
+
 	startIndex := 0
 	for i, option := range params.Options {
 		if value, ok := any(option.Value).(string); ok && value == "" {
@@ -37,9 +42,6 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 			InitialValue: params.Options[startIndex].Value,
 			CursorIndex:  startIndex,
 			Render: func(_p *Prompt[TValue]) string {
-				if params.Render == nil {
-					return ErrMissingRender.Error()
-				}
 				return params.Render(p)
 			},
 		}),
