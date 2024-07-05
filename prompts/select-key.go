@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Mist3rBru/go-clack/core"
+	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
@@ -21,6 +22,9 @@ type SelectKeyParams[TValue comparable] struct {
 }
 
 func SelectKey[TValue comparable](params SelectKeyParams[TValue]) (TValue, error) {
+	v := validator.NewValidator("SelectKey")
+	v.ValidateOptions(len(params.Options))
+
 	var options []*core.SelectKeyOption[TValue]
 	for _, option := range params.Options {
 		options = append(options, &core.SelectKeyOption[TValue]{

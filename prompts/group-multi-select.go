@@ -2,6 +2,7 @@ package prompts
 
 import (
 	"github.com/Mist3rBru/go-clack/core"
+	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/prompts/test"
 	"github.com/Mist3rBru/go-clack/prompts/utils"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
@@ -18,6 +19,9 @@ type GroupMultiSelectParams[TValue comparable] struct {
 }
 
 func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) ([]TValue, error) {
+	v := validator.NewValidator("GroupMultiSelect")
+	v.ValidateOptions(len(params.Options))
+
 	groups := make(map[string][]core.MultiSelectOption[TValue])
 	for group, options := range params.Options {
 		groups[group] = make([]core.MultiSelectOption[TValue], len(options))
