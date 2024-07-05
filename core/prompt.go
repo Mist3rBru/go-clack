@@ -149,6 +149,35 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	}
 }
 
+func (p *Prompt[TValue]) PressKey(key *Key) {
+	if p.State == ErrorState || p.State == InitialState {
+		p.State = ActiveState
+	}
+
+	p.Emit(KeyEvent, key)
+
+	if key.Name == EnterKey {
+		if p.Validate != nil {
+			err := p.Validate(p.Value)
+			if err != nil {
+				p.State = ErrorState
+				p.Error = err.Error()
+			}
+		}
+		if p.State != ErrorState {
+			p.State = SubmitState
+		}
+	}
+	if key.Name == CancelKey {
+		p.State = CancelState
+	}
+	if p.State == SubmitState || p.State == CancelState {
+		p.Emit(FinalizeEvent)
+	}
+	p.render()
+	p.Emit(Event(p.State), p.Value)
+}
+
 func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 	value := *valuePtr
 	switch key.Name {
@@ -183,35 +212,6 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 	}
 
 	*valuePtr = value
-}
-
-func (p *Prompt[TValue]) PressKey(key *Key) {
-	if p.State == ErrorState || p.State == InitialState {
-		p.State = ActiveState
-	}
-
-	p.Emit(KeyEvent, key)
-
-	if key.Name == EnterKey {
-		if p.Validate != nil {
-			err := p.Validate(p.Value)
-			if err != nil {
-				p.State = ErrorState
-				p.Error = err.Error()
-			}
-		}
-		if p.State != ErrorState {
-			p.State = SubmitState
-		}
-	}
-	if key.Name == CancelKey {
-		p.State = CancelState
-	}
-	if p.State == SubmitState || p.State == CancelState {
-		p.Emit(FinalizeEvent)
-	}
-	p.render()
-	p.Emit(Event(p.State), p.Value)
 }
 
 func (p *Prompt[TValue]) write(str string) {

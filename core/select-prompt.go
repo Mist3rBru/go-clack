@@ -34,6 +34,7 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 			startIndex = i
 		}
 	}
+
 	var p SelectPrompt[TValue]
 	p = SelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[TValue]{
@@ -45,19 +46,24 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 		}),
 		Options: params.Options,
 	}
+
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		switch key.Name {
-		case UpKey, LeftKey:
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
-		case DownKey, RightKey:
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
-		case HomeKey:
-			p.CursorIndex = 0
-		case EndKey:
-			p.CursorIndex = len(p.Options) - 1
-		}
-		p.Value = p.Options[p.CursorIndex].Value
+		p.handleKeyPress(args[0].(*Key))
 	})
+
 	return &p
+}
+
+func (p *SelectPrompt[TValue]) handleKeyPress(key *Key) {
+	switch key.Name {
+	case UpKey, LeftKey:
+		p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
+	case DownKey, RightKey:
+		p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
+	case HomeKey:
+		p.CursorIndex = 0
+	case EndKey:
+		p.CursorIndex = len(p.Options) - 1
+	}
+	p.Value = p.Options[p.CursorIndex].Value
 }

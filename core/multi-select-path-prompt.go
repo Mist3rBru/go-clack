@@ -53,6 +53,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 		Required:    params.Required,
 		FileSystem:  params.FileSystem,
 	}
+
 	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialPath == "" {
 		params.InitialPath = cwd
 	}
@@ -65,44 +66,14 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 	p.mapSelectedOptions(p.Root)
 
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		switch key.Name {
-		case UpKey:
-			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
-		case DownKey:
-			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
-		case LeftKey:
-			p.exitChildren()
-		case RightKey:
-			p.enterChildren()
-		case HomeKey:
-			p.CurrentOption = p.CurrentLayer[0]
-		case EndKey:
-			p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
-		case SpaceKey:
-			if p.CurrentOption.IsSelected {
-				p.CurrentOption.IsSelected = false
-				value := []string{}
-				for _, v := range p.Value {
-					if v != p.CurrentOption.Path {
-						value = append(value, v)
-					}
-				}
-				p.Value = value
-			} else {
-				p.CurrentOption.IsSelected = true
-				p.Value = append(p.Value, p.CurrentOption.Path)
-			}
-		}
-		if key.Name != SpaceKey {
-			p.CursorIndex = p.cursorIndex()
-		}
+		p.handleKeyPress(args[0].(*Key))
 	})
 	p.On(FinalizeEvent, func(args ...any) {
 		sort.Slice(p.Value, func(i, j int) bool {
 			return p.Value[i] < p.Value[j]
 		})
 	})
+
 	return &p
 }
 
@@ -165,6 +136,40 @@ func (p *MultiSelectPathPrompt) enterChildren() {
 	p.mapSelectedOptions(p.CurrentOption)
 	p.CurrentOption = children[0]
 	p.CurrentLayer = children
+}
+
+func (p *MultiSelectPathPrompt) handleKeyPress(key *Key) {
+	switch key.Name {
+	case UpKey:
+		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
+	case DownKey:
+		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
+	case LeftKey:
+		p.exitChildren()
+	case RightKey:
+		p.enterChildren()
+	case HomeKey:
+		p.CurrentOption = p.CurrentLayer[0]
+	case EndKey:
+		p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
+	case SpaceKey:
+		if p.CurrentOption.IsSelected {
+			p.CurrentOption.IsSelected = false
+			value := []string{}
+			for _, v := range p.Value {
+				if v != p.CurrentOption.Path {
+					value = append(value, v)
+				}
+			}
+			p.Value = value
+		} else {
+			p.CurrentOption.IsSelected = true
+			p.Value = append(p.Value, p.CurrentOption.Path)
+		}
+	}
+	if key.Name != SpaceKey {
+		p.CursorIndex = p.cursorIndex()
+	}
 }
 
 func (p *MultiSelectPathPrompt) mapSelectedOptions(node *PathNode) {

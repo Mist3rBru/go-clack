@@ -45,6 +45,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 		OnlyShowDir: params.OnlyShowDir,
 		FileSystem:  params.FileSystem,
 	}
+
 	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialValue == "" {
 		params.InitialValue = cwd
 	}
@@ -57,29 +58,14 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	p.Value = p.CurrentOption.Path
 
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		switch key.Name {
-		case UpKey:
-			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
-		case DownKey:
-			p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
-		case LeftKey:
-			p.exitChildren()
-		case RightKey:
-			p.enterChildren()
-		case HomeKey:
-			p.CurrentOption = p.CurrentLayer[0]
-		case EndKey:
-			p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
-		}
-		p.Value = p.CurrentOption.Path
-		p.CursorIndex = p.cursorIndex()
+		p.handleKeyPress(args[0].(*Key))
 	})
+
 	return &p
 }
 
 func (p *SelectPathPrompt) Options() []*PathNode {
-	options := []*PathNode{}
+	var options []*PathNode
 
 	var traverse func(node *PathNode)
 	traverse = func(node *PathNode) {
@@ -135,4 +121,23 @@ func (p *SelectPathPrompt) enterChildren() {
 	p.CurrentOption.Children = children
 	p.CurrentOption = children[0]
 	p.CurrentLayer = children
+}
+
+func (p *SelectPathPrompt) handleKeyPress(key *Key) {
+	switch key.Name {
+	case UpKey:
+		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
+	case DownKey:
+		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
+	case LeftKey:
+		p.exitChildren()
+	case RightKey:
+		p.enterChildren()
+	case HomeKey:
+		p.CurrentOption = p.CurrentLayer[0]
+	case EndKey:
+		p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
+	}
+	p.Value = p.CurrentOption.Path
+	p.CursorIndex = p.cursorIndex()
 }

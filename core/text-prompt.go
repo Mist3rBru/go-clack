@@ -40,17 +40,21 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 		Placeholder: params.Placeholder,
 		Required:    params.Required,
 	}
+
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		if key.Name == TabKey && p.Value == "" && p.Placeholder != "" {
-			p.Value = p.Placeholder
-			p.CursorIndex = len(p.Placeholder)
-			return
-		} else {
-			p.TrackKeyValue(key, &p.Value)
-		}
+		p.handleKeyPress(args[0].(*Key))
 	})
+
 	return &p
+}
+
+func (p *TextPrompt) handleKeyPress(key *Key) {
+	if key.Name == TabKey && p.Value == "" && p.Placeholder != "" {
+		p.Value = p.Placeholder
+		p.CursorIndex = len(p.Placeholder)
+	} else {
+		p.TrackKeyValue(key, &p.Value)
+	}
 }
 
 func (p *TextPrompt) ValueWithCursor() string {

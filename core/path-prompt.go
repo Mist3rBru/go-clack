@@ -48,6 +48,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 		HintIndex:   -1,
 		Required:    params.Required,
 	}
+
 	if cwd, err := os.Getwd(); err == nil && params.InitialValue == "" {
 		p.Prompt.Value = cwd
 		p.Value = cwd
@@ -56,15 +57,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	p.changeHint()
 
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		p.TrackKeyValue(key, &p.Value)
-		if key.Name == RightKey && p.CursorIndex >= len(p.Value) {
-			p.completeValue()
-		} else if key.Name == TabKey {
-			p.tabComplete()
-		} else {
-			p.changeHint()
-		}
+		p.handleKeyPress(args[0].(*Key))
 	})
 
 	return &p
@@ -160,5 +153,16 @@ func (p *PathPrompt) tabComplete() {
 	} else {
 		p.HintIndex = utils.MinMaxIndex(p.HintIndex+1, len(p.HintOptions))
 		p.Hint = strings.Replace(p.HintOptions[p.HintIndex], p.valueEnd(), "", 1)
+	}
+}
+
+func (p *PathPrompt) handleKeyPress(key *Key) {
+	p.TrackKeyValue(key, &p.Value)
+	if key.Name == RightKey && p.CursorIndex >= len(p.Value) {
+		p.completeValue()
+	} else if key.Name == TabKey {
+		p.tabComplete()
+	} else {
+		p.changeHint()
 	}
 }

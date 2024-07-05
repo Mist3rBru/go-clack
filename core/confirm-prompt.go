@@ -32,6 +32,7 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 	if params.Inactive == "" {
 		params.Inactive = "no"
 	}
+
 	var p ConfirmPrompt
 	p = ConfirmPrompt{
 		Prompt: *NewPrompt(PromptParams[bool]{
@@ -43,13 +44,18 @@ func NewConfirmPrompt(params ConfirmPromptParams) *ConfirmPrompt {
 		Active:   params.Active,
 		Inactive: params.Inactive,
 	}
+
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		switch key.Name {
-		case UpKey, DownKey, LeftKey, RightKey:
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, 2)
-			p.Value = !p.Value
-		}
+		p.handleKeyPress(args[0].(*Key))
 	})
+
 	return &p
+}
+
+func (p *ConfirmPrompt) handleKeyPress(key *Key) {
+	switch key.Name {
+	case UpKey, DownKey, LeftKey, RightKey:
+		p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, 2)
+		p.Value = !p.Value
+	}
 }

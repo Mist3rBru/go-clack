@@ -36,49 +36,14 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 	v.ValidateRender(params.Render)
 	v.ValidateOptions(len(params.Options))
 
-	options := []*GroupMultiSelectOption[TValue]{}
-	for groupName, groupOptions := range params.Options {
-		group := &GroupMultiSelectOption[TValue]{
-			MultiSelectOption: MultiSelectOption[TValue]{
-				Label: groupName,
-			},
-			IsGroup: true,
-			Options: make([]*GroupMultiSelectOption[TValue], len(groupOptions)),
-		}
-		options = append(options, group)
-		for i, groupOption := range groupOptions {
-			option := &GroupMultiSelectOption[TValue]{
-				MultiSelectOption: MultiSelectOption[TValue]{
-					Label:      groupOption.Label,
-					Value:      groupOption.Value,
-					IsSelected: groupOption.IsSelected,
-				},
-			}
-			if value, ok := any(option.Value).(string); ok && value == "" {
-				option.Value = any(option.Label).(TValue)
-			}
-			group.Options[i] = option
-			options = append(options, option)
-		}
-	}
-
-	var initialValue []TValue
-	if len(params.InitialValue) > 0 {
-		initialValue = params.InitialValue
-	} else {
-		for _, option := range options {
-			if option.IsSelected {
-				initialValue = append(initialValue, option.Value)
-			}
-		}
-	}
+	options := mapGroupMultiSelectOptions(params.Options)
 
 	var p GroupMultiSelectPrompt[TValue]
 	p = GroupMultiSelectPrompt[TValue]{
 		Prompt: *NewPrompt(PromptParams[[]TValue]{
 			Input:        params.Input,
 			Output:       params.Output,
-			InitialValue: initialValue,
+			InitialValue: mapGroupMultiSelectInitialValue(params.InitialValue, options),
 			Validate:     WrapValidateSlice(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
 			Render:       WrapRender[[]TValue](&p, params.Render),
 		}),
@@ -92,27 +57,31 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 	}
 
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		switch key.Name {
-		case UpKey, LeftKey:
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
-			if p.DisabledGroups && p.Options[p.CursorIndex].IsGroup {
-				p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
-			}
-		case DownKey, RightKey:
-			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
-			if p.DisabledGroups && p.Options[p.CursorIndex].IsGroup {
-				p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
-			}
-		case HomeKey:
-			p.CursorIndex = 0
-		case EndKey:
-			p.CursorIndex = len(p.Options) - 1
-		case SpaceKey:
-			p.toggleOption()
-		}
+		p.handleKeyPress(args[0].(*Key))
 	})
+
 	return &p
+}
+
+func (p *GroupMultiSelectPrompt[TValue]) handleKeyPress(key *Key) {
+	switch key.Name {
+	case UpKey, LeftKey:
+		p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
+		if p.DisabledGroups && p.Options[p.CursorIndex].IsGroup {
+			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex-1, len(p.Options))
+		}
+	case DownKey, RightKey:
+		p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
+		if p.DisabledGroups && p.Options[p.CursorIndex].IsGroup {
+			p.CursorIndex = utils.MinMaxIndex(p.CursorIndex+1, len(p.Options))
+		}
+	case HomeKey:
+		p.CursorIndex = 0
+	case EndKey:
+		p.CursorIndex = len(p.Options) - 1
+	case SpaceKey:
+		p.toggleOption()
+	}
 }
 
 func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupMultiSelectOption[TValue]) bool {
@@ -163,4 +132,51 @@ func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
 			p.Value = append(p.Value, option.Value)
 		}
 	}
+}
+
+func mapGroupMultiSelectOptions[TValue comparable](groups map[string][]MultiSelectOption[TValue]) []*GroupMultiSelectOption[TValue] {
+	options := []*GroupMultiSelectOption[TValue](nil)
+
+	for groupName, groupOptions := range groups {
+		group := &GroupMultiSelectOption[TValue]{
+			MultiSelectOption: MultiSelectOption[TValue]{
+				Label: groupName,
+			},
+			IsGroup: true,
+			Options: make([]*GroupMultiSelectOption[TValue], len(groupOptions)),
+		}
+		options = append(options, group)
+		for i, groupOption := range groupOptions {
+			option := &GroupMultiSelectOption[TValue]{
+				MultiSelectOption: MultiSelectOption[TValue]{
+					Label:      groupOption.Label,
+					Value:      groupOption.Value,
+					IsSelected: groupOption.IsSelected,
+				},
+			}
+			if value, ok := any(option.Value).(string); ok && value == "" {
+				option.Value = any(option.Label).(TValue)
+			}
+			group.Options[i] = option
+			options = append(options, option)
+		}
+	}
+
+	return options
+}
+
+func mapGroupMultiSelectInitialValue[TValue comparable](value []TValue, options []*GroupMultiSelectOption[TValue]) []TValue {
+	var initialValue []TValue
+
+	if len(value) > 0 {
+		initialValue = value
+	} else {
+		for _, option := range options {
+			if option.IsSelected {
+				initialValue = append(initialValue, option.Value)
+			}
+		}
+	}
+
+	return initialValue
 }

@@ -44,19 +44,24 @@ func NewSelectKeyPrompt[TValue any](params SelectKeyPromptParams[TValue]) *Selec
 		}),
 		Options: params.Options,
 	}
+
 	p.On(KeyEvent, func(args ...any) {
-		key := args[0].(*Key)
-		for i, option := range p.Options {
-			if key.Name == KeyName(option.Key) {
-				p.State = SubmitState
-				p.Value = option.Value
-				p.CursorIndex = i
-				return
-			}
-		}
-		if key.Name == EnterKey && p.State != SubmitState {
-			key.Name = ""
-		}
+		p.handleKeyPress(args[0].(*Key))
 	})
+
 	return &p
+}
+
+func (p *SelectKeyPrompt[TValue]) handleKeyPress(key *Key) {
+	for i, option := range p.Options {
+		if key.Name == KeyName(option.Key) {
+			p.State = SubmitState
+			p.Value = option.Value
+			p.CursorIndex = i
+			return
+		}
+	}
+	if key.Name == EnterKey && p.State != SubmitState {
+		key.Name = ""
+	}
 }
