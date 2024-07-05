@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"os"
 
 	"github.com/Mist3rBru/go-clack/core/validator"
@@ -35,17 +34,8 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate: func(value string) error {
-				var err error
-				if params.Validate != nil {
-					err = params.Validate(value)
-				}
-				if err == nil && p.Required && p.Value == "" {
-					err = errors.New("Value is required! Please enter a value.")
-				}
-				return err
-			},
-			Render: WrapRender[string](&p, params.Render),
+			Validate:     WrapValidateString(params.Validate, &p.Required, "Value is required! Please enter a value."),
+			Render:       WrapRender[string](&p, params.Render),
 		}),
 		Placeholder: params.Placeholder,
 		Required:    params.Required,

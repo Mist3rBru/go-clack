@@ -151,3 +151,29 @@ func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) fu
 		return render(p)
 	}
 }
+
+func WrapValidateSlice[T []E, E any](validate func(value T) error, isRequired *bool, msg string) func(value T) error {
+	return func(value T) error {
+		var err error
+		if validate != nil {
+			err = validate(value)
+		}
+		if err == nil && *isRequired && len(value) == 0 {
+			err = errors.New(msg)
+		}
+		return err
+	}
+}
+
+func WrapValidateString(validate func(value string) error, isRequired *bool, msg string) func(value string) error {
+	return func(value string) error {
+		var err error
+		if validate != nil {
+			err = validate(value)
+		}
+		if err == nil && *isRequired && value == "" {
+			err = errors.New(msg)
+		}
+		return err
+	}
+}

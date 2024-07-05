@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"os"
 	"regexp"
 	"strings"
@@ -42,17 +41,8 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate: func(value string) error {
-				var err error
-				if params.Validate != nil {
-					err = params.Validate(value)
-				}
-				if err == nil && p.Required && p.Value == "" {
-					err = errors.New("Path does not exist! Please enter a valid path.")
-				}
-				return err
-			},
-			Render: WrapRender[string](&p, params.Render),
+			Validate:     WrapValidateString(params.Validate, &p.Required, "Path does not exist! Please enter a valid path."),
+			Render:       WrapRender[string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,

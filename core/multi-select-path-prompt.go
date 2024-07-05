@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"os"
 	"path"
 	"sort"
@@ -46,18 +45,9 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
-			Validate: func(value []string) error {
-				var err error
-				if params.Validate != nil {
-					err = params.Validate(value)
-				}
-				if err == nil && p.Required && len(p.Value) == 0 {
-					err = errors.New("Please select at least one option. Press `space` to select")
-				}
-				return err
-			},
-			CursorIndex: 1,
-			Render:      WrapRender[[]string](&p, params.Render),
+			CursorIndex:  1,
+			Validate:     WrapValidateSlice(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
+			Render:       WrapRender[[]string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
 		Required:    params.Required,
