@@ -495,6 +495,24 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 	return strings.Join(formattedLines, "\r\n")
 }
 
+func (p *Prompt[TValue]) DiffLines(a string, b string) []int {
+	diff := []int{}
+
+	if a == b {
+		return diff
+	}
+
+	aLines := strings.Split(a, "\n")
+	bLines := strings.Split(b, "\n")
+	for i := range max(len(aLines), len(bLines)) {
+		if i >= len(aLines) || i >= len(bLines) || aLines[i] != bLines[i] {
+			diff = append(diff, i)
+		}
+	}
+
+	return diff
+}
+
 func (p *Prompt[TValue]) render() {
 	frame := p.Render(p)
 
@@ -513,7 +531,7 @@ func (p *Prompt[TValue]) render() {
 		return
 	}
 
-	diff := utils.DiffLines(frame, p.Frame)
+	diff := p.DiffLines(frame, p.Frame)
 	diffLineIndex := diff[0]
 	prevFrameLines := strings.Split((p.Frame), "\n")
 

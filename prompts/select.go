@@ -5,8 +5,9 @@ import (
 
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/core/validator"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	"github.com/Mist3rBru/go-clack/prompts/test"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/theme"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -46,13 +47,13 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 				for i, option := range params.Options {
 					var radio, label, hint string
 					if i == p.CursorIndex {
-						radio = picocolors.Green(utils.S_RADIO_ACTIVE)
+						radio = picocolors.Green(symbols.RADIO_ACTIVE)
 						label = option.Label
 						if option.Hint != "" {
 							hint = picocolors.Dim("(" + option.Hint + ")")
 						}
 					} else {
-						radio = picocolors.Dim(utils.S_RADIO_INACTIVE)
+						radio = picocolors.Dim(symbols.RADIO_INACTIVE)
 						label = picocolors.Dim(option.Label)
 					}
 					radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
@@ -60,7 +61,7 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 				value = p.LimitLines(radioOptions, 3)
 			}
 
-			return utils.ApplyTheme(utils.ThemeParams[TValue]{
+			return theme.ApplyTheme(theme.ThemeParams[TValue]{
 				Ctx:             p.Prompt,
 				Message:         params.Message,
 				Value:           params.Options[p.CursorIndex].Label,

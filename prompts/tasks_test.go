@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Mist3rBru/go-clack/prompts"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,9 +59,9 @@ func TestTasksSubmit(t *testing.T) {
 	})
 
 	expectedList := []string{
-		utils.S_STEP_SUBMIT + " Foo\n",
-		utils.S_STEP_SUBMIT + " Bar\n",
-		utils.S_STEP_SUBMIT + " Baz\n",
+		symbols.STEP_SUBMIT + " Foo\n",
+		symbols.STEP_SUBMIT + " Bar\n",
+		symbols.STEP_SUBMIT + " Baz\n",
 	}
 	for _, expected := range expectedList {
 		assert.Equal(t, expected, writer.HaveBeenCalledWith(expected))

@@ -5,8 +5,9 @@ import (
 
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/core/validator"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	"github.com/Mist3rBru/go-clack/prompts/test"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/theme"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -63,22 +64,22 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 				for i, option := range p.Options {
 					var radio, label, hint string
 					if option.IsSelected && i == p.CursorIndex {
-						radio = picocolors.Green(utils.S_CHECKBOX_SELECTED)
+						radio = picocolors.Green(symbols.CHECKBOX_SELECTED)
 						label = option.Label
 						if params.Options[i].Hint != "" {
 							hint = picocolors.Dim("(" + params.Options[i].Hint + ")")
 						}
 					} else if i == p.CursorIndex {
-						radio = picocolors.Green(utils.S_CHECKBOX_ACTIVE)
+						radio = picocolors.Green(symbols.CHECKBOX_ACTIVE)
 						label = option.Label
 						if params.Options[i].Hint != "" {
 							hint = picocolors.Dim("(" + params.Options[i].Hint + ")")
 						}
 					} else if option.IsSelected {
-						radio = picocolors.Green(utils.S_CHECKBOX_SELECTED)
+						radio = picocolors.Green(symbols.CHECKBOX_SELECTED)
 						label = picocolors.Dim(option.Label)
 					} else {
-						radio = picocolors.Dim(utils.S_CHECKBOX_INACTIVE)
+						radio = picocolors.Dim(symbols.CHECKBOX_INACTIVE)
 						label = picocolors.Dim(option.Label)
 					}
 					radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
@@ -86,7 +87,7 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 				value = p.LimitLines(radioOptions, 3)
 			}
 
-			return utils.ApplyTheme(utils.ThemeParams[[]TValue]{
+			return theme.ApplyTheme(theme.ThemeParams[[]TValue]{
 				Ctx:             p.Prompt,
 				Message:         params.Message,
 				Value:           value,

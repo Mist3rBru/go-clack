@@ -1,9 +1,10 @@
-package utils
+package theme
 
 import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -23,13 +24,13 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 	ctx := params.Ctx
 
 	title := strings.Join([]string{
-		picocolors.Gray(S_BAR),
+		picocolors.Gray(symbols.BAR),
 		ctx.FormatLines(strings.Split(params.Message, "\n"), core.FormatLinesOptions{
 			FirstLine: core.FormatLineOptions{
-				Start: SymbolState(ctx.State),
+				Start: symbols.State(ctx.State),
 			},
 			NewLine: core.FormatLineOptions{
-				Start: picocolors.Gray(S_BAR),
+				Start: picocolors.Gray(symbols.BAR),
 			},
 		}),
 	}, "\r\n")
@@ -38,7 +39,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 	case core.ErrorState:
 		value := ctx.FormatLines(strings.Split(params.ValueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Yellow(S_BAR),
+				Start: picocolors.Yellow(symbols.BAR),
 			},
 		})
 		if ctx.Error == "" {
@@ -46,11 +47,11 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		}
 		err := ctx.FormatLines(strings.Split(ctx.Error, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Yellow(S_BAR),
+				Start: picocolors.Yellow(symbols.BAR),
 				Style: picocolors.Yellow,
 			},
 			LastLine: core.FormatLineOptions{
-				Start: picocolors.Yellow(S_BAR_END),
+				Start: picocolors.Yellow(symbols.BAR_END),
 			},
 		})
 		return strings.Join([]string{title, value, err}, "\r\n")
@@ -58,7 +59,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 	case core.CancelState:
 		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Gray(S_BAR),
+				Start: picocolors.Gray(symbols.BAR),
 				Style: func(line string) string {
 					return picocolors.Strikethrough(picocolors.Dim(line))
 				},
@@ -67,26 +68,26 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		if params.Value == "" {
 			return strings.Join([]string{title, value}, "\r\n")
 		}
-		end := picocolors.Gray(S_BAR)
+		end := picocolors.Gray(symbols.BAR)
 		return strings.Join([]string{title, value, end}, "\r\n")
 
 	case core.SubmitState:
 		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Gray(S_BAR),
+				Start: picocolors.Gray(symbols.BAR),
 				Style: picocolors.Dim,
 			},
 		})
 		return strings.Join([]string{title, value}, "\r\n")
 
 	default:
-		start := picocolors.Gray(S_BAR)
+		start := picocolors.Gray(symbols.BAR)
 		title = ctx.FormatLines(strings.Split(params.Message, "\n"), core.FormatLinesOptions{
 			FirstLine: core.FormatLineOptions{
-				Start: SymbolState(ctx.State),
+				Start: symbols.State(ctx.State),
 			},
 			NewLine: core.FormatLineOptions{
-				Start: picocolors.Cyan(S_BAR),
+				Start: picocolors.Cyan(symbols.BAR),
 			},
 		})
 
@@ -98,10 +99,10 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		}
 		value := ctx.FormatLines(strings.Split(valueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Cyan(S_BAR),
+				Start: picocolors.Cyan(symbols.BAR),
 			},
 		})
-		end := picocolors.Cyan(S_BAR_END)
+		end := picocolors.Cyan(symbols.BAR_END)
 
 		return strings.Join([]string{start, title, value, end}, "\r\n")
 	}

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	isunicodesupported "github.com/Mist3rBru/go-clack/third_party/is-unicode-supported"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 	"github.com/Mist3rBru/go-clack/third_party/sisteransi"
@@ -82,7 +82,7 @@ func Spinner(ctx context.Context, options SpinnerOptions) *SpinnerController {
 	return &SpinnerController{
 		Start: func(msg string) {
 			write(sisteransi.HideCursor())
-			write(picocolors.Gray(utils.S_BAR) + "\n")
+			write(picocolors.Gray(symbols.BAR) + "\n")
 
 			frameIndex = 0
 			dotsTimer = 0
@@ -123,11 +123,11 @@ func Spinner(ctx context.Context, options SpinnerOptions) *SpinnerController {
 			var step string
 			switch code {
 			case 0:
-				step = picocolors.Green(utils.S_STEP_SUBMIT)
+				step = picocolors.Green(symbols.STEP_SUBMIT)
 			case 1:
-				step = picocolors.Red(utils.S_STEP_CANCEL)
+				step = picocolors.Red(symbols.STEP_CANCEL)
 			default:
-				step = picocolors.Red(utils.S_STEP_ERROR)
+				step = picocolors.Red(symbols.STEP_ERROR)
 			}
 			if msg != "" {
 				message = parseMessage(msg)

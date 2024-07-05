@@ -3,7 +3,7 @@ package prompts
 import (
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/prompts/test"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/theme"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -38,7 +38,7 @@ func Path(params PathParams) (string, error) {
 			}
 			valueWithCursorAndOptions := p.ValueWithCursor() + hintOptions
 
-			return utils.ApplyTheme(utils.ThemeParams[string]{
+			return theme.ApplyTheme(theme.ThemeParams[string]{
 				Ctx:             p.Prompt,
 				Message:         params.Message,
 				Value:           p.Value,

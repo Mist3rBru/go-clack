@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	coreUtils "github.com/Mist3rBru/go-clack/core/utils"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -21,7 +21,7 @@ func Note(msg string, options NoteOptions) {
 		options.Output = os.Stdout
 	}
 	if options.Title != "" {
-		options.Title = fmt.Sprintf("%s %s ", picocolors.Green(utils.S_STEP_SUBMIT), options.Title)
+		options.Title = fmt.Sprintf("%s %s ", picocolors.Green(symbols.STEP_SUBMIT), options.Title)
 	}
 	titleLength := coreUtils.StrLength(options.Title)
 	largestLineLength := titleLength
@@ -31,9 +31,9 @@ func Note(msg string, options NoteOptions) {
 		largestLineLength = max(coreUtils.StrLength(line), largestLineLength)
 	}
 
-	bar := picocolors.Gray(utils.S_BAR)
-	boxTop := picocolors.Gray(strings.Repeat(utils.S_BAR_H, max(largestLineLength+4-titleLength, 1)))
-	boxTopTight := picocolors.Gray(utils.S_CORNER_TOP_RIGHT)
+	bar := picocolors.Gray(symbols.BAR)
+	boxTop := picocolors.Gray(strings.Repeat(symbols.BAR_H, max(largestLineLength+4-titleLength, 1)))
+	boxTopTight := picocolors.Gray(symbols.CORNER_TOP_RIGHT)
 	boxHeader := strings.Join([]string{bar, options.Title, boxTop, boxTopTight}, "")
 
 	boxLines := make([]string, len(lines))
@@ -43,8 +43,8 @@ func Note(msg string, options NoteOptions) {
 	}
 	boxBody := strings.Join(boxLines, "\r\n")
 
-	boxBottom := strings.Repeat(picocolors.Gray(utils.S_BAR_H), largestLineLength+4)
-	boxBottomRight := picocolors.Gray(utils.S_CORNER_BOTTOM_RIGHT)
+	boxBottom := strings.Repeat(picocolors.Gray(symbols.BAR_H), largestLineLength+4)
+	boxBottomRight := picocolors.Gray(symbols.CORNER_BOTTOM_RIGHT)
 	boxFooter := strings.Join([]string{bar, boxBottom, boxBottomRight}, "")
 
 	box := strings.Join([]string{

@@ -6,7 +6,7 @@ import (
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/prompts/test"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/theme"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -50,7 +50,7 @@ func SelectKey[TValue comparable](params SelectKeyParams[TValue]) (TValue, error
 				value = p.LimitLines(keyOptions, 3)
 			}
 
-			return utils.ApplyTheme(utils.ThemeParams[TValue]{
+			return theme.ApplyTheme(theme.ThemeParams[TValue]{
 				Ctx:             p.Prompt,
 				Message:         params.Message,
 				Value:           params.Options[p.CursorIndex].Label,

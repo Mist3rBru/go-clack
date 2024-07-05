@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core"
+	"github.com/Mist3rBru/go-clack/prompts/symbols"
 	"github.com/Mist3rBru/go-clack/prompts/test"
-	"github.com/Mist3rBru/go-clack/prompts/utils"
+	"github.com/Mist3rBru/go-clack/prompts/theme"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
@@ -41,10 +42,10 @@ func SelectPath(params SelectPathParams) (string, error) {
 						}
 					}
 					if i == p.CursorIndex {
-						radio = picocolors.Green(utils.S_RADIO_ACTIVE)
+						radio = picocolors.Green(symbols.RADIO_ACTIVE)
 						label = option.Name
 					} else {
-						radio = picocolors.Dim(utils.S_RADIO_INACTIVE)
+						radio = picocolors.Dim(symbols.RADIO_INACTIVE)
 						label = picocolors.Dim(option.Name)
 						dir = picocolors.Dim(dir)
 					}
@@ -54,7 +55,7 @@ func SelectPath(params SelectPathParams) (string, error) {
 				value = p.LimitLines(radioOptions, 3)
 			}
 
-			return utils.ApplyTheme(utils.ThemeParams[string]{
+			return theme.ApplyTheme(theme.ThemeParams[string]{
 				Ctx:             p.Prompt,
 				Message:         params.Message,
 				Value:           p.Value,
