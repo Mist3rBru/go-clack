@@ -14,11 +14,11 @@ func TestNoteBox(t *testing.T) {
 
 	assert.Equal(t, strings.Join([]string{
 		"│",
-		"│────────╮",
+		"├────────╮",
 		"│        │",
 		"│  test  │",
 		"│        │",
-		"│────────╯",
+		"├────────╯",
 		"",
 	}, "\r\n"), writer.Data[0])
 }
@@ -29,13 +29,13 @@ func TestNoteBoxMultiline(t *testing.T) {
 
 	assert.Equal(t, strings.Join([]string{
 		"│",
-		"│───────────╮",
+		"├───────────╮",
 		"│           │",
 		"│  test     │",
 		"│  tee      │",
 		"│  foooooo  │",
 		"│           │",
-		"│───────────╯",
+		"├───────────╯",
 		"",
 	}, "\r\n"), writer.Data[0])
 }
@@ -46,11 +46,26 @@ func TestNoteTitle(t *testing.T) {
 
 	assert.Equal(t, strings.Join([]string{
 		"│",
-		"│◇ Title Test ────╮",
+		"◇ Title Test ─────╮",
 		"│                 │",
 		"│  test           │",
 		"│                 │",
-		"│─────────────────╯",
+		"├─────────────────╯",
+		"",
+	}, "\r\n"), writer.Data[0])
+}
+
+func TestNoteSmallTitle(t *testing.T) {
+	writer := &MockWriter{}
+	prompts.Note("test foo bar", prompts.NoteOptions{Output: writer, Title: "Title"})
+
+	assert.Equal(t, strings.Join([]string{
+		"│",
+		"◇ Title ─────────╮",
+		"│                │",
+		"│  test foo bar  │",
+		"│                │",
+		"├────────────────╯",
 		"",
 	}, "\r\n"), writer.Data[0])
 }
@@ -61,13 +76,13 @@ func TestNoteTitleWithMultiline(t *testing.T) {
 
 	assert.Equal(t, strings.Join([]string{
 		"│",
-		"│◇ Title Test ────╮",
+		"◇ Title Test ─────╮",
 		"│                 │",
 		"│  test           │",
 		"│  tee            │",
 		"│  foooooo        │",
 		"│                 │",
-		"│─────────────────╯",
+		"├─────────────────╯",
 		"",
 	}, "\r\n"), writer.Data[0])
 }
