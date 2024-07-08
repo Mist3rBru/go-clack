@@ -1,4 +1,25 @@
 
+<a name="v0.1.9"></a>
+## [v0.1.9](https://github.com/Mist3rBru/go-clack/compare/v0.1.8...v0.1.9) (2024-07-06)
+
+### 🚀 Features
+
+* **core:** add internal validation of essential params
+* **prompts:** add internal validation of essential params
+
+### 🛠️ Refactors
+
+* move utils to dedicated modules
+* **core:** simplify prompt constructors
+* **core:** add WrapValidate helper function
+* **core:** add WrapRender helper function
+* **prompts:** connect note borders
+
+### 🏡 Chore
+
+* update changelog
+
+
 <a name="v0.1.8"></a>
 ## [v0.1.8](https://github.com/Mist3rBru/go-clack/compare/v0.1.7...v0.1.8) (2024-07-03)
 
