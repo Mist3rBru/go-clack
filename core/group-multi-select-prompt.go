@@ -135,7 +135,7 @@ func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
 }
 
 func mapGroupMultiSelectOptions[TValue comparable](groups map[string][]MultiSelectOption[TValue]) []*GroupMultiSelectOption[TValue] {
-	options := []*GroupMultiSelectOption[TValue](nil)
+	var options []*GroupMultiSelectOption[TValue]
 
 	for groupName, groupOptions := range groups {
 		group := &GroupMultiSelectOption[TValue]{

@@ -75,10 +75,12 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	}
 }
 
+// On registers a listener for the specified event.
 func (p *Prompt[TValue]) On(event Event, listener Listener) {
 	p.listeners[event] = append(p.listeners[event], listener)
 }
 
+// Once registers a one-time listener for the specified event.
 func (p *Prompt[TValue]) Once(event Event, listener Listener) {
 	var onceListener Listener
 	onceListener = func(args ...any) {
@@ -88,6 +90,7 @@ func (p *Prompt[TValue]) Once(event Event, listener Listener) {
 	p.On(event, onceListener)
 }
 
+// Off removes a listener for the specified event.
 func (p *Prompt[TValue]) Off(event Event, listener Listener) {
 	listeners := p.listeners[event]
 	for i, l := range listeners {
@@ -98,13 +101,14 @@ func (p *Prompt[TValue]) Off(event Event, listener Listener) {
 	}
 }
 
+// Emit triggers the specified event with the given arguments.
 func (p *Prompt[TValue]) Emit(event Event, args ...any) {
-	listeners := append([]Listener{}, p.listeners[event]...)
-	for _, listener := range listeners {
+	for _, listener := range p.listeners[event] {
 		listener(args...)
 	}
 }
 
+// ParseKey parses a rune into a Key.
 func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	// TODO: parse Backtab(shift+tab) and other variations of shift and ctrl
 	switch r {
@@ -149,6 +153,7 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	}
 }
 
+// PressKey handles key press events and updates the state of the prompt.
 func (p *Prompt[TValue]) PressKey(key *Key) {
 	if p.State == ErrorState || p.State == InitialState {
 		p.State = ActiveState
@@ -178,6 +183,7 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 	p.Emit(Event(p.State), p.Value)
 }
 
+// TrackKeyValue updates the string value and cursor position based on key presses.
 func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 	value := *valuePtr
 	switch key.Name {
@@ -214,10 +220,7 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
 	*valuePtr = value
 }
 
-func (p *Prompt[TValue]) write(str string) {
-	p.output.WriteString(str)
-}
-
+// LimitLines limits the number of lines to fit within the terminal size.
 func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 	_, maxRows, err := term.GetSize(int(p.output.Fd()))
 	if err != nil {
@@ -273,6 +276,7 @@ type FormatLinesOptions struct {
 	MaxWidth  *int
 }
 
+// getOptionOrDefault retrieves the option for the given line and option type, or returns a default value.
 func getOptionOrDefault(line LineOption, opt string, options FormatLinesOptions) string {
 	switch line {
 	case FirstLine:
@@ -390,6 +394,7 @@ func mergeOptions(primary, secondary FormatLineOptions) FormatLineOptions {
 	}
 }
 
+// FormatLines applies styles to multiple lines based on their type and the provided options.
 func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions) string {
 	terminalWidth, _, err := term.GetSize(int(p.output.Fd()))
 	if err != nil {
@@ -495,17 +500,18 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 	return strings.Join(formattedLines, "\r\n")
 }
 
-func (p *Prompt[TValue]) DiffLines(a string, b string) []int {
-	diff := []int{}
+// DiffLines calculates the difference between an old and a new frame.
+func (p *Prompt[TValue]) DiffLines(oldFrame, newFrame string) []int {
+	var diff []int
 
-	if a == b {
+	if oldFrame == newFrame {
 		return diff
 	}
 
-	aLines := strings.Split(a, "\n")
-	bLines := strings.Split(b, "\n")
-	for i := range max(len(aLines), len(bLines)) {
-		if i >= len(aLines) || i >= len(bLines) || aLines[i] != bLines[i] {
+	oldLines := strings.Split(oldFrame, "\n")
+	newLines := strings.Split(newFrame, "\n")
+	for i := range max(len(oldLines), len(newLines)) {
+		if i >= len(oldLines) || i >= len(newLines) || oldLines[i] != newLines[i] {
 			diff = append(diff, i)
 		}
 	}
@@ -513,6 +519,7 @@ func (p *Prompt[TValue]) DiffLines(a string, b string) []int {
 	return diff
 }
 
+// render renders a new frame to the output.
 func (p *Prompt[TValue]) render() {
 	frame := p.Render(p)
 
@@ -521,8 +528,8 @@ func (p *Prompt[TValue]) render() {
 	}
 
 	if p.State == InitialState {
-		p.write(sisteransi.HideCursor())
-		p.write(frame)
+		p.output.WriteString(sisteransi.HideCursor())
+		p.output.WriteString(frame)
 		p.Frame = frame
 		return
 	}
@@ -536,25 +543,26 @@ func (p *Prompt[TValue]) render() {
 	prevFrameLines := strings.Split((p.Frame), "\n")
 
 	// Move to first diff line
-	p.write(sisteransi.MoveCursor(-(len(prevFrameLines) - 1), -999))
-	p.write(sisteransi.MoveCursor(diffLineIndex, 0))
+	p.output.WriteString(sisteransi.MoveCursor(-(len(prevFrameLines) - 1), -999))
+	p.output.WriteString(sisteransi.MoveCursor(diffLineIndex, 0))
 
 	if len(diff) == 1 {
-		p.write(sisteransi.EraseCurrentLine())
+		p.output.WriteString(sisteransi.EraseCurrentLine())
 		lines := strings.Split(frame, "\n")
-		p.write(lines[diffLineIndex])
+		p.output.WriteString(lines[diffLineIndex])
 		p.Frame = frame
-		p.write(sisteransi.MoveCursorDown(len(lines) - diffLineIndex - 1))
+		p.output.WriteString(sisteransi.MoveCursorDown(len(lines) - diffLineIndex - 1))
 		return
 	}
 
-	p.write(sisteransi.EraseDown())
+	p.output.WriteString(sisteransi.EraseDown())
 	lines := strings.Split(frame, "\n")
 	newLines := lines[diffLineIndex:]
-	p.write(strings.Join(newLines, "\n"))
+	p.output.WriteString(strings.Join(newLines, "\n"))
 	p.Frame = frame
 }
 
+// Run runs the prompt and processes input.
 func (p *Prompt[TValue]) Run() (TValue, error) {
 	if flag.Lookup("test.v") == nil {
 		oldState, err := term.MakeRaw(int(p.input.Fd()))
@@ -566,8 +574,8 @@ func (p *Prompt[TValue]) Run() (TValue, error) {
 
 	done := make(chan struct{})
 	closeCb := func(args ...any) {
-		p.write(sisteransi.ShowCursor())
-		p.write("\r\n")
+		p.output.WriteString(sisteransi.ShowCursor())
+		p.output.WriteString("\r\n")
 		close(done)
 	}
 	p.Once(SubmitEvent, closeCb)
