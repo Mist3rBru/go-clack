@@ -1,7 +1,6 @@
 package prompts
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"math"
@@ -33,12 +32,12 @@ type SpinnerOptions struct {
 
 type SpinnerController struct {
 	Start   func(msg string)
-	Stop    func(msg string, code int)
 	Message func(msg string)
+	Stop    func(msg string, code int)
 }
 
-func Spinner(ctx context.Context, options SpinnerOptions) *SpinnerController {
-	_ctx, cancel := context.WithCancel(ctx)
+func Spinner(options SpinnerOptions) *SpinnerController {
+	done := make(chan any)
 
 	var timer Timer
 	if options.Timer == nil {
@@ -91,7 +90,7 @@ func Spinner(ctx context.Context, options SpinnerOptions) *SpinnerController {
 			go func() {
 				for {
 					select {
-					case <-_ctx.Done():
+					case <-done:
 						return
 					default:
 						clearPrevMessage()
@@ -118,7 +117,7 @@ func Spinner(ctx context.Context, options SpinnerOptions) *SpinnerController {
 			message = parseMessage(msg)
 		},
 		Stop: func(msg string, code int) {
-			cancel()
+			close(done)
 			clearPrevMessage()
 			var step string
 			switch code {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 func SpinnerExample() {
 	prompts.Intro("spinner start...")
 
-	s := prompts.Spinner(context.Background(), prompts.SpinnerOptions{})
+	s := prompts.Spinner(prompts.SpinnerOptions{})
 	total := 10000
 	progress := 0
 

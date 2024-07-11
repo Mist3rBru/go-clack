@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -79,7 +78,7 @@ func BasicExample() {
 	HandleCancel(err)
 
 	if install {
-		s := prompts.Spinner(context.Background(), prompts.SpinnerOptions{})
+		s := prompts.Spinner(prompts.SpinnerOptions{})
 		s.Start("Installing via pnpm")
 		time.Sleep(3 * time.Second)
 		s.Stop("Installed via pnpm", 0)

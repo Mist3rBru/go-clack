@@ -1,7 +1,6 @@
 package prompts_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -20,7 +19,7 @@ func TestTasksStart(t *testing.T) {
 	timer := &MockTimer{autoResolve: true}
 	writer := &MockWriter{}
 
-	prompts.Tasks(context.Background(), []prompts.Task{
+	prompts.Tasks([]prompts.Task{
 		{Title: "Foo", Task: task},
 		{Title: "Bar", Task: task},
 		{Title: "Baz", Task: task},
@@ -49,7 +48,7 @@ func TestTasksSubmit(t *testing.T) {
 	timer := &MockTimer{autoResolve: true}
 	writer := &MockWriter{}
 
-	prompts.Tasks(context.Background(), []prompts.Task{
+	prompts.Tasks([]prompts.Task{
 		{Title: "Foo", Task: task},
 		{Title: "Bar", Task: task},
 		{Title: "Baz", Task: task},
@@ -77,10 +76,7 @@ func TestTasksUpdateMessage(t *testing.T) {
 	timer := &MockTimer{autoResolve: false}
 	writer := &MockWriter{}
 
-	prompts.Tasks(
-		context.Background(),
-		[]prompts.Task{{Title: "Foo", Task: task}},
-		prompts.SpinnerOptions{Timer: timer, Output: writer})
+	prompts.Tasks([]prompts.Task{{Title: "Foo", Task: task}}, prompts.SpinnerOptions{Timer: timer, Output: writer})
 	time.Sleep(time.Millisecond)
 	timer.ResolveAll()
 	time.Sleep(time.Millisecond)

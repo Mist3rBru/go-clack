@@ -1,7 +1,6 @@
 package prompts_test
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -60,7 +59,7 @@ func (w *MockWriter) HaveBeenCalledWith(str string) string {
 func runSpinner() (*prompts.SpinnerController, *MockTimer, *MockWriter) {
 	timer := &MockTimer{}
 	writer := &MockWriter{}
-	s := prompts.Spinner(context.TODO(), prompts.SpinnerOptions{
+	s := prompts.Spinner(prompts.SpinnerOptions{
 		Timer:  timer,
 		Output: writer,
 	})
