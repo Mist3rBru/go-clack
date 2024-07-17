@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"reflect"
 
 	"github.com/Mist3rBru/go-clack/core/internals"
 )
@@ -143,33 +144,22 @@ func (p *PathNode) MapChildren() []*PathNode {
 	return children
 }
 
-func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) func(_ *Prompt[T]) string {
-	return func(_ *Prompt[T]) string {
+func WrapRender[TValue any, TPrompt any](p TPrompt, render func(p TPrompt) string) func(_ *Prompt[TValue]) string {
+	return func(_ *Prompt[TValue]) string {
 		return render(p)
 	}
 }
 
-func WrapValidateSlice[T []E, E any](validate func(value T) error, isRequired *bool, msg string) func(value T) error {
-	return func(value T) error {
+func WrapValidate[TValue any](validate func(value TValue) error, isRequired *bool, msg string) func(value TValue) error {
+	return func(value TValue) error {
 		var err error
 		if validate != nil {
 			err = validate(value)
 		}
-		if err == nil && *isRequired && len(value) == 0 {
-			err = errors.New(msg)
-		}
-		return err
-	}
-}
-
-func WrapValidateString(validate func(value string) error, isRequired *bool, msg string) func(value string) error {
-	return func(value string) error {
-		var err error
-		if validate != nil {
-			err = validate(value)
-		}
-		if err == nil && *isRequired && value == "" {
-			err = errors.New(msg)
+		if err == nil && *isRequired {
+			if v := reflect.ValueOf(value); v.Len() == 0 {
+				err = errors.New(msg)
+			}
 		}
 		return err
 	}

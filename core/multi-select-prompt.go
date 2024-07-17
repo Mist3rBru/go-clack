@@ -40,7 +40,7 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: mapMultiSelectInitialValue(params.InitialValue, params.Options),
-			Validate:     WrapValidateSlice(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
 			Render:       WrapRender[[]TValue](&p, params.Render),
 		}),
 		Options:  params.Options,

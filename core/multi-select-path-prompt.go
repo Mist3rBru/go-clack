@@ -47,7 +47,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  1,
-			Validate:     WrapValidateSlice(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
 			Render:       WrapRender[[]string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
