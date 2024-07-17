@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 	"path"
+
+	"github.com/Mist3rBru/go-clack/core/internals"
 )
 
 type SelectOption[TValue comparable] struct {
@@ -88,6 +90,10 @@ type PathNodeOptions struct {
 }
 
 func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
+	if options.FileSystem == nil {
+		options.FileSystem = internals.OSFileSystem{}
+	}
+
 	root := &PathNode{
 		Index:    0,
 		Depth:    0,
