@@ -68,16 +68,6 @@ type FileSystem interface {
 	ReadDir(name string) ([]os.DirEntry, error)
 }
 
-type OSFileSystem struct{}
-
-func (fs OSFileSystem) Getwd() (string, error) {
-	return os.Getwd()
-}
-
-func (fs OSFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
-	return os.ReadDir(name)
-}
-
 type PathNode struct {
 	Index    int
 	Depth    int

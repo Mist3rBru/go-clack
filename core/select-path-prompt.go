@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/Mist3rBru/go-clack/core/internals"
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/core/validator"
 )
@@ -31,7 +32,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 	v.ValidateRender(params.Render)
 
 	if params.FileSystem == nil {
-		params.FileSystem = OSFileSystem{}
+		params.FileSystem = internals.OSFileSystem{}
 	}
 
 	var p SelectPathPrompt
