@@ -71,11 +71,13 @@ type FileSystem interface {
 }
 
 type PathNode struct {
-	Index    int
-	Depth    int
-	Path     string
-	Name     string
-	Parent   *PathNode
+	Index  int
+	Depth  int
+	Path   string
+	Name   string
+	Parent *PathNode
+
+	IsDir    bool
 	Children []*PathNode
 
 	IsSelected bool
@@ -95,11 +97,9 @@ func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
 	}
 
 	root := &PathNode{
-		Index:    0,
-		Depth:    0,
-		Path:     rootPath,
-		Name:     rootPath,
-		Children: []*PathNode{},
+		Path:  rootPath,
+		Name:  rootPath,
+		IsDir: true,
 
 		OnlyShowDir: options.OnlyShowDir,
 		FileSystem:  options.FileSystem,
@@ -109,7 +109,7 @@ func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
 }
 
 func (p *PathNode) MapChildren() []*PathNode {
-	if p.Children == nil {
+	if !p.IsDir {
 		return nil
 	}
 	if len(p.Children) > 0 {
@@ -135,7 +135,8 @@ func (p *PathNode) MapChildren() []*PathNode {
 			OnlyShowDir: p.OnlyShowDir,
 		}
 		if entry.IsDir() {
-			child.Children = []*PathNode{}
+			child.IsDir = true
+			child.Children = []*PathNode(nil)
 		}
 		children = append(children, child)
 	}

@@ -84,7 +84,7 @@ func (p *MultiSelectPathPrompt) Options() []*PathNode {
 	var traverse func(node *PathNode)
 	traverse = func(node *PathNode) {
 		options = append(options, node)
-		if node.Children == nil {
+		if !node.IsDir {
 			return
 		}
 		for _, child := range node.Children {
@@ -182,7 +182,7 @@ func (p *MultiSelectPathPrompt) mapSelectedOptions(node *PathNode) {
 				break
 			}
 		}
-		if node.Children == nil {
+		if !node.IsDir {
 			return
 		}
 		for _, child := range node.Children {
