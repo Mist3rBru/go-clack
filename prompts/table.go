@@ -48,11 +48,12 @@ func Table(rows [][]string, options TableOptions) {
 		}
 	}
 
-	var table string
-	separator := picocolors.Dim(symbols.BAR)
+	table := ""
+	colSeparator := picocolors.Dim(symbols.BAR)
 
-	for _, row := range rows {
+	for i, row := range rows {
 		var tableRow []string
+		var tableRowSeparator []string
 
 		for i, col := range row {
 			remainingWidth := sizes[i] - utils.StrLength(col)
@@ -75,10 +76,22 @@ func Table(rows [][]string, options TableOptions) {
 				tableCol = col + spacing
 			}
 
+			tableCol = fmt.Sprint(" ", tableCol, " ")
 			tableRow = append(tableRow, tableCol)
+			tableRowSeparator = append(tableRowSeparator, strings.Repeat(symbols.BAR_H, utils.StrLength(tableCol)))
 		}
 
-		table += fmt.Sprint(separator, " ", strings.Join(tableRow, " "+separator+" "), " ", separator, "\n")
+		if i == 0 {
+			table += picocolors.Dim(fmt.Sprint(symbols.CONNECT_TOP_LEFT, strings.Join(tableRowSeparator, symbols.CONNECT_TOP), symbols.CONNECT_TOP_RIGHT, "\n"))
+		}
+
+		table += fmt.Sprint(colSeparator, strings.Join(tableRow, colSeparator), colSeparator, "\n")
+
+		if i+1 < len(rows) {
+			table += picocolors.Dim(fmt.Sprint(symbols.CONNECT_LEFT, strings.Join(tableRowSeparator, symbols.CONNECT_CENTER), symbols.CONNECT_RIGHT, "\n"))
+		} else {
+			table += picocolors.Dim(fmt.Sprint(symbols.CONNECT_BOTTOM_LEFT, strings.Join(tableRowSeparator, symbols.CONNECT_BOTTOM), symbols.CONNECT_BOTTOM_RIGHT, "\n"))
+		}
 	}
 
 	options.Output.Write([]byte(table))
