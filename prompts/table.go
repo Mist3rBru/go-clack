@@ -32,18 +32,16 @@ func Table(rows [][]string, options TableOptions) {
 		options.Output = os.Stdout
 	}
 
-	var sizes []int
+	colWidths := make([]int, len(rows[0]))
 
 	for _, row := range rows {
 		for i, col := range row {
 			colLength := len(col)
 
-			if i >= len(sizes) || sizes[i] == 0 || colLength > sizes[i] {
-				if i < len(sizes) {
-					sizes[i] = colLength
-				} else {
-					sizes = append(sizes, colLength)
-				}
+			if i >= len(colWidths) {
+				colWidths = append(colWidths, colLength)
+			} else if colLength > colWidths[i] {
+				colWidths[i] = colLength
 			}
 		}
 	}
@@ -55,18 +53,19 @@ func Table(rows [][]string, options TableOptions) {
 		var tableRow []string
 		var tableRowSeparator []string
 
-		for i, col := range row {
-			remainingWidth := sizes[i] - utils.StrLength(col)
-			spacing := strings.Repeat(" ", max(remainingWidth, 0))
+		for j, col := range row {
+			colWith := colWidths[j]
+			remainingColWidth := colWith - utils.StrLength(col)
+			spacing := strings.Repeat(" ", max(remainingColWidth, 0))
 
 			var tableCol string
 
-			switch options.Align[i] {
+			switch options.Align[j] {
 			case TableAlignCenter:
 				tableCol = fmt.Sprint(
-					strings.Repeat(" ", (remainingWidth+1)/2),
+					strings.Repeat(" ", (remainingColWidth+1)/2),
 					col,
-					strings.Repeat(" ", (remainingWidth)/2),
+					strings.Repeat(" ", (remainingColWidth)/2),
 				)
 
 			case TableAlignRight:
@@ -76,9 +75,8 @@ func Table(rows [][]string, options TableOptions) {
 				tableCol = col + spacing
 			}
 
-			tableCol = fmt.Sprint(" ", tableCol, " ")
-			tableRow = append(tableRow, tableCol)
-			tableRowSeparator = append(tableRowSeparator, strings.Repeat(symbols.BAR_H, utils.StrLength(tableCol)))
+			tableRow = append(tableRow, " "+tableCol+" ")
+			tableRowSeparator = append(tableRowSeparator, strings.Repeat(symbols.BAR_H, colWith+2))
 		}
 
 		if i == 0 {
