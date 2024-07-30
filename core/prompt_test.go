@@ -107,16 +107,15 @@ func TestTrackValue(t *testing.T) {
 	assert.Equal(t, "", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.TrackKeyValue(&core.Key{Char: "a"}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Char: "a"}, "", 0)
 	assert.Equal(t, "a", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
-	p.TrackKeyValue(&core.Key{Char: "b"}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Char: "b"}, "a", 1)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
-	p.CursorIndex = 1
-	p.TrackKeyValue(&core.Key{Char: "c"}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Char: "c"}, "ab", 1)
 	assert.Equal(t, "acb", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 }
@@ -124,61 +123,41 @@ func TestTrackValue(t *testing.T) {
 func TestTrackCursor(t *testing.T) {
 	p := newPrompt()
 
-	p.Value = "abc"
-	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.HomeKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.HomeKey}, "abc", 3)
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.EndKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.EndKey}, "abc", 0)
 	assert.Equal(t, 3, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.LeftKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.LeftKey}, "abc", 3)
 	assert.Equal(t, 2, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.LeftKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.LeftKey}, "abc", 0)
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 2
-	p.TrackKeyValue(&core.Key{Name: core.RightKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.RightKey}, "abc", 2)
 	assert.Equal(t, 3, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.RightKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.RightKey}, "abc", 3)
 	assert.Equal(t, 3, p.CursorIndex)
 }
 
 func TestTrackBackspace(t *testing.T) {
 	p := newPrompt()
 
-	p.Value = "abc"
-	p.CursorIndex = 3
-	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, "abc", 3)
 	assert.Equal(t, "ab", p.Value)
 	assert.Equal(t, 2, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 2
-	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, "abc", 2)
 	assert.Equal(t, "ac", p.Value)
 	assert.Equal(t, 1, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 1
-	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, "abc", 1)
 	assert.Equal(t, "bc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 
-	p.Value = "abc"
-	p.CursorIndex = 0
-	p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(&core.Key{Name: core.BackspaceKey}, "abc", 0)
 	assert.Equal(t, "abc", p.Value)
 	assert.Equal(t, 0, p.CursorIndex)
 }

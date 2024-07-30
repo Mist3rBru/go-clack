@@ -184,40 +184,39 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 }
 
 // TrackKeyValue updates the string value and cursor position based on key presses.
-func (p *Prompt[TValue]) TrackKeyValue(key *Key, valuePtr *string) {
-	value := *valuePtr
+func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string, cursorIndex int) (string, int) {
 	switch key.Name {
 	case BackspaceKey:
-		if p.CursorIndex > 0 {
-			if p.CursorIndex == len(value) {
-				p.CursorIndex--
-				value = value[0:p.CursorIndex]
+		if cursorIndex > 0 {
+			if cursorIndex == len(value) {
+				cursorIndex--
+				value = value[0:cursorIndex]
 			} else {
-				p.CursorIndex--
-				value = value[0:p.CursorIndex] + value[p.CursorIndex+1:]
+				cursorIndex--
+				value = value[0:cursorIndex] + value[cursorIndex+1:]
 			}
 		}
 	case HomeKey:
-		p.CursorIndex = 0
+		cursorIndex = 0
 	case EndKey:
-		p.CursorIndex = len(value)
+		cursorIndex = len(value)
 	case LeftKey:
-		if p.CursorIndex == 0 {
+		if cursorIndex == 0 {
 			break
 		}
-		p.CursorIndex--
+		cursorIndex--
 	case RightKey:
-		if p.CursorIndex < len(value) {
-			p.CursorIndex++
+		if cursorIndex < len(value) {
+			cursorIndex++
 		}
 	default:
 		if len(key.Char) == 1 {
-			value = value[0:p.CursorIndex] + key.Char + value[p.CursorIndex:]
-			p.CursorIndex++
+			value = value[0:cursorIndex] + key.Char + value[cursorIndex:]
+			cursorIndex++
 		}
 	}
 
-	*valuePtr = value
+	return value, cursorIndex
 }
 
 // LimitLines limits the number of lines to fit within the terminal size.
@@ -545,16 +544,6 @@ func (p *Prompt[TValue]) render() {
 	// Move to first diff line
 	p.output.WriteString(sisteransi.MoveCursor(-(len(prevFrameLines) - 1), -999))
 	p.output.WriteString(sisteransi.MoveCursor(diffLineIndex, 0))
-
-	if len(diff) == 1 {
-		p.output.WriteString(sisteransi.EraseCurrentLine())
-		lines := strings.Split(frame, "\n")
-		p.output.WriteString(lines[diffLineIndex])
-		p.Frame = frame
-		p.output.WriteString(sisteransi.MoveCursorDown(len(lines) - diffLineIndex - 1))
-		return
-	}
-
 	p.output.WriteString(sisteransi.EraseDown())
 	lines := strings.Split(frame, "\n")
 	newLines := lines[diffLineIndex:]

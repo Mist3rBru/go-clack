@@ -53,7 +53,7 @@ func (p *TextPrompt) handleKeyPress(key *Key) {
 		p.Value = p.Placeholder
 		p.CursorIndex = len(p.Placeholder)
 	} else {
-		p.TrackKeyValue(key, &p.Value)
+		p.Value, p.CursorIndex = p.TrackKeyValue(key, p.Value, p.CursorIndex)
 	}
 }
 

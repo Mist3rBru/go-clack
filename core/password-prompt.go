@@ -40,7 +40,7 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 	}
 
 	p.On(KeyEvent, func(args ...any) {
-		p.TrackKeyValue(args[0].(*Key), &p.Value)
+		p.Value, p.CursorIndex = p.TrackKeyValue(args[0].(*Key), p.Value, p.CursorIndex)
 	})
 
 	return &p

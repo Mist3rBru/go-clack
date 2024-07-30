@@ -157,7 +157,7 @@ func (p *PathPrompt) tabComplete() {
 }
 
 func (p *PathPrompt) handleKeyPress(key *Key) {
-	p.TrackKeyValue(key, &p.Value)
+	p.Value, p.CursorIndex = p.TrackKeyValue(key, p.Value, p.CursorIndex)
 	if key.Name == RightKey && p.CursorIndex >= len(p.Value) {
 		p.completeValue()
 	} else if key.Name == TabKey {
