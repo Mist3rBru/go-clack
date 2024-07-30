@@ -44,7 +44,7 @@ func NewGroupMultiSelectPrompt[TValue comparable](params GroupMultiSelectPromptP
 			Input:        params.Input,
 			Output:       params.Output,
 			InitialValue: mapGroupMultiSelectInitialValue(params.InitialValue, options),
-			Validate:     WrapValidateSlice(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
 			Render:       WrapRender[[]TValue](&p, params.Render),
 		}),
 		Options:        options,

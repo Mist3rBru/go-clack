@@ -33,7 +33,7 @@ func NewPasswordPrompt(params PasswordPromptParams) *PasswordPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate:     WrapValidateString(params.Validate, &p.Required, "Password is required! Please enter a value."),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Password is required! Please enter a value."),
 			Render:       WrapRender[string](&p, params.Render),
 		}),
 		Required: params.Required,

@@ -50,7 +50,7 @@ func TestSelectPathEnterDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
-		if node.Children != nil {
+		if node.IsDir {
 			p.CurrentOption = node
 			break
 		}
@@ -65,7 +65,7 @@ func TestSelectPathEnterNonDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
-		if node.Children == nil {
+		if !node.IsDir {
 			p.CurrentOption = node
 			break
 		}
@@ -80,7 +80,7 @@ func TestSelectPathExitDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
-		if node.Children != nil {
+		if node.IsDir {
 			p.CurrentOption = node
 			break
 		}

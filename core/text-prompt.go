@@ -34,7 +34,7 @@ func NewTextPrompt(params TextPromptParams) *TextPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate:     WrapValidateString(params.Validate, &p.Required, "Value is required! Please enter a value."),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Value is required! Please enter a value."),
 			Render:       WrapRender[string](&p, params.Render),
 		}),
 		Placeholder: params.Placeholder,

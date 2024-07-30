@@ -5,6 +5,7 @@ import (
 	"path"
 	"sort"
 
+	"github.com/Mist3rBru/go-clack/core/internals"
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/core/validator"
 )
@@ -36,7 +37,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 	v.ValidateRender(params.Render)
 
 	if params.FileSystem == nil {
-		params.FileSystem = OSFileSystem{}
+		params.FileSystem = internals.OSFileSystem{}
 	}
 
 	var p MultiSelectPathPrompt
@@ -46,7 +47,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  1,
-			Validate:     WrapValidateSlice(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
 			Render:       WrapRender[[]string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
@@ -167,7 +168,7 @@ func (p *MultiSelectPathPrompt) mapSelectedOptions(node *PathNode) {
 				break
 			}
 		}
-		if node.Children == nil {
+		if !node.IsDir {
 			return
 		}
 		for _, child := range node.Children {

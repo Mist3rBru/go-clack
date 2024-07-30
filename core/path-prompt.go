@@ -41,7 +41,7 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 			Output:       params.Output,
 			InitialValue: params.InitialValue,
 			CursorIndex:  len(params.InitialValue),
-			Validate:     WrapValidateString(params.Validate, &p.Required, "Path does not exist! Please enter a valid path."),
+			Validate:     WrapValidate(params.Validate, &p.Required, "Path does not exist! Please enter a valid path."),
 			Render:       WrapRender[string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,

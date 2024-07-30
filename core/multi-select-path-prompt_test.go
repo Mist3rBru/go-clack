@@ -62,7 +62,7 @@ func TestMultiSelectPathEnterDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
-		if node.Children != nil {
+		if node.IsDir {
 			p.CurrentOption = node
 			break
 		}
@@ -77,7 +77,7 @@ func TestMultiSelectPathEnterNonDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
-		if node.Children == nil {
+		if !node.IsDir {
 			p.CurrentOption = node
 			break
 		}
@@ -92,7 +92,7 @@ func TestMultiSelectPathExitDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
 	for _, node := range p.CurrentLayer {
-		if node.Children != nil {
+		if node.IsDir {
 			p.CurrentOption = node
 			break
 		}

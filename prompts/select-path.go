@@ -34,7 +34,7 @@ func SelectPath(params SelectPathParams) (string, error) {
 				radioOptions := make([]string, len(options))
 				for i, option := range options {
 					var radio, label, dir string
-					if option.Children != nil {
+					if option.IsDir {
 						if len(option.Children) == 0 {
 							dir = ">"
 						} else {

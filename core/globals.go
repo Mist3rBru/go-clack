@@ -4,6 +4,9 @@ import (
 	"errors"
 	"os"
 	"path"
+	"reflect"
+
+	"github.com/Mist3rBru/go-clack/core/internals"
 )
 
 type SelectOption[TValue comparable] struct {
@@ -68,22 +71,14 @@ type FileSystem interface {
 	ReadDir(name string) ([]os.DirEntry, error)
 }
 
-type OSFileSystem struct{}
-
-func (fs OSFileSystem) Getwd() (string, error) {
-	return os.Getwd()
-}
-
-func (fs OSFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
-	return os.ReadDir(name)
-}
-
 type PathNode struct {
-	Index    int
-	Depth    int
-	Path     string
-	Name     string
-	Parent   *PathNode
+	Index  int
+	Depth  int
+	Path   string
+	Name   string
+	Parent *PathNode
+
+	IsDir    bool
 	Children []*PathNode
 
 	IsSelected bool
@@ -98,12 +93,14 @@ type PathNodeOptions struct {
 }
 
 func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
+	if options.FileSystem == nil {
+		options.FileSystem = internals.OSFileSystem{}
+	}
+
 	root := &PathNode{
-		Index:    0,
-		Depth:    0,
-		Path:     rootPath,
-		Name:     rootPath,
-		Children: []*PathNode{},
+		Path:  rootPath,
+		Name:  rootPath,
+		IsDir: true,
 
 		OnlyShowDir: options.OnlyShowDir,
 		FileSystem:  options.FileSystem,
@@ -113,7 +110,7 @@ func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
 }
 
 func (p *PathNode) MapChildren() []*PathNode {
-	if p.Children == nil {
+	if !p.IsDir {
 		return nil
 	}
 	if len(p.Children) > 0 {
@@ -139,7 +136,8 @@ func (p *PathNode) MapChildren() []*PathNode {
 			OnlyShowDir: p.OnlyShowDir,
 		}
 		if entry.IsDir() {
-			child.Children = []*PathNode{}
+			child.IsDir = true
+			child.Children = []*PathNode(nil)
 		}
 		children = append(children, child)
 	}
@@ -152,7 +150,7 @@ func (p *PathNode) Flat() []*PathNode {
 	var traverse func(node *PathNode)
 	traverse = func(node *PathNode) {
 		options = append(options, node)
-		if node.Children == nil {
+		if !node.IsDir {
 			return
 		}
 		for _, child := range node.Children {
@@ -170,27 +168,16 @@ func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) fu
 	}
 }
 
-func WrapValidateSlice[T []E, E any](validate func(value T) error, isRequired *bool, msg string) func(value T) error {
-	return func(value T) error {
+func WrapValidate[TValue any](validate func(value TValue) error, isRequired *bool, msg string) func(value TValue) error {
+	return func(value TValue) error {
 		var err error
 		if validate != nil {
 			err = validate(value)
 		}
-		if err == nil && *isRequired && len(value) == 0 {
-			err = errors.New(msg)
-		}
-		return err
-	}
-}
-
-func WrapValidateString(validate func(value string) error, isRequired *bool, msg string) func(value string) error {
-	return func(value string) error {
-		var err error
-		if validate != nil {
-			err = validate(value)
-		}
-		if err == nil && *isRequired && value == "" {
-			err = errors.New(msg)
+		if err == nil && *isRequired {
+			if v := reflect.ValueOf(value); v.Len() == 0 {
+				err = errors.New(msg)
+			}
 		}
 		return err
 	}
