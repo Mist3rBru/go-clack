@@ -71,7 +71,7 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 
 func (p *SelectPathPrompt) cursorIndex() int {
 	for i, option := range p.Options() {
-		if option.Path == p.CurrentOption.Path {
+		if option.IsEqual(p.CurrentOption) {
 			return i
 		}
 	}
@@ -79,7 +79,7 @@ func (p *SelectPathPrompt) cursorIndex() int {
 }
 
 func (p *SelectPathPrompt) exitChildren() {
-	if p.CurrentOption.Path == p.Root.Path {
+	if p.CurrentOption.IsEqual(p.Root) {
 		p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
 			FileSystem:  p.FileSystem,
@@ -88,7 +88,7 @@ func (p *SelectPathPrompt) exitChildren() {
 		p.CurrentOption = p.Root
 		return
 	}
-	if p.CurrentOption.Parent.Path == p.Root.Path {
+	if p.CurrentOption.Parent.IsEqual(p.Root) {
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
 		return

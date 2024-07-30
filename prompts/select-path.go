@@ -41,7 +41,7 @@ func SelectPath(params SelectPathParams) (string, error) {
 							dir = "v"
 						}
 					}
-					if i == p.CursorIndex {
+					if option.IsEqual(p.CurrentOption) {
 						radio = picocolors.Green(symbols.RADIO_ACTIVE)
 						label = option.Name
 					} else {

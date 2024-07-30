@@ -162,6 +162,10 @@ func (p *PathNode) Flat() []*PathNode {
 	return options
 }
 
+func (p *PathNode) IsEqual(node *PathNode) bool {
+	return node.Path == p.Path
+}
+
 func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) func(_ *Prompt[T]) string {
 	return func(_ *Prompt[T]) string {
 		return render(p)
