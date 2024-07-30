@@ -105,3 +105,21 @@ func TestSelectPathExitRootDirectory(t *testing.T) {
 	assert.Equal(t, p.Root, p.CurrentOption)
 	assert.NotEqual(t, pastChildrenLength, len(p.Root.Children))
 }
+
+func TestSelectPathFilter(t *testing.T) {
+	p1 := core.NewSelectPathPrompt(core.SelectPathPromptParams{
+		Render: func(p *core.SelectPathPrompt) string { return "" },
+	})
+	p2 := core.NewSelectPathPrompt(core.SelectPathPromptParams{
+		Filter:     true,
+		FileSystem: MockFileSystem{},
+		Render:     func(p *core.SelectPathPrompt) string { return "" },
+	})
+
+	p1.PressKey(&core.Key{Char: "d"})
+	p2.PressKey(&core.Key{Char: "d"})
+
+	assert.Greater(t, len(p1.Options()), 0)
+	assert.Greater(t, len(p2.Options()), 0)
+	assert.Greater(t, len(p1.Options()), len(p2.Options()))
+}

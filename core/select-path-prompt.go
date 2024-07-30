@@ -15,6 +15,8 @@ type SelectPathPrompt struct {
 	CurrentLayer  []*PathNode
 	CurrentOption *PathNode
 	OnlyShowDir   bool
+	Filter        bool
+	Search        string
 	FileSystem    FileSystem
 }
 
@@ -23,6 +25,7 @@ type SelectPathPromptParams struct {
 	Output       *os.File
 	InitialValue string
 	OnlyShowDir  bool
+	Filter       bool
 	FileSystem   FileSystem
 	Render       func(p *SelectPathPrompt) string
 }
@@ -44,6 +47,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 			Render:      WrapRender[string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
+		Filter:      params.Filter,
 		FileSystem:  params.FileSystem,
 	}
 
@@ -66,7 +70,9 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 }
 
 func (p *SelectPathPrompt) Options() []*PathNode {
-	return p.Root.Flat()
+	var options []*PathNode
+	options, p.CurrentOption = p.Root.FilteredFlat(p.Search, p.CurrentOption)
+	return options
 }
 
 func (p *SelectPathPrompt) cursorIndex() int {
@@ -118,12 +124,18 @@ func (p *SelectPathPrompt) handleKeyPress(key *Key) {
 		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
 	case LeftKey:
 		p.exitChildren()
+		p.Search = ""
 	case RightKey:
 		p.enterChildren()
+		p.Search = ""
 	case HomeKey:
 		p.CurrentOption = p.CurrentLayer[0]
 	case EndKey:
 		p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
+	default:
+		if p.Filter {
+			p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
+		}
 	}
 	p.Value = p.CurrentOption.Path
 	p.CursorIndex = p.cursorIndex()

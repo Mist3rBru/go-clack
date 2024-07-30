@@ -2,59 +2,12 @@ package prompts_test
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/Mist3rBru/go-clack/prompts"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockTimer struct {
-	mu          sync.Mutex
-	waiters     []chan struct{}
-	autoResolve bool
-}
-
-func (t *MockTimer) Sleep(duration time.Duration) {
-	if !t.autoResolve {
-		waiter := make(chan struct{})
-		t.mu.Lock()
-		t.waiters = append(t.waiters, waiter)
-		t.mu.Unlock()
-		<-waiter
-	}
-}
-
-func (m *MockTimer) ResolveAll() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, waiter := range m.waiters {
-		close(waiter)
-	}
-	m.waiters = []chan struct{}(nil)
-}
-
-type MockWriter struct {
-	mu   sync.Mutex
-	Data []string
-}
-
-func (w *MockWriter) Write(data []byte) (int, error) {
-	w.mu.Lock()
-	w.Data = append(w.Data, string(data))
-	w.mu.Unlock()
-	return 0, nil
-}
-
-func (w *MockWriter) HaveBeenCalledWith(str string) string {
-	for _, data := range w.Data {
-		if data == str {
-			return data
-		}
-	}
-	return ""
-}
 
 func runSpinner() (*prompts.SpinnerController, *MockTimer, *MockWriter) {
 	timer := &MockTimer{}
