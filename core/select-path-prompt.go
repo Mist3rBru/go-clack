@@ -75,15 +75,6 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 	return options
 }
 
-func (p *SelectPathPrompt) cursorIndex() int {
-	for i, option := range p.Options() {
-		if option.IsEqual(p.CurrentOption) {
-			return i
-		}
-	}
-	return -1
-}
-
 func (p *SelectPathPrompt) exitChildren() {
 	if p.CurrentOption.IsEqual(p.Root) {
 		p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
@@ -138,5 +129,5 @@ func (p *SelectPathPrompt) handleKeyPress(key *Key) {
 		}
 	}
 	p.Value = p.CurrentOption.Path
-	p.CursorIndex = p.cursorIndex()
+	p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
 }

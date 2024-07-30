@@ -134,3 +134,21 @@ func TestMultiSelectPathRequiredValue(t *testing.T) {
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)
 }
+
+func TestMultiSelectPathFilter(t *testing.T) {
+	p1 := core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{
+		Render: func(p *core.MultiSelectPathPrompt) string { return "" },
+	})
+	p2 := core.NewMultiSelectPathPrompt(core.MultiSelectPathPromptParams{
+		Filter:     true,
+		FileSystem: MockFileSystem{},
+		Render:     func(p *core.MultiSelectPathPrompt) string { return "" },
+	})
+
+	p1.PressKey(&core.Key{Char: "d"})
+	p2.PressKey(&core.Key{Char: "d"})
+
+	assert.Greater(t, len(p1.Options()), 0)
+	assert.Greater(t, len(p2.Options()), 0)
+	assert.Greater(t, len(p1.Options()), len(p2.Options()))
+}

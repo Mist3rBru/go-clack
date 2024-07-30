@@ -137,3 +137,12 @@ func (p *PathNode) FilteredFlat(search string, currentNode *PathNode) ([]*PathNo
 func (p *PathNode) IsEqual(node *PathNode) bool {
 	return node.Path == p.Path
 }
+
+func (p *PathNode) IndexOf(node *PathNode, options []*PathNode) int {
+	for i, option := range options {
+		if option.IsEqual(node) {
+			return i
+		}
+	}
+	return -1
+}

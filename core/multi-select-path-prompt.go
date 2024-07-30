@@ -16,6 +16,8 @@ type MultiSelectPathPrompt struct {
 	CurrentLayer  []*PathNode
 	CurrentOption *PathNode
 	OnlyShowDir   bool
+	Filter        bool
+	Search        string
 	Required      bool
 	FileSystem    FileSystem
 }
@@ -27,6 +29,7 @@ type MultiSelectPathPromptParams struct {
 	InitialPath  string
 	OnlyShowDir  bool
 	Required     bool
+	Filter       bool
 	FileSystem   FileSystem
 	Validate     func(value []string) error
 	Render       func(p *MultiSelectPathPrompt) string
@@ -51,6 +54,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 			Render:       WrapRender[[]string](&p, params.Render),
 		}),
 		OnlyShowDir: params.OnlyShowDir,
+		Filter:      params.Filter,
 		Required:    params.Required,
 		FileSystem:  params.FileSystem,
 	}
@@ -79,16 +83,9 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 }
 
 func (p *MultiSelectPathPrompt) Options() []*PathNode {
-	return p.Root.Flat()
-}
-
-func (p *MultiSelectPathPrompt) cursorIndex() int {
-	for i, option := range p.Options() {
-		if option.IsEqual(p.CurrentOption) {
-			return i
-		}
-	}
-	return -1
+	var options []*PathNode
+	options, p.CurrentOption = p.Root.FilteredFlat(p.Search, p.CurrentOption)
+	return options
 }
 
 func (p *MultiSelectPathPrompt) exitChildren() {
@@ -133,8 +130,10 @@ func (p *MultiSelectPathPrompt) handleKeyPress(key *Key) {
 		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
 	case LeftKey:
 		p.exitChildren()
+		p.Search = ""
 	case RightKey:
 		p.enterChildren()
+		p.Search = ""
 	case HomeKey:
 		p.CurrentOption = p.CurrentLayer[0]
 	case EndKey:
@@ -153,9 +152,13 @@ func (p *MultiSelectPathPrompt) handleKeyPress(key *Key) {
 			p.CurrentOption.IsSelected = true
 			p.Value = append(p.Value, p.CurrentOption.Path)
 		}
+	default:
+		if p.Filter {
+			p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
+		}
 	}
 	if key.Name != SpaceKey {
-		p.CursorIndex = p.cursorIndex()
+		p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
 	}
 }
 

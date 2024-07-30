@@ -18,6 +18,7 @@ type MultiSelectPathParams struct {
 	Required     bool
 	Validate     func(value []string) error
 	OnlyShowDir  bool
+	Filter       bool
 	FileSystem   FileSystem
 }
 
@@ -28,9 +29,12 @@ func MultiSelectPath(params MultiSelectPathParams) ([]string, error) {
 		OnlyShowDir:  params.OnlyShowDir,
 		FileSystem:   params.FileSystem,
 		Required:     params.Required,
+		Filter:       params.Filter,
 		Validate:     params.Validate,
 		Render: func(p *core.MultiSelectPathPrompt) string {
+			message := params.Message
 			var value string
+
 			switch p.State {
 			case core.SubmitState, core.CancelState:
 			default:
@@ -45,14 +49,14 @@ func MultiSelectPath(params MultiSelectPathParams) ([]string, error) {
 							dir = "v"
 						}
 					}
-					if option.IsSelected && i == p.CursorIndex {
+					if option.IsSelected && option.IsEqual(p.CurrentOption) {
 						radio = picocolors.Green(symbols.CHECKBOX_SELECTED)
 						label = option.Name
 					} else if option.IsSelected {
 						radio = picocolors.Green(symbols.CHECKBOX_SELECTED)
 						label = picocolors.Dim(option.Name)
 						dir = picocolors.Dim(dir)
-					} else if i == p.CursorIndex {
+					} else if option.IsEqual(p.CurrentOption) {
 						radio = picocolors.Green(symbols.CHECKBOX_ACTIVE)
 						label = option.Name
 					} else {
@@ -63,12 +67,23 @@ func MultiSelectPath(params MultiSelectPathParams) ([]string, error) {
 					depth := strings.Repeat(" ", option.Depth)
 					radioOptions[i] = fmt.Sprintf("%s%s %s %s", depth, radio, label, dir)
 				}
-				value = p.LimitLines(radioOptions, 3)
+
+				if p.Filter {
+					if p.Search == "" {
+						message = fmt.Sprintf("%s\n> %s", message, picocolors.Inverse("T")+picocolors.Dim("ype to filter..."))
+					} else {
+						message = fmt.Sprintf("%s\n> %s", message, p.Search+picocolors.Inverse(" "))
+					}
+
+					value = p.LimitLines(radioOptions, 4)
+				} else {
+					value = p.LimitLines(radioOptions, 3)
+				}
 			}
 
 			return theme.ApplyTheme(theme.ThemeParams[[]string]{
 				Ctx:             p.Prompt,
-				Message:         params.Message,
+				Message:         message,
 				Value:           strings.Join(p.Value, "\n"),
 				ValueWithCursor: value,
 			})
