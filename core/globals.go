@@ -146,6 +146,24 @@ func (p *PathNode) MapChildren() []*PathNode {
 	return children
 }
 
+func (p *PathNode) Flat() []*PathNode {
+	var options []*PathNode
+
+	var traverse func(node *PathNode)
+	traverse = func(node *PathNode) {
+		options = append(options, node)
+		if node.Children == nil {
+			return
+		}
+		for _, child := range node.Children {
+			traverse(child)
+		}
+	}
+
+	traverse(p)
+	return options
+}
+
 func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) func(_ *Prompt[T]) string {
 	return func(_ *Prompt[T]) string {
 		return render(p)

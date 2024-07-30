@@ -78,21 +78,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 }
 
 func (p *MultiSelectPathPrompt) Options() []*PathNode {
-	options := []*PathNode{}
-
-	var traverse func(node *PathNode)
-	traverse = func(node *PathNode) {
-		options = append(options, node)
-		if node.Children == nil {
-			return
-		}
-		for _, child := range node.Children {
-			traverse(child)
-		}
-	}
-
-	traverse(p.Root)
-	return options
+	return p.Root.Flat()
 }
 
 func (p *MultiSelectPathPrompt) cursorIndex() int {

@@ -65,21 +65,7 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 }
 
 func (p *SelectPathPrompt) Options() []*PathNode {
-	var options []*PathNode
-
-	var traverse func(node *PathNode)
-	traverse = func(node *PathNode) {
-		options = append(options, node)
-		if node.Children == nil {
-			return
-		}
-		for _, child := range node.Children {
-			traverse(child)
-		}
-	}
-
-	traverse(p.Root)
-	return options
+	return p.Root.Flat()
 }
 
 func (p *SelectPathPrompt) cursorIndex() int {
