@@ -3,6 +3,8 @@ package core
 import (
 	"path"
 	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/Mist3rBru/go-clack/core/internals"
 )
@@ -52,17 +54,18 @@ func (p *PathNode) MapChildren() []*PathNode {
 	if len(p.Children) > 0 {
 		return p.Children
 	}
+
 	entries, err := p.FileSystem.ReadDir(p.Path)
 	if err != nil {
 		return nil
 	}
+
 	children := []*PathNode{}
 	for _, entry := range entries {
 		if p.OnlyShowDir && !entry.IsDir() {
 			continue
 		}
 		child := &PathNode{
-			Index:  len(children),
 			Depth:  p.Depth + 1,
 			Path:   path.Join(p.Path, entry.Name()),
 			Name:   entry.Name(),
@@ -77,6 +80,18 @@ func (p *PathNode) MapChildren() []*PathNode {
 		}
 		children = append(children, child)
 	}
+
+	sort.SliceStable(children, func(i, j int) bool {
+		if children[i].IsDir != children[j].IsDir {
+			return children[i].IsDir
+		}
+		return strings.ToLower(children[i].Name) < strings.ToLower(children[j].Name)
+	})
+
+	for i, child := range children {
+		child.Index = i
+	}
+
 	return children
 }
 
