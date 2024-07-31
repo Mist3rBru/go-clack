@@ -52,10 +52,26 @@ func TestChangeGroupMultiSelectCursor(t *testing.T) {
 	assert.Equal(t, 0, p.CursorIndex)
 }
 
+func TestSelectGroupMultiSelectGroup(t *testing.T) {
+	p := newGroupMultiSelectPrompt()
+
+	assert.Len(t, p.Value, 0)
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Len(t, p.Value, 3)
+
+	p.CursorIndex = 4
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Len(t, p.Value, 6)
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Len(t, p.Value, 3)
+}
+
 func TestSelectGroupMultiSelectOption(t *testing.T) {
 	p := newGroupMultiSelectPrompt()
 
-	assert.Equal(t, []string(nil), p.Value)
+	assert.Len(t, p.Value, 0)
 
 	p.PressKey(&core.Key{Name: core.DownKey})
 	p.PressKey(&core.Key{Name: core.SpaceKey})
@@ -67,49 +83,108 @@ func TestSelectGroupMultiSelectOption(t *testing.T) {
 
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{p.Options[1].Value}, p.Value)
-}
-
-func TestSelectGroupMultiSelectGroupOption(t *testing.T) {
-	p := newGroupMultiSelectPrompt()
-
-	assert.Equal(t, []string(nil), p.Value)
-
-	p.PressKey(&core.Key{Name: core.SpaceKey})
-	for _, option := range p.Options[0].Options {
-		assert.Equal(t, true, option.IsSelected, option.Value)
-	}
-	assert.Equal(t, len(p.Options[0].Options), len(p.Value))
-
-	p.PressKey(&core.Key{Name: core.SpaceKey})
-	for _, option := range p.Options[0].Options {
-		assert.Equal(t, false, option.IsSelected)
-	}
-	assert.Equal(t, 0, len(p.Value))
 }
 
 func TestGroupMultiSelectIsGroupSelected(t *testing.T) {
 	p := newGroupMultiSelectPrompt()
+
 	group := p.Options[0]
+	assert.Equal(t, false, p.IsGroupSelected(group))
 
-	isSelected := p.IsGroupSelected(group)
-	assert.Equal(t, false, isSelected)
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Equal(t, true, p.IsGroupSelected(group))
 
-	for _, option := range group.Options {
-		option.IsSelected = true
-	}
-	isSelected = p.IsGroupSelected(group)
-	assert.Equal(t, true, isSelected)
+	p.DisabledGroups = true
+	assert.Equal(t, false, p.IsGroupSelected(group))
 }
 
 func TestLabelAsGroupMultiSelectValue(t *testing.T) {
-	p := newGroupMultiSelectPrompt()
+	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
+		Options: map[string][]core.MultiSelectOption[string]{
+			"g1": {
+				{Label: "a"},
+				{Label: "b"},
+				{Label: "c"},
+			},
+		},
+		Render: func(p *core.GroupMultiSelectPrompt[string]) string {
+			return ""
+		},
+	})
+
+	assert.NotEmpty(t, p.Options[1].Value)
 
 	p.PressKey(&core.Key{Name: core.DownKey})
 	p.PressKey(&core.Key{Name: core.SpaceKey})
 	assert.Equal(t, []string{p.Options[1].Value}, p.Value)
-	p.PressKey(&core.Key{Name: core.DownKey})
-	p.PressKey(&core.Key{Name: core.SpaceKey})
-	assert.Equal(t, []string{p.Options[1].Value, p.Options[2].Value}, p.Value)
+}
+
+func TestGroupMultiSelectInitialValue(t *testing.T) {
+	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
+		InitialValue: []string{"a", "b", "c"},
+		Options: map[string][]core.MultiSelectOption[string]{
+			"g1": {
+				{Value: "a"},
+				{Value: "b"},
+				{Value: "c"},
+			},
+			"g2": {
+				{Value: "x"},
+				{Value: "y"},
+				{Value: "z"},
+			},
+		},
+		Render: func(p *core.GroupMultiSelectPrompt[string]) string {
+			return ""
+		},
+	})
+
+	assert.Len(t, p.Value, 3)
+}
+
+func TestGroupMultiSelectInitialValueAsIsSelected(t *testing.T) {
+	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
+		Options: map[string][]core.MultiSelectOption[string]{
+			"g1": {
+				{Value: "a"},
+				{Value: "b", IsSelected: true},
+				{Value: "c"},
+			},
+			"g2": {
+				{Value: "x", IsSelected: true},
+				{Value: "y", IsSelected: true},
+				{Value: "z", IsSelected: true},
+			},
+		},
+		Render: func(p *core.GroupMultiSelectPrompt[string]) string {
+			return ""
+		},
+	})
+
+	assert.Equal(t, []string{"b", "x", "y", "z"}, p.Value)
+}
+
+func TestGroupMultiSelectInitialValueOverIsSelected(t *testing.T) {
+	p := core.NewGroupMultiSelectPrompt(core.GroupMultiSelectPromptParams[string]{
+		InitialValue: []string{"a", "b", "c"},
+		Options: map[string][]core.MultiSelectOption[string]{
+			"g1": {
+				{Value: "a"},
+				{Value: "b"},
+				{Value: "c"},
+			},
+			"g2": {
+				{Value: "x", IsSelected: true},
+				{Value: "y", IsSelected: true},
+				{Value: "z"},
+			},
+		},
+		Render: func(p *core.GroupMultiSelectPrompt[string]) string {
+			return ""
+		},
+	})
+
+	assert.Equal(t, []string{"a", "b", "c"}, p.Value)
 }
 
 func TestGroupMultiSelectRequiredValue(t *testing.T) {

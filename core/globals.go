@@ -66,6 +66,7 @@ const (
 type FileSystem interface {
 	Getwd() (string, error)
 	ReadDir(name string) ([]os.DirEntry, error)
+	UserHomeDir() (string, error)
 }
 
 func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) func(_ *Prompt[T]) string {

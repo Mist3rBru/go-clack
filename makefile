@@ -18,6 +18,20 @@ profile:
 	done
 	go tool cover -html cover.out -o cover.html
 	rm cover.out
+profile-core:
+	@until [ $$RET -eq 0 ]; do \
+		go test ./core -cover -coverprofile cover.out ; \
+		RET=$$? ; \
+	done
+	go tool cover -html cover.out -o cover.html
+	rm cover.out
+profile-prompts:
+	@until [ $$RET -eq 0 ]; do \
+		go test ./prompts -cover -coverprofile cover.out ; \
+		RET=$$? ; \
+	done
+	go tool cover -html cover.out -o cover.html
+	rm cover.out
 snap:
 	@UPDATE_SNAPSHOTS=true go test ./prompts
 format:

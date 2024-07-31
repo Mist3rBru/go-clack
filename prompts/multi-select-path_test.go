@@ -78,3 +78,32 @@ func TestMultiSelectPathSubmitState(t *testing.T) {
 	assert.Equal(t, core.SubmitState, p.State)
 	cupaloy.SnapshotT(t, p.Frame)
 }
+
+func TestMultiSelectPathEmptyFilter(t *testing.T) {
+	go prompts.MultiSelectPath(prompts.MultiSelectPathParams{
+		Message:    message,
+		FileSystem: (prompts.FileSystem)(MockFileSystem{}),
+		Filter:     true,
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.MultiSelectPathTestingPrompt
+
+	assert.Equal(t, core.InitialState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestMultiSelectPathFilledFilter(t *testing.T) {
+	go prompts.MultiSelectPath(prompts.MultiSelectPathParams{
+		Message:    message,
+		FileSystem: (prompts.FileSystem)(MockFileSystem{}),
+		Filter:     true,
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.MultiSelectPathTestingPrompt
+	p.PressKey(&core.Key{Char: "f"})
+
+	assert.Equal(t, core.ActiveState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}

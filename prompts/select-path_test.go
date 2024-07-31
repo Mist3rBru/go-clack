@@ -59,3 +59,32 @@ func TestSelectPathSubmitState(t *testing.T) {
 	assert.Equal(t, core.SubmitState, p.State)
 	cupaloy.SnapshotT(t, p.Frame)
 }
+
+func TestSelectPathEmptyFilter(t *testing.T) {
+	go prompts.SelectPath(prompts.SelectPathParams{
+		Message:    message,
+		FileSystem: (prompts.FileSystem)(MockFileSystem{}),
+		Filter:     true,
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.SelectPathTestingPrompt
+
+	assert.Equal(t, core.InitialState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestSelectPathFilledFilter(t *testing.T) {
+	go prompts.SelectPath(prompts.SelectPathParams{
+		Message:    message,
+		FileSystem: (prompts.FileSystem)(MockFileSystem{}),
+		Filter:     true,
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.SelectPathTestingPrompt
+	p.PressKey(&core.Key{Char: "f"})
+
+	assert.Equal(t, core.ActiveState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}

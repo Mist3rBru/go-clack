@@ -53,3 +53,11 @@ func TestKeyAsSelectValue(t *testing.T) {
 	p.PressKey(&core.Key{Name: "a"})
 	assert.Equal(t, "a", p.Value)
 }
+
+func TestSelectKeyInvalidSubmit(t *testing.T) {
+	p := newSelectKeyPrompt()
+	p.Options = []*core.SelectKeyOption[string]{{Key: "a"}}
+
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ActiveState, p.State)
+}

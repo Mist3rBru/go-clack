@@ -43,6 +43,10 @@ func (fs MockFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
 	}, nil
 }
 
+func (fs MockFileSystem) UserHomeDir() (string, error) {
+	return "/home/clack", nil
+}
+
 type MockTimer struct {
 	mu          sync.Mutex
 	waiters     []chan struct{}

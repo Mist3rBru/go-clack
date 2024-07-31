@@ -38,3 +38,7 @@ func (fs MockFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
 		MockDirEntry{name: "file", isDir: false},
 	}, nil
 }
+
+func (fs MockFileSystem) UserHomeDir() (string, error) {
+	return "/home/clack", nil
+}

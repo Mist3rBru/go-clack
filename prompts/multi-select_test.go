@@ -54,6 +54,24 @@ func TestMultiSelectWithHint(t *testing.T) {
 	cupaloy.SnapshotT(t, p.Frame)
 }
 
+func TestMultiSelectWithSelectedHint(t *testing.T) {
+	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
+		Message: message,
+		Options: []*prompts.MultiSelectOption[string]{
+			{Label: "a", Hint: "b"},
+			{Label: "b", Hint: "c"},
+			{Label: "c", Hint: "a"},
+		},
+	})
+	time.Sleep(time.Millisecond)
+	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+
+	assert.Equal(t, core.ActiveState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
 func TestMultiSelectCancelState(t *testing.T) {
 	go runMultiSelect()
 	time.Sleep(time.Millisecond)

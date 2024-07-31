@@ -152,3 +152,12 @@ func TestMultiSelectPathFilter(t *testing.T) {
 	assert.Greater(t, len(p2.Options()), 0)
 	assert.Greater(t, len(p1.Options()), len(p2.Options()))
 }
+
+func TestMultiSelectPathSortOnFinalize(t *testing.T) {
+	p := newMultiSelectPathPrompt()
+
+	p.Value = []string{"b", "a", "1"}
+	p.PressKey(&core.Key{Name: core.EnterKey})
+
+	assert.Equal(t, []string{"1", "a", "b"}, p.Value)
+}

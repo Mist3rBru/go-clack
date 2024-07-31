@@ -61,7 +61,7 @@ func (p *SelectKeyPrompt[TValue]) handleKeyPress(key *Key) {
 			return
 		}
 	}
-	if key.Name == EnterKey && p.State != SubmitState {
+	if key.Name == EnterKey {
 		key.Name = ""
 	}
 }

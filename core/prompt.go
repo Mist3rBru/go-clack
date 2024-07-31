@@ -54,11 +54,7 @@ func NewPrompt[TValue any](params PromptParams[TValue]) *Prompt[TValue] {
 	if params.Output == nil {
 		params.Output = os.Stdout
 	}
-	if params.Render == nil {
-		params.Render = func(p *Prompt[TValue]) string {
-			return ""
-		}
-	}
+
 	return &Prompt[TValue]{
 		listeners: make(map[Event][]Listener),
 

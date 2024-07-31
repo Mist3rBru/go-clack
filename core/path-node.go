@@ -144,6 +144,10 @@ func (p *PathNode) FilteredFlat(search string, currentNode *PathNode) ([]*PathNo
 	return options, currentNode
 }
 
+func (p *PathNode) IsRoot() bool {
+	return p.Parent == nil
+}
+
 func (p *PathNode) IsEqual(node *PathNode) bool {
 	return node.Path == p.Path
 }

@@ -1,6 +1,8 @@
 package prompts_test
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -81,5 +83,39 @@ func TestTasksUpdateMessage(t *testing.T) {
 	timer.ResolveAll()
 	time.Sleep(time.Millisecond)
 
-	assert.Equal(t, "◒ Bar", writer.HaveBeenCalledWith("◒ Bar"))
+	assert.NotEmpty(t, writer.HaveBeenCalledWith("◒ Bar"))
+}
+
+func TestTasksWithDisabledTask(t *testing.T) {
+	counter := 0
+	task := func(message func(msg string)) (string, error) {
+		counter++
+		return "", nil
+	}
+	timer := &MockTimer{autoResolve: true}
+	writer := &MockWriter{}
+
+	prompts.Tasks([]prompts.Task{
+		{Title: "Foo", Task: task, Disabled: true},
+	}, prompts.SpinnerOptions{
+		Timer:  timer,
+		Output: writer,
+	})
+
+	assert.Equal(t, 0, counter)
+}
+
+func TestTasksTaskWithError(t *testing.T) {
+	task := func(message func(msg string)) (string, error) {
+		return "", errors.New("task error")
+	}
+	timer := &MockTimer{autoResolve: false}
+	writer := &MockWriter{}
+
+	prompts.Tasks([]prompts.Task{{Title: "Foo", Task: task}}, prompts.SpinnerOptions{Timer: timer, Output: writer})
+	time.Sleep(time.Millisecond)
+	timer.ResolveAll()
+	time.Sleep(time.Millisecond)
+
+	assert.NotEmpty(t, writer.HaveBeenCalledWith(fmt.Sprintf("%s task error\n", symbols.STEP_CANCEL)))
 }

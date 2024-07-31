@@ -76,7 +76,7 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 }
 
 func (p *SelectPathPrompt) exitChildren() {
-	if p.CurrentOption.IsEqual(p.Root) {
+	if p.CurrentOption.IsRoot() {
 		p.Root = NewPathNode(filepath.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
 			FileSystem:  p.FileSystem,
@@ -85,7 +85,7 @@ func (p *SelectPathPrompt) exitChildren() {
 		p.CurrentOption = p.Root
 		return
 	}
-	if p.CurrentOption.Parent.IsEqual(p.Root) {
+	if p.CurrentOption.Parent.IsRoot() {
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
 		return

@@ -11,3 +11,7 @@ func (fs OSFileSystem) Getwd() (string, error) {
 func (fs OSFileSystem) ReadDir(name string) ([]os.DirEntry, error) {
 	return os.ReadDir(name)
 }
+
+func (fs OSFileSystem) UserHomeDir() (string, error) {
+	return os.UserHomeDir()
+}

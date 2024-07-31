@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Mist3rBru/go-clack/core/internals"
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/core/validator"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
@@ -14,10 +15,10 @@ type PathPrompt struct {
 	Prompt[string]
 	OnlyShowDir bool
 	Required    bool
-	Placeholder string
 	Hint        string
 	HintOptions []string
 	HintIndex   int
+	FileSystem  FileSystem
 }
 
 type PathPromptParams struct {
@@ -26,6 +27,7 @@ type PathPromptParams struct {
 	InitialValue string
 	OnlyShowDir  bool
 	Required     bool
+	FileSystem   FileSystem
 	Validate     func(value string) error
 	Render       func(p *PathPrompt) string
 }
@@ -33,6 +35,10 @@ type PathPromptParams struct {
 func NewPathPrompt(params PathPromptParams) *PathPrompt {
 	v := validator.NewValidator("PathPrompt")
 	v.ValidateRender(params.Render)
+
+	if params.FileSystem == nil {
+		params.FileSystem = internals.OSFileSystem{}
+	}
 
 	var p PathPrompt
 	p = PathPrompt{
@@ -47,9 +53,10 @@ func NewPathPrompt(params PathPromptParams) *PathPrompt {
 		OnlyShowDir: params.OnlyShowDir,
 		HintIndex:   -1,
 		Required:    params.Required,
+		FileSystem:  params.FileSystem,
 	}
 
-	if cwd, err := os.Getwd(); err == nil && params.InitialValue == "" {
+	if cwd, err := p.FileSystem.Getwd(); err == nil && params.InitialValue == "" {
 		p.Prompt.Value = cwd
 		p.Value = cwd
 		p.CursorIndex = len(cwd)
@@ -69,15 +76,16 @@ func (p *PathPrompt) mapHintOptions() []string {
 	dirPath := dirPathRegex.ReplaceAllString(p.Value, "$1")
 
 	if strings.HasPrefix(dirPath, "~") {
-		if homeDir, err := os.UserHomeDir(); err == nil {
+		if homeDir, err := p.FileSystem.UserHomeDir(); err == nil {
 			dirPath = strings.Replace(dirPath, "~", homeDir, 1)
 		}
 	}
 
-	entries, err := os.ReadDir(dirPath)
+	entries, err := p.FileSystem.ReadDir(dirPath)
 	if err != nil {
 		return options
 	}
+
 	for _, entry := range entries {
 		if (p.OnlyShowDir && !entry.IsDir()) || !strings.HasPrefix(entry.Name(), p.valueEnd()) {
 			continue
@@ -88,6 +96,7 @@ func (p *PathPrompt) mapHintOptions() []string {
 			options = append(options, entry.Name())
 		}
 	}
+
 	return options
 }
 
@@ -129,13 +138,7 @@ func (p *PathPrompt) ValueWithCursor() string {
 }
 
 func (p *PathPrompt) completeValue() {
-	var complete string
-	if p.Value == "" {
-		complete = p.Placeholder
-	} else {
-		complete = p.Hint
-	}
-	p.Value += complete
+	p.Value += p.Hint
 	p.Prompt.Value = p.Value
 	p.CursorIndex = len(p.Value)
 	p.Hint = ""

@@ -19,9 +19,9 @@ type Timer interface {
 	Sleep(duration time.Duration)
 }
 
-type DefaultTimer struct{}
+type defaultTimer struct{}
 
-func (t *DefaultTimer) Sleep(duration time.Duration) {
+func (t *defaultTimer) Sleep(duration time.Duration) {
 	time.Sleep(duration)
 }
 
@@ -41,7 +41,7 @@ func Spinner(options SpinnerOptions) *SpinnerController {
 
 	var timer Timer
 	if options.Timer == nil {
-		timer = &DefaultTimer{}
+		timer = &defaultTimer{}
 	} else {
 		timer = options.Timer
 	}

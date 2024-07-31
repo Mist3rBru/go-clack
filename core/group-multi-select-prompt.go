@@ -105,7 +105,7 @@ func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
 				option.IsSelected = false
 			}
 			p.Value = []TValue{}
-			for _, option := range option.Options {
+			for _, option := range p.Options {
 				if option.IsSelected {
 					p.Value = append(p.Value, option.Value)
 				}

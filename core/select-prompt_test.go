@@ -55,6 +55,21 @@ func TestChangeSelectValue(t *testing.T) {
 	assert.Equal(t, p.Options[1].Value, p.Value)
 }
 
+func TestSelectInitialValue(t *testing.T) {
+	p := core.NewSelectPrompt(core.SelectPromptParams[string]{
+		Options: []*core.SelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+		InitialValue: "baz",
+		Render:       func(p *core.SelectPrompt[string]) string { return "" },
+	})
+
+	assert.Equal(t, "baz", p.Value)
+	assert.Equal(t, 2, p.CursorIndex)
+}
+
 func TestLabelAsSelectValue(t *testing.T) {
 	p := core.NewSelectPrompt(core.SelectPromptParams[string]{
 		Options: []*core.SelectOption[string]{

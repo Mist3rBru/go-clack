@@ -74,7 +74,7 @@ func NewMultiSelectPathPrompt(params MultiSelectPathPromptParams) *MultiSelectPa
 		p.handleKeyPress(args[0].(*Key))
 	})
 	p.On(FinalizeEvent, func(args ...any) {
-		sort.Slice(p.Value, func(i, j int) bool {
+		sort.SliceStable(p.Value, func(i, j int) bool {
 			return p.Value[i] < p.Value[j]
 		})
 	})
@@ -89,7 +89,7 @@ func (p *MultiSelectPathPrompt) Options() []*PathNode {
 }
 
 func (p *MultiSelectPathPrompt) exitChildren() {
-	if p.CurrentOption.IsEqual(p.Root) {
+	if p.CurrentOption.IsRoot() {
 		p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
 			FileSystem:  p.FileSystem,
@@ -99,7 +99,7 @@ func (p *MultiSelectPathPrompt) exitChildren() {
 		p.mapSelectedOptions(p.Root)
 		return
 	}
-	if p.CurrentOption.Parent.IsEqual(p.Root) {
+	if p.CurrentOption.Parent.IsRoot() {
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
 		return

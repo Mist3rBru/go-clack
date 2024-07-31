@@ -43,7 +43,6 @@ func Path(params PathParams) (string, error) {
 				Message:         params.Message,
 				Value:           p.Value,
 				ValueWithCursor: valueWithCursorAndOptions,
-				Placeholder:     p.Placeholder,
 			})
 		},
 	})

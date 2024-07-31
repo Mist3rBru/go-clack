@@ -2,7 +2,6 @@ package core_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -18,7 +17,8 @@ func newPathPrompt() *core.PathPrompt {
 func TestPathDefaultValue(t *testing.T) {
 	p := newPathPrompt()
 
-	cwd, _ := os.Getwd()
+	cwd, _ := p.FileSystem.Getwd()
+
 	assert.Equal(t, cwd, p.Value)
 	assert.Equal(t, len(cwd), p.CursorIndex)
 }
@@ -108,7 +108,7 @@ func TestPathValueWithHint(t *testing.T) {
 	assert.Equal(t, p.Value+p.Hint, p.ValueWithCursor())
 }
 
-func TestValidatePath(t *testing.T) {
+func TestPathValidateValue(t *testing.T) {
 	p := core.NewPathPrompt(core.PathPromptParams{
 		InitialValue: "/folder",
 		Validate: func(value string) error {
