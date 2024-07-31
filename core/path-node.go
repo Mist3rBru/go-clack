@@ -43,56 +43,51 @@ func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
 		OnlyShowDir: options.OnlyShowDir,
 		FileSystem:  options.FileSystem,
 	}
-	root.Children = root.MapChildren()
+	root.MapChildren()
+
 	return root
 }
 
-func (p *PathNode) MapChildren() []*PathNode {
-	if !p.IsDir {
-		return nil
-	}
-	if len(p.Children) > 0 {
-		return p.Children
+func (p *PathNode) MapChildren() {
+	if !p.IsDir || len(p.Children) > 0 {
+		return
 	}
 
 	entries, err := p.FileSystem.ReadDir(p.Path)
 	if err != nil {
-		return nil
+		return
 	}
 
-	children := []*PathNode{}
 	for _, entry := range entries {
 		if p.OnlyShowDir && !entry.IsDir() {
 			continue
 		}
-		child := &PathNode{
+		p.Children = append(p.Children, &PathNode{
 			Depth:  p.Depth + 1,
 			Path:   path.Join(p.Path, entry.Name()),
 			Name:   entry.Name(),
 			Parent: p,
+			IsDir:  entry.IsDir(),
 
 			FileSystem:  p.FileSystem,
 			OnlyShowDir: p.OnlyShowDir,
-		}
-		if entry.IsDir() {
-			child.IsDir = true
-			child.Children = []*PathNode(nil)
-		}
-		children = append(children, child)
+		})
 	}
 
-	sort.SliceStable(children, func(i, j int) bool {
-		if children[i].IsDir != children[j].IsDir {
-			return children[i].IsDir
+	sort.SliceStable(p.Children, func(i, j int) bool {
+		if p.Children[i].IsDir != p.Children[j].IsDir {
+			return p.Children[i].IsDir
 		}
-		return strings.ToLower(children[i].Name) < strings.ToLower(children[j].Name)
+		return strings.ToLower(p.Children[i].Name) < strings.ToLower(p.Children[j].Name)
 	})
 
-	for i, child := range children {
+	for i, child := range p.Children {
 		child.Index = i
 	}
+}
 
-	return children
+func (p *PathNode) ClearChildren() {
+	p.Children = []*PathNode(nil)
 }
 
 func (p *PathNode) TraverseNodes(visit func(node *PathNode)) {

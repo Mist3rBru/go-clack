@@ -2,7 +2,7 @@ package core
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/Mist3rBru/go-clack/core/internals"
 	"github.com/Mist3rBru/go-clack/core/utils"
@@ -77,7 +77,7 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 
 func (p *SelectPathPrompt) exitChildren() {
 	if p.CurrentOption.IsEqual(p.Root) {
-		p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
+		p.Root = NewPathNode(filepath.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
 			FileSystem:  p.FileSystem,
 		})
@@ -92,19 +92,16 @@ func (p *SelectPathPrompt) exitChildren() {
 	}
 	p.CurrentLayer = p.CurrentOption.Parent.Parent.Children
 	p.CurrentOption = p.CurrentOption.Parent
-	if p.CurrentOption.Children != nil {
-		p.CurrentOption.Children = []*PathNode{}
-	}
+	p.CurrentOption.ClearChildren()
 }
 
 func (p *SelectPathPrompt) enterChildren() {
-	children := p.CurrentOption.MapChildren()
-	if len(children) == 0 {
+	p.CurrentOption.MapChildren()
+	if len(p.CurrentOption.Children) == 0 {
 		return
 	}
-	p.CurrentOption.Children = children
-	p.CurrentOption = children[0]
-	p.CurrentLayer = children
+	p.CurrentLayer = p.CurrentOption.Children
+	p.CurrentOption = p.CurrentOption.Children[0]
 }
 
 func (p *SelectPathPrompt) handleKeyPress(key *Key) {

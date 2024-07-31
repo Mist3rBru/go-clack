@@ -106,20 +106,17 @@ func (p *MultiSelectPathPrompt) exitChildren() {
 	}
 	p.CurrentLayer = p.CurrentOption.Parent.Parent.Children
 	p.CurrentOption = p.CurrentOption.Parent
-	if p.CurrentOption.Children != nil {
-		p.CurrentOption.Children = []*PathNode{}
-	}
+	p.CurrentOption.ClearChildren()
 }
 
 func (p *MultiSelectPathPrompt) enterChildren() {
-	children := p.CurrentOption.MapChildren()
-	if len(children) == 0 {
+	p.CurrentOption.MapChildren()
+	if len(p.CurrentOption.Children) == 0 {
 		return
 	}
-	p.CurrentOption.Children = children
 	p.mapSelectedOptions(p.CurrentOption)
-	p.CurrentOption = children[0]
-	p.CurrentLayer = children
+	p.CurrentLayer = p.CurrentOption.Children
+	p.CurrentOption = p.CurrentOption.Children[0]
 }
 
 func (p *MultiSelectPathPrompt) handleKeyPress(key *Key) {
@@ -163,21 +160,13 @@ func (p *MultiSelectPathPrompt) handleKeyPress(key *Key) {
 }
 
 func (p *MultiSelectPathPrompt) mapSelectedOptions(node *PathNode) {
-	var traverse func(node *PathNode)
-	traverse = func(node *PathNode) {
+	node.TraverseNodes(func(node *PathNode) {
 		for _, path := range p.Value {
 			if path == node.Path {
 				node.IsSelected = true
-				break
+				return
 			}
 		}
-		if !node.IsDir {
-			return
-		}
-		for _, child := range node.Children {
-			traverse(child)
-		}
-	}
-
-	traverse(node)
+		node.IsSelected = false
+	})
 }
