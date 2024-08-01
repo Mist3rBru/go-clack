@@ -23,14 +23,17 @@ type ThemeParams[TValue ThemeValue] struct {
 func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 	ctx := params.Ctx
 
+	symbolColor := SymbolColor(ctx.State)
+	barColor := BarColor(ctx.State)
+
 	title := strings.Join([]string{
 		picocolors.Gray(symbols.BAR),
 		ctx.FormatLines(strings.Split(params.Message, "\n"), core.FormatLinesOptions{
 			FirstLine: core.FormatLineOptions{
-				Start: symbols.State(ctx.State),
+				Start: symbolColor(symbols.State(ctx.State)),
 			},
 			NewLine: core.FormatLineOptions{
-				Start: picocolors.Gray(symbols.BAR),
+				Start: barColor(symbols.BAR),
 			},
 		}),
 	}, "\r\n")
@@ -39,7 +42,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 	case core.ErrorState:
 		value := ctx.FormatLines(strings.Split(params.ValueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Yellow(symbols.BAR),
+				Start: barColor(symbols.BAR),
 			},
 		})
 		if ctx.Error == "" {
@@ -47,11 +50,11 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		}
 		err := ctx.FormatLines(strings.Split(ctx.Error, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Yellow(symbols.BAR),
+				Start: barColor(symbols.BAR),
 				Style: picocolors.Yellow,
 			},
 			LastLine: core.FormatLineOptions{
-				Start: picocolors.Yellow(symbols.BAR_END),
+				Start: barColor(symbols.BAR_END),
 			},
 		})
 		return strings.Join([]string{title, value, err}, "\r\n")
@@ -59,7 +62,7 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 	case core.CancelState:
 		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Gray(symbols.BAR),
+				Start: barColor(symbols.BAR),
 				Style: func(line string) string {
 					return picocolors.Strikethrough(picocolors.Dim(line))
 				},
@@ -68,29 +71,19 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		if params.Value == "" {
 			return strings.Join([]string{title, value}, "\r\n")
 		}
-		end := picocolors.Gray(symbols.BAR)
+		end := barColor(symbols.BAR)
 		return strings.Join([]string{title, value, end}, "\r\n")
 
 	case core.SubmitState:
 		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Gray(symbols.BAR),
+				Start: barColor(symbols.BAR),
 				Style: picocolors.Dim,
 			},
 		})
 		return strings.Join([]string{title, value}, "\r\n")
 
 	default:
-		start := picocolors.Gray(symbols.BAR)
-		title = ctx.FormatLines(strings.Split(params.Message, "\n"), core.FormatLinesOptions{
-			FirstLine: core.FormatLineOptions{
-				Start: symbols.State(ctx.State),
-			},
-			NewLine: core.FormatLineOptions{
-				Start: picocolors.Cyan(symbols.BAR),
-			},
-		})
-
 		var valueWithCursor string
 		if params.Placeholder != "" && params.Value == "" {
 			valueWithCursor = picocolors.Inverse(string(params.Placeholder[0])) + picocolors.Dim(params.Placeholder[1:])
@@ -99,11 +92,33 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		}
 		value := ctx.FormatLines(strings.Split(valueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
-				Start: picocolors.Cyan(symbols.BAR),
+				Start: barColor(symbols.BAR),
 			},
 		})
-		end := picocolors.Cyan(symbols.BAR_END)
+		end := barColor(symbols.BAR_END)
 
-		return strings.Join([]string{start, title, value, end}, "\r\n")
+		return strings.Join([]string{title, value, end}, "\r\n")
+	}
+}
+
+func SymbolColor(state core.State) func(input string) string {
+	switch state {
+	case core.ErrorState, core.CancelState:
+		return picocolors.Red
+	case core.SubmitState:
+		return picocolors.Green
+	default:
+		return picocolors.Cyan
+	}
+}
+
+func BarColor(state core.State) func(input string) string {
+	switch state {
+	case core.ErrorState:
+		return picocolors.Yellow
+	case core.InitialState, core.ActiveState:
+		return picocolors.Cyan
+	default:
+		return picocolors.Gray
 	}
 }

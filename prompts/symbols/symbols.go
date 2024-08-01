@@ -3,7 +3,6 @@ package symbols
 import (
 	"github.com/Mist3rBru/go-clack/core"
 	isunicodesupported "github.com/Mist3rBru/go-clack/third_party/is-unicode-supported"
-	"github.com/Mist3rBru/go-clack/third_party/picocolors"
 )
 
 func s(c, fallback string) string {
@@ -46,12 +45,12 @@ var (
 func State(state core.State) string {
 	switch state {
 	case core.ErrorState:
-		return picocolors.Yellow(STEP_ERROR)
+		return STEP_ERROR
 	case core.CancelState:
-		return picocolors.Red(STEP_CANCEL)
+		return STEP_CANCEL
 	case core.SubmitState:
-		return picocolors.Green(STEP_SUBMIT)
+		return STEP_SUBMIT
 	default:
-		return picocolors.Cyan(STEP_ACTIVE)
+		return STEP_ACTIVE
 	}
 }
