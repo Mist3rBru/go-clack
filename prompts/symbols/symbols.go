@@ -12,34 +12,34 @@ func s(c, fallback string) string {
 	return fallback
 }
 
-type Synbol = string
+type Symbol = string
 
 var (
-	STEP_ACTIVE Synbol = s("◆", "*")
-	STEP_CANCEL Synbol = s("■", "x")
-	STEP_ERROR  Synbol = s("▲", "x")
-	STEP_SUBMIT Synbol = s("◇", "o")
+	STEP_ACTIVE Symbol = s("◆", "*")
+	STEP_CANCEL Symbol = s("■", "x")
+	STEP_ERROR  Symbol = s("▲", "x")
+	STEP_SUBMIT Symbol = s("◇", "o")
 
-	BAR_START Synbol = s("┌", "T")
-	BAR       Synbol = s("│", "|")
-	BAR_END   Synbol = s("└", "—")
+	BAR_START Symbol = s("┌", "T")
+	BAR       Symbol = s("│", "|")
+	BAR_END   Symbol = s("└", "—")
 
-	RADIO_ACTIVE      Synbol = s("●", ">")
-	RADIO_INACTIVE    Synbol = s("○", " ")
-	CHECKBOX_ACTIVE   Synbol = s("◻", "[•]")
-	CHECKBOX_SELECTED Synbol = s("◼", "[+]")
-	CHECKBOX_INACTIVE Synbol = s("◻", "[ ]")
-	PASSWORD_MASK     Synbol = s("▪", "•")
+	RADIO_ACTIVE      Symbol = s("●", ">")
+	RADIO_INACTIVE    Symbol = s("○", " ")
+	CHECKBOX_ACTIVE   Symbol = s("◻", "[•]")
+	CHECKBOX_SELECTED Symbol = s("◼", "[+]")
+	CHECKBOX_INACTIVE Symbol = s("◻", "[ ]")
+	PASSWORD_MASK     Symbol = s("▪", "•")
 
-	BAR_H               Synbol = s("─", "-")
-	CORNER_TOP_RIGHT    Synbol = s("╮", "+")
-	CONNECT_LEFT        Synbol = s("├", "+")
-	CORNER_BOTTOM_RIGHT Synbol = s("╯", "+")
+	BAR_H               Symbol = s("─", "-")
+	CORNER_TOP_RIGHT    Symbol = s("╮", "+")
+	CONNECT_LEFT        Symbol = s("├", "+")
+	CORNER_BOTTOM_RIGHT Symbol = s("╯", "+")
 
-	INFO    Synbol = s("●", "•")
-	SUCCESS Synbol = s("◆", "*")
-	WARN    Synbol = s("▲", "!")
-	ERROR   Synbol = s("■", "x")
+	INFO    Symbol = s("●", "•")
+	SUCCESS Symbol = s("◆", "*")
+	WARN    Symbol = s("▲", "!")
+	ERROR   Symbol = s("■", "x")
 )
 
 func State(state core.State) string {
