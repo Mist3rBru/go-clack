@@ -1,6 +1,7 @@
 package prompts
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -22,6 +23,7 @@ type MultiSelectParams[TValue comparable] struct {
 	Message      string
 	Options      []*MultiSelectOption[TValue]
 	InitialValue []TValue
+	Filter       bool
 	Required     bool
 	Validate     func(value []TValue) error
 }
@@ -42,9 +44,11 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[TValue]{
 		InitialValue: params.InitialValue,
 		Options:      options,
+		Filter:       params.Filter,
 		Required:     params.Required,
 		Validate:     params.Validate,
 		Render: func(p *core.MultiSelectPrompt[TValue]) string {
+			message := params.Message
 			var value string
 
 			switch p.State {
@@ -84,12 +88,23 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 					}
 					radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
 				}
-				value = p.LimitLines(radioOptions, 3)
+
+				if p.Filter {
+					if p.Search == "" {
+						message = fmt.Sprintf("%s\n> %s", message, picocolors.Inverse("T")+picocolors.Dim("ype to filter..."))
+					} else {
+						message = fmt.Sprintf("%s\n> %s", message, p.Search+picocolors.Inverse(" "))
+					}
+
+					value = p.LimitLines(radioOptions, 4)
+				} else {
+					value = p.LimitLines(radioOptions, 3)
+				}
 			}
 
 			return theme.ApplyTheme(theme.ThemeParams[[]TValue]{
 				Ctx:             p.Prompt,
-				Message:         params.Message,
+				Message:         message,
 				Value:           value,
 				ValueWithCursor: value,
 			})

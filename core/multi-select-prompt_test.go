@@ -10,9 +10,9 @@ import (
 func newMultiSelectPrompt() *core.MultiSelectPrompt[string] {
 	return core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
 		Options: []*core.MultiSelectOption[string]{
-			{Value: "a"},
-			{Value: "b"},
-			{Value: "c"},
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
 		},
 		Render: func(p *core.MultiSelectPrompt[string]) string { return "" },
 	})
@@ -74,12 +74,12 @@ func TestChangeMultiSelectValue(t *testing.T) {
 }
 
 func TestMultiSelectInitialValue(t *testing.T) {
-	initialValue := []string{"a", "c"}
+	initialValue := []string{"foo", "baz"}
 	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
 		Options: []*core.MultiSelectOption[string]{
-			{Value: "a"},
-			{Value: "b"},
-			{Value: "c"},
+			{Value: "foo"},
+			{Value: "bar"},
+			{Value: "baz"},
 		},
 		InitialValue: initialValue,
 		Render:       func(p *core.MultiSelectPrompt[string]) string { return "" },
@@ -97,12 +97,12 @@ func TestMultiSelectInitialValue(t *testing.T) {
 }
 
 func TestMultiSelectInitialSelectedOptions(t *testing.T) {
-	initialValue := []string{"a", "c"}
+	initialValue := []string{"foo", "baz"}
 	p := core.NewMultiSelectPrompt(core.MultiSelectPromptParams[string]{
 		Options: []*core.MultiSelectOption[string]{
-			{Value: "a", IsSelected: true},
-			{Value: "b"},
-			{Value: "c", IsSelected: true},
+			{Value: "foo", IsSelected: true},
+			{Value: "bar"},
+			{Value: "baz", IsSelected: true},
 		},
 		Render: func(p *core.MultiSelectPrompt[string]) string { return "" },
 	})
@@ -141,4 +141,80 @@ func TestMultiSelectRequiredValue(t *testing.T) {
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
 	assert.Equal(t, core.ErrorState, p.State)
+}
+
+func TestMultiSelectFilter(t *testing.T) {
+	p1 := newMultiSelectPrompt()
+	p2 := newMultiSelectPrompt()
+	p2.Filter = true
+
+	p1.PressKey(&core.Key{Char: "b"})
+	p2.PressKey(&core.Key{Char: "b"})
+
+	assert.Greater(t, len(p1.Options), 0)
+	assert.Greater(t, len(p2.Options), 0)
+	assert.Greater(t, len(p1.Options), len(p2.Options))
+}
+
+func TestMultiSelectFilterCursor(t *testing.T) {
+	p := newMultiSelectPrompt()
+	p.Filter = true
+
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "b"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "a"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "z"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 1, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 1, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 2, p.CursorIndex)
+}
+
+func TestMultiSelectFilterOutOptions(t *testing.T) {
+	p := newMultiSelectPrompt()
+	p.Filter = true
+
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "z"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "#"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 2, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "#"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 0, p.CursorIndex)
+}
+
+func TestMultiSelectFilterOverSelectAll(t *testing.T) {
+	p := newMultiSelectPrompt()
+	p.Filter = true
+
+	assert.Equal(t, 0, len(p.Value))
+	assert.Equal(t, 3, len(p.Options))
+
+	p.PressKey(&core.Key{Name: "a", Char: "a"})
+	assert.Equal(t, 0, len(p.Value))
+	assert.Equal(t, 2, len(p.Options))
+	assert.Equal(t, "a", p.Search)
 }

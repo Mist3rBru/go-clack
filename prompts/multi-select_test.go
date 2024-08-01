@@ -15,9 +15,9 @@ func runMultiSelect() {
 	prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
 		Options: []*prompts.MultiSelectOption[string]{
-			{Label: "a", IsSelected: true},
-			{Label: "b", IsSelected: true},
-			{Label: "c"},
+			{Label: "foo", IsSelected: true},
+			{Label: "bar", IsSelected: true},
+			{Label: "baz"},
 		},
 	})
 }
@@ -26,9 +26,9 @@ func TestMultiSelectInitialState(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
 		Options: []*prompts.MultiSelectOption[string]{
-			{Label: "a"},
-			{Label: "b"},
-			{Label: "c"},
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
 		},
 	})
 	time.Sleep(time.Millisecond)
@@ -42,9 +42,9 @@ func TestMultiSelectWithHint(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
 		Options: []*prompts.MultiSelectOption[string]{
-			{Label: "a", Hint: "b"},
-			{Label: "b", Hint: "c"},
-			{Label: "c", Hint: "a"},
+			{Label: "foo", Hint: "hint-foo"},
+			{Label: "bar", Hint: "hint-bar"},
+			{Label: "baz", Hint: "hint-baz"},
 		},
 	})
 	time.Sleep(time.Millisecond)
@@ -58,9 +58,9 @@ func TestMultiSelectWithSelectedHint(t *testing.T) {
 	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
 		Message: message,
 		Options: []*prompts.MultiSelectOption[string]{
-			{Label: "a", Hint: "b"},
-			{Label: "b", Hint: "c"},
-			{Label: "c", Hint: "a"},
+			{Label: "foo", Hint: "hint-foo"},
+			{Label: "bar", Hint: "hint-bar"},
+			{Label: "baz", Hint: "hint-baz"},
 		},
 	})
 	time.Sleep(time.Millisecond)
@@ -135,6 +135,43 @@ func TestMultiSelectMultiValue(t *testing.T) {
 	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
 	p.CursorIndex = 1
 	p.PressKey(&core.Key{Name: core.DownKey})
+
+	assert.Equal(t, core.ActiveState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestMultiSelectEmptyFilter(t *testing.T) {
+	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
+		Message: message,
+		Filter:  true,
+		Options: []*prompts.MultiSelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
+
+	assert.Equal(t, core.InitialState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestMultiSelectFilledFilter(t *testing.T) {
+	go prompts.MultiSelect(prompts.MultiSelectParams[string]{
+		Message: message,
+		Filter:  true,
+		Options: []*prompts.MultiSelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.MultiSelectTestingPrompt.(*core.MultiSelectPrompt[string])
+	p.PressKey(&core.Key{Char: "b"})
 
 	assert.Equal(t, core.ActiveState, p.State)
 	cupaloy.SnapshotT(t, p.Frame)

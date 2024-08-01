@@ -137,7 +137,7 @@ func TestSelectFilterOutOptions(t *testing.T) {
 
 	p.PressKey(&core.Key{Name: core.BackspaceKey})
 	assert.Equal(t, 0, p.CursorIndex)
-	
+
 	p.PressKey(&core.Key{Name: core.BackspaceKey})
 	assert.Equal(t, 2, p.CursorIndex)
 }

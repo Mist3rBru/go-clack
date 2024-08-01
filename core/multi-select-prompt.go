@@ -2,6 +2,7 @@ package core
 
 import (
 	"os"
+	"regexp"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/core/validator"
@@ -9,8 +10,11 @@ import (
 
 type MultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
-	Options  []*MultiSelectOption[TValue]
-	Required bool
+	initialOptions []*MultiSelectOption[TValue]
+	Options        []*MultiSelectOption[TValue]
+	Required       bool
+	Filter         bool
+	Search         string
 }
 
 type MultiSelectPromptParams[TValue comparable] struct {
@@ -18,6 +22,7 @@ type MultiSelectPromptParams[TValue comparable] struct {
 	Output       *os.File
 	InitialValue []TValue
 	Options      []*MultiSelectOption[TValue]
+	Filter       bool
 	Required     bool
 	Validate     func(value []TValue) error
 	Render       func(p *MultiSelectPrompt[TValue]) string
@@ -43,8 +48,10 @@ func NewMultiSelectPrompt[TValue comparable](params MultiSelectPromptParams[TVal
 			Validate:     WrapValidate(params.Validate, &p.Required, "Please select at least one option. Press `space` to select"),
 			Render:       WrapRender[[]TValue](&p, params.Render),
 		}),
-		Options:  params.Options,
-		Required: params.Required,
+		initialOptions: params.Options,
+		Options:        params.Options,
+		Filter:         params.Filter,
+		Required:       params.Required,
 	}
 
 	p.On(KeyEvent, func(args ...any) {
@@ -80,16 +87,64 @@ func (p *MultiSelectPrompt[TValue]) handleKeyPress(key *Key) {
 			p.Value = append(p.Value, option.Value)
 		}
 	case "a":
-		if len(p.Value) == len(p.Options) {
-			p.Value = []TValue{}
-			for _, option := range p.Options {
-				option.IsSelected = false
-			}
+		if p.Filter {
+			p.filterOptions(key)
 		} else {
-			p.Value = make([]TValue, len(p.Options))
-			for i, option := range p.Options {
-				option.IsSelected = true
-				p.Value[i] = option.Value
+			p.selectAll()
+		}
+	case EnterKey, CancelKey:
+	default:
+		if p.Filter {
+			p.filterOptions(key)
+		}
+	}
+}
+
+func (p *MultiSelectPrompt[TValue]) selectAll() {
+	if len(p.Value) == len(p.Options) {
+		p.Value = []TValue{}
+		for _, option := range p.Options {
+			option.IsSelected = false
+		}
+	} else {
+		p.Value = make([]TValue, len(p.Options))
+		for i, option := range p.Options {
+			option.IsSelected = true
+			p.Value[i] = option.Value
+		}
+	}
+}
+
+func (p *MultiSelectPrompt[TValue]) filterOptions(key *Key) {
+	var currentOption *MultiSelectOption[TValue]
+	if p.CursorIndex >= 0 && p.CursorIndex < len(p.Options) {
+		currentOption = p.Options[p.CursorIndex]
+	}
+	p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
+	p.CursorIndex = 0
+	if p.Search == "" {
+		p.Options = p.initialOptions
+		if currentOption == nil {
+			return
+		}
+		for i, option := range p.Options {
+			if option.Value == currentOption.Value {
+				p.CursorIndex = i
+				break
+			}
+		}
+	} else {
+		p.Options = []*MultiSelectOption[TValue]{}
+		searchRegex, err := regexp.Compile("(?i)" + p.Search)
+		if err != nil {
+			return
+		}
+		for _, option := range p.initialOptions {
+			if matched := searchRegex.MatchString(option.Label); matched {
+				p.Options = append(p.Options, option)
+				if currentOption != nil && option.Value == currentOption.Value {
+					p.CursorIndex = len(p.Options) - 1
+				}
 			}
 		}
 	}

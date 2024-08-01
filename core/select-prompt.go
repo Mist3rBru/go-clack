@@ -86,8 +86,12 @@ func (p *SelectPrompt[TValue]) handleKeyPress(key *Key) {
 				}
 			} else {
 				p.Options = []*SelectOption[TValue]{}
+				searchRegex, err := regexp.Compile("(?i)" + p.Search)
+				if err != nil {
+					return
+				}
 				for _, option := range p.initialOptions {
-					if matched, _ := regexp.MatchString("(?i)"+p.Search, option.Label); matched {
+					if matched := searchRegex.MatchString(option.Label); matched {
 						p.Options = append(p.Options, option)
 						if option.Value == p.Value {
 							p.CursorIndex = len(p.Options) - 1

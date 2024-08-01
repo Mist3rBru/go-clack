@@ -1,6 +1,6 @@
 │
 ◆ test message
-│ ◻ a (b)
-│ ◻ b 
-│ ◻ c 
+│ ◻ foo (hint-foo)
+│ ◻ bar 
+│ ◻ baz 
 └

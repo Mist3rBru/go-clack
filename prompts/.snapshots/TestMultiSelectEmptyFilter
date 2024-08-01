@@ -1,6 +1,7 @@
 │
 ◆ test message
-│ ◼ foo (hint-foo)
+│ > Type to filter...
+│ ◻ foo 
 │ ◻ bar 
 │ ◻ baz 
 └
