@@ -85,6 +85,17 @@ func TestLabelAsSelectValue(t *testing.T) {
 	assert.Equal(t, "bar", p.Value)
 }
 
+func TestSelectRequiredValue(t *testing.T) {
+	p := newSelectPrompt()
+	p.Filter = true
+	p.Required = true
+
+	p.PressKey(&core.Key{Name: "#", Char: "#"})
+
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+}
+
 func TestSelectFilter(t *testing.T) {
 	p1 := newSelectPrompt()
 	p2 := newSelectPrompt()

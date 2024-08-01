@@ -136,7 +136,7 @@ func TestLabelAsMultiSelectValue(t *testing.T) {
 }
 
 func TestMultiSelectRequiredValue(t *testing.T) {
-	p := newMultiSelectPathPrompt()
+	p := newMultiSelectPrompt()
 	p.Required = true
 
 	p.PressKey(&core.Key{Name: core.EnterKey})

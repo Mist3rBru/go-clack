@@ -15,8 +15,8 @@ type SelectPathPrompt struct {
 	CurrentLayer  []*PathNode
 	CurrentOption *PathNode
 	OnlyShowDir   bool
-	Filter        bool
 	Search        string
+	Filter        bool
 	FileSystem    FileSystem
 }
 

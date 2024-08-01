@@ -10,18 +10,20 @@ import (
 
 type SelectPrompt[TValue comparable] struct {
 	Prompt[TValue]
-	Filter         bool
-	Search         string
 	initialOptions []*SelectOption[TValue]
 	Options        []*SelectOption[TValue]
+	Search         string
+	Filter         bool
+	Required       bool
 }
 
 type SelectPromptParams[TValue comparable] struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue TValue
-	Filter       bool
 	Options      []*SelectOption[TValue]
+	Filter       bool
+	Required     bool
 	Render       func(p *SelectPrompt[TValue]) string
 }
 
@@ -47,11 +49,13 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 			Output:       params.Output,
 			InitialValue: params.Options[startIndex].Value,
 			CursorIndex:  startIndex,
+			Validate:     WrapValidate[TValue](nil, &p.Required, "Please select an option."),
 			Render:       WrapRender[TValue](&p, params.Render),
 		}),
-		Filter:         params.Filter,
 		initialOptions: params.Options,
 		Options:        params.Options,
+		Filter:         params.Filter,
+		Required:       params.Required,
 	}
 
 	p.On(KeyEvent, func(args ...any) {

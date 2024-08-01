@@ -12,9 +12,9 @@ type MultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
 	initialOptions []*MultiSelectOption[TValue]
 	Options        []*MultiSelectOption[TValue]
-	Required       bool
-	Filter         bool
 	Search         string
+	Filter         bool
+	Required       bool
 }
 
 type MultiSelectPromptParams[TValue comparable] struct {

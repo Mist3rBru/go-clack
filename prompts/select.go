@@ -21,8 +21,9 @@ type SelectOption[TValue comparable] struct {
 type SelectParams[TValue comparable] struct {
 	Message      string
 	InitialValue TValue
-	Filter       bool
 	Options      []*SelectOption[TValue]
+	Filter       bool
+	Required     bool
 }
 
 func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
@@ -38,9 +39,10 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 	}
 
 	p := core.NewSelectPrompt(core.SelectPromptParams[TValue]{
-		Filter:       params.Filter,
 		InitialValue: params.InitialValue,
 		Options:      options,
+		Filter:       params.Filter,
+		Required:     params.Required,
 		Render: func(p *core.SelectPrompt[TValue]) string {
 			message := params.Message
 			var value string
