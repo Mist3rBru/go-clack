@@ -2,6 +2,7 @@ package core
 
 import (
 	"os"
+	"regexp"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/core/validator"
@@ -9,13 +10,17 @@ import (
 
 type SelectPrompt[TValue comparable] struct {
 	Prompt[TValue]
-	Options []*SelectOption[TValue]
+	Filter         bool
+	Search         string
+	initialOptions []*SelectOption[TValue]
+	Options        []*SelectOption[TValue]
 }
 
 type SelectPromptParams[TValue comparable] struct {
 	Input        *os.File
 	Output       *os.File
 	InitialValue TValue
+	Filter       bool
 	Options      []*SelectOption[TValue]
 	Render       func(p *SelectPrompt[TValue]) string
 }
@@ -44,7 +49,9 @@ func NewSelectPrompt[TValue comparable](params SelectPromptParams[TValue]) *Sele
 			CursorIndex:  startIndex,
 			Render:       WrapRender[TValue](&p, params.Render),
 		}),
-		Options: params.Options,
+		Filter:         params.Filter,
+		initialOptions: params.Options,
+		Options:        params.Options,
 	}
 
 	p.On(KeyEvent, func(args ...any) {
@@ -64,6 +71,35 @@ func (p *SelectPrompt[TValue]) handleKeyPress(key *Key) {
 		p.CursorIndex = 0
 	case EndKey:
 		p.CursorIndex = len(p.Options) - 1
+	case EnterKey, CancelKey:
+	default:
+		if p.Filter {
+			p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
+			p.CursorIndex = 0
+			if p.Search == "" {
+				p.Options = p.initialOptions
+				for i, option := range p.Options {
+					if option.Value == p.Value {
+						p.CursorIndex = i
+						break
+					}
+				}
+			} else {
+				p.Options = []*SelectOption[TValue]{}
+				for _, option := range p.initialOptions {
+					if matched, _ := regexp.MatchString("(?i)"+p.Search, option.Label); matched {
+						p.Options = append(p.Options, option)
+						if option.Value == p.Value {
+							p.CursorIndex = len(p.Options) - 1
+						}
+					}
+				}
+			}
+		}
 	}
-	p.Value = p.Options[p.CursorIndex].Value
+	if p.CursorIndex >= 0 && p.CursorIndex < len(p.Options) {
+		p.Value = p.Options[p.CursorIndex].Value
+	} else {
+		p.Value = *new(TValue)
+	}
 }

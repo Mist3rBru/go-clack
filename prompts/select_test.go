@@ -15,9 +15,9 @@ func runSelect() {
 	prompts.Select(prompts.SelectParams[string]{
 		Message: message,
 		Options: []*prompts.SelectOption[string]{
-			{Label: "a"},
-			{Label: "b"},
-			{Label: "c"},
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
 		},
 	})
 }
@@ -35,9 +35,9 @@ func TestSelectWithHint(t *testing.T) {
 	go prompts.Select(prompts.SelectParams[string]{
 		Message: message,
 		Options: []*prompts.SelectOption[string]{
-			{Label: "a", Hint: "b"},
-			{Label: "b", Hint: "c"},
-			{Label: "c", Hint: "a"},
+			{Label: "foo", Hint: "hint-foo"},
+			{Label: "bar", Hint: "hint-bar"},
+			{Label: "baz", Hint: "hint-baz"},
 		},
 	})
 	time.Sleep(time.Millisecond)
@@ -76,20 +76,57 @@ func TestSelectWithLongList(t *testing.T) {
 			{Label: "a"},
 			{Label: "b"},
 			{Label: "c"},
-			{Label: "a"},
-			{Label: "b"},
-			{Label: "c"},
-			{Label: "a"},
-			{Label: "b"},
-			{Label: "c"},
-			{Label: "a"},
-			{Label: "b"},
-			{Label: "c"},
+			{Label: "d"},
+			{Label: "e"},
+			{Label: "f"},
+			{Label: "g"},
+			{Label: "h"},
+			{Label: "i"},
+			{Label: "j"},
+			{Label: "k"},
+			{Label: "l"},
 		},
 	})
 	time.Sleep(time.Millisecond)
 	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
 
 	assert.Equal(t, core.InitialState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestSelectEmptyFilter(t *testing.T) {
+	go prompts.Select(prompts.SelectParams[string]{
+		Message: message,
+		Filter:  true,
+		Options: []*prompts.SelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
+
+	assert.Equal(t, core.InitialState, p.State)
+	cupaloy.SnapshotT(t, p.Frame)
+}
+
+func TestSelectFilledFilter(t *testing.T) {
+	go prompts.Select(prompts.SelectParams[string]{
+		Message: message,
+		Filter:  true,
+		Options: []*prompts.SelectOption[string]{
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
+		},
+	})
+	time.Sleep(time.Millisecond)
+
+	p := test.SelectTestingPrompt.(*core.SelectPrompt[string])
+	p.PressKey(&core.Key{Char: "b"})
+
+	assert.Equal(t, core.ActiveState, p.State)
 	cupaloy.SnapshotT(t, p.Frame)
 }

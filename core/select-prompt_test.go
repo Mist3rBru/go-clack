@@ -10,9 +10,9 @@ import (
 func newSelectPrompt() *core.SelectPrompt[string] {
 	return core.NewSelectPrompt(core.SelectPromptParams[string]{
 		Options: []*core.SelectOption[string]{
-			{Value: "a"},
-			{Value: "b"},
-			{Value: "c"},
+			{Label: "foo"},
+			{Label: "bar"},
+			{Label: "baz"},
 		},
 		Render: func(p *core.SelectPrompt[string]) string { return "" },
 	})
@@ -83,4 +83,61 @@ func TestLabelAsSelectValue(t *testing.T) {
 	assert.Equal(t, "foo", p.Value)
 	p.PressKey(&core.Key{Name: core.DownKey})
 	assert.Equal(t, "bar", p.Value)
+}
+
+func TestSelectFilter(t *testing.T) {
+	p1 := newSelectPrompt()
+	p2 := newSelectPrompt()
+	p2.Filter = true
+
+	p1.PressKey(&core.Key{Char: "b"})
+	p2.PressKey(&core.Key{Char: "b"})
+
+	assert.Greater(t, len(p1.Options), 0)
+	assert.Greater(t, len(p2.Options), 0)
+	assert.Greater(t, len(p1.Options), len(p2.Options))
+}
+
+func TestSelectFilterCursor(t *testing.T) {
+	p := newSelectPrompt()
+	p.Filter = true
+
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "b"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "a"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "z"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 1, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 1, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 2, p.CursorIndex)
+}
+
+func TestSelectFilterOutOptions(t *testing.T) {
+	p := newSelectPrompt()
+	p.Filter = true
+
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "z"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Char: "#"})
+	assert.Equal(t, 0, p.CursorIndex)
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 0, p.CursorIndex)
+	
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 2, p.CursorIndex)
 }
