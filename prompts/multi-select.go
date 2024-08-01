@@ -64,7 +64,7 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 				}
 
 			default:
-				radioOptions := make([]string, len(params.Options))
+				radioOptions := make([]string, len(p.Options))
 				for i, option := range p.Options {
 					var radio, label, hint string
 					if option.IsSelected && i == p.CursorIndex {

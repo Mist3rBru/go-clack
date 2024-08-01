@@ -72,19 +72,21 @@ func (p *MultiSelectPrompt[TValue]) handleKeyPress(key *Key) {
 	case EndKey:
 		p.CursorIndex = len(p.Options) - 1
 	case SpaceKey:
-		option := p.Options[p.CursorIndex]
-		if option.IsSelected {
-			option.IsSelected = false
-			value := []TValue{}
-			for _, v := range p.Value {
-				if v != option.Value {
-					value = append(value, v)
+		if p.CursorIndex >= 0 && p.CursorIndex < len(p.Options) {
+			option := p.Options[p.CursorIndex]
+			if option.IsSelected {
+				option.IsSelected = false
+				value := []TValue{}
+				for _, v := range p.Value {
+					if v != option.Value {
+						value = append(value, v)
+					}
 				}
+				p.Value = value
+			} else {
+				option.IsSelected = true
+				p.Value = append(p.Value, option.Value)
 			}
-			p.Value = value
-		} else {
-			option.IsSelected = true
-			p.Value = append(p.Value, option.Value)
 		}
 	case "a":
 		if p.Filter {

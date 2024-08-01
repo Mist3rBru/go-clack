@@ -218,3 +218,16 @@ func TestMultiSelectFilterOverSelectAll(t *testing.T) {
 	assert.Equal(t, 2, len(p.Options))
 	assert.Equal(t, "a", p.Search)
 }
+
+func TestMultiSelectInvalidOptionSelection(t *testing.T) {
+	p := newMultiSelectPrompt()
+	p.Filter = true
+
+	p.PressKey(&core.Key{Name: "#", Char: "#"})
+	assert.Equal(t, 0, len(p.Options))
+	assert.Equal(t, 0, len(p.Value))
+
+	p.PressKey(&core.Key{Name: core.SpaceKey})
+	assert.Equal(t, 0, len(p.Options))
+	assert.Equal(t, 0, len(p.Value))
+}
