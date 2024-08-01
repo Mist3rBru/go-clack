@@ -82,7 +82,20 @@ func WrapValidate[TValue any](validate func(value TValue) error, isRequired *boo
 			err = validate(value)
 		}
 		if err == nil && *isRequired {
-			if v := reflect.ValueOf(value); v.Len() == 0 {
+			v := reflect.ValueOf(value)
+			if !v.IsValid() {
+				return errors.New(msg)
+			}
+
+			k := v.Kind()
+			if (k == reflect.Ptr || k == reflect.Interface) && v.IsNil() {
+				err = errors.New(msg)
+			} else if k != reflect.Bool &&
+				((k == reflect.Slice && v.Len() == 0) ||
+					(k == reflect.Array && v.Len() == 0) ||
+					(k == reflect.Map && v.Len() == 0) ||
+					(k == reflect.Struct && v.IsZero()) ||
+					v.IsZero()) {
 				err = errors.New(msg)
 			}
 		}
