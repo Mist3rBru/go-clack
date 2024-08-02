@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/core/validator"
@@ -29,10 +30,13 @@ type Prompt[TValue any] struct {
 	Error       string
 	Value       TValue
 	CursorIndex int
-	Frame       string
 
-	Validate func(value TValue) error
-	Render   func(p *Prompt[TValue]) string
+	Validate           func(value TValue) error
+	ValidationDuration time.Duration
+	IsValidating       bool
+
+	Render func(p *Prompt[TValue]) string
+	Frame  string
 }
 
 type PromptParams[TValue any] struct {
@@ -159,7 +163,22 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 
 	if key.Name == EnterKey {
 		if p.Validate != nil {
+			p.IsValidating = true
+			validationStart := time.Now()
+
+			time.AfterFunc(400*time.Millisecond, func() {
+				for p.IsValidating {
+					p.State = ValidateState
+					p.ValidationDuration = time.Since(validationStart)
+					p.Emit(Event(ValidateState), p.ValidationDuration)
+					p.render()
+					time.Sleep(125 * time.Millisecond)
+				}
+			})
+
 			err := p.Validate(p.Value)
+			p.IsValidating = false
+
 			if err != nil {
 				p.State = ErrorState
 				p.Error = err.Error()
@@ -168,13 +187,14 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 		if p.State != ErrorState {
 			p.State = SubmitState
 		}
-	}
-	if key.Name == CancelKey {
+	} else if key.Name == CancelKey {
 		p.State = CancelState
 	}
+
 	if p.State == SubmitState || p.State == CancelState {
 		p.Emit(FinalizeEvent)
 	}
+
 	p.render()
 	p.Emit(Event(p.State), p.Value)
 }
@@ -575,10 +595,7 @@ outer:
 			break outer
 		default:
 			r, size, err := p.rl.ReadRune()
-			if err != nil {
-				continue
-			}
-			if size == 0 {
+			if err != nil || size == 0 || p.IsValidating {
 				continue
 			}
 			key := p.ParseKey(r)

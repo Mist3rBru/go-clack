@@ -29,11 +29,12 @@ const (
 type State string
 
 const (
-	InitialState State = "initial"
-	ActiveState  State = "active"
-	ErrorState   State = "error"
-	CancelState  State = "cancel"
-	SubmitState  State = "submit"
+	InitialState  State = "initial"
+	ActiveState   State = "active"
+	ValidateState State = "validate"
+	ErrorState    State = "error"
+	CancelState   State = "cancel"
+	SubmitState   State = "submit"
 )
 
 var (

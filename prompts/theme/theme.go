@@ -83,6 +83,17 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		})
 		return strings.Join([]string{title, value}, "\r\n")
 
+	case core.ValidateState:
+		value := ctx.FormatLines(strings.Split(params.Value, "\n"), core.FormatLinesOptions{
+			Default: core.FormatLineOptions{
+				Start: barColor(symbols.BAR),
+				Style: picocolors.Dim,
+			},
+		})
+		dots := strings.Repeat(".", int(ctx.ValidationDuration.Seconds())%4)
+		validatingMsg := barColor(symbols.BAR_END) + " " + picocolors.Dim("validating"+dots)
+		return strings.Join([]string{title, value, validatingMsg}, "\r\n")
+
 	default:
 		var valueWithCursor string
 		if params.Placeholder != "" && params.Value == "" {

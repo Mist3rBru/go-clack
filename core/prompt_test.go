@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
@@ -401,13 +402,40 @@ func TestValidateValue(t *testing.T) {
 	assert.Equal(t, "invalid value: foo", p.Error)
 }
 
-func TestEmitFinalizeOnSubmit(t *testing.T) {
+func TestEmitFinalizeBeforeSubmit(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
 	p.On(core.FinalizeEvent, func(args ...any) {
 		calledTimes++
 	})
+	p.On(core.SubmitEvent, func(args ...any) {
+		assert.Equal(t, 1, calledTimes)
+		calledTimes++
+	})
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
-	assert.Equal(t, 1, calledTimes)
+	assert.Equal(t, 2, calledTimes)
+}
+
+func TestSlowValidation(t *testing.T) {
+	p := newPrompt()
+	p.Validate = func(value string) error {
+		time.Sleep(528 * time.Millisecond)
+		return nil
+	}
+
+	go p.PressKey(&core.Key{Name: core.EnterKey})
+	time.Sleep(400 * time.Millisecond)
+	assert.Equal(t, true, p.IsValidating)
+	assert.Equal(t, core.ValidateState, p.State)
+	assert.GreaterOrEqual(t, p.ValidationDuration, 400*time.Millisecond)
+
+	time.Sleep(126 * time.Millisecond)
+	assert.Equal(t, true, p.IsValidating)
+	assert.Equal(t, core.ValidateState, p.State)
+	assert.GreaterOrEqual(t, p.ValidationDuration, 525*time.Millisecond)
+
+	time.Sleep(2 * time.Millisecond)
+	assert.Equal(t, false, p.IsValidating)
+	assert.Equal(t, core.SubmitState, p.State)
 }

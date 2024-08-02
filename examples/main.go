@@ -20,6 +20,7 @@ func main() {
 			{Label: "basic"},
 			{Label: "changeset"},
 			{Label: "spinner"},
+			{Label: "async validation"},
 		},
 	})
 	if err != nil {
@@ -30,13 +31,12 @@ func main() {
 	switch prompt {
 	case "basic":
 		BasicExample()
-		return
 	case "changeset":
 		ChangesetExample()
-		return
 	case "spinner":
 		SpinnerExample()
-		return
+	case "async validation":
+		AsyncValidation()
 	default:
 		prompts.Error("example not found")
 	}
