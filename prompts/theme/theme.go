@@ -38,9 +38,16 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		}),
 	}, "\r\n")
 
+	var valueWithCursor string
+	if params.Placeholder != "" && params.ValueWithCursor == "" {
+		valueWithCursor = picocolors.Inverse(string(params.Placeholder[0])) + picocolors.Dim(params.Placeholder[1:])
+	} else {
+		valueWithCursor = params.ValueWithCursor
+	}
+
 	switch ctx.State {
 	case core.ErrorState:
-		value := ctx.FormatLines(strings.Split(params.ValueWithCursor, "\n"), core.FormatLinesOptions{
+		value := ctx.FormatLines(strings.Split(valueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
 				Start: barColor(symbols.BAR),
 			},
@@ -95,12 +102,6 @@ func ApplyTheme[TValue ThemeValue](params ThemeParams[TValue]) string {
 		return strings.Join([]string{title, value, validatingMsg}, "\r\n")
 
 	default:
-		var valueWithCursor string
-		if params.Placeholder != "" && params.Value == "" {
-			valueWithCursor = picocolors.Inverse(string(params.Placeholder[0])) + picocolors.Dim(params.Placeholder[1:])
-		} else {
-			valueWithCursor = params.ValueWithCursor
-		}
 		value := ctx.FormatLines(strings.Split(valueWithCursor, "\n"), core.FormatLinesOptions{
 			Default: core.FormatLineOptions{
 				Start: barColor(symbols.BAR),
