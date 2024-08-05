@@ -13,10 +13,10 @@ import (
 
 func TestApplyThemeInitialState(t *testing.T) {
 	testCases := []struct {
-		Description string
-		Value       string
-		Placeholder string
-		Expected    string
+		Description     string
+		ValueWithCursor string
+		Placeholder     string
+		Expected        string
 	}{
 		{
 			Description: "InitialState",
@@ -38,8 +38,8 @@ func TestApplyThemeInitialState(t *testing.T) {
 			}, "\r\n"),
 		},
 		{
-			Description: "InitialStateWithValue",
-			Value:       "Value",
+			Description:     "InitialStateWithValue",
+			ValueWithCursor: "Value with cursor ",
 			Expected: strings.Join([]string{
 				symbols.BAR,
 				symbols.STEP_ACTIVE + " Test message",
@@ -48,13 +48,24 @@ func TestApplyThemeInitialState(t *testing.T) {
 			}, "\r\n"),
 		},
 		{
-			Description: "InitialStateWithPlaceholderAndValue",
-			Placeholder: "Placeholder",
-			Value:       "Value",
+			Description:     "InitialStateWithPlaceholderAndValue",
+			Placeholder:     "Placeholder",
+			ValueWithCursor: "Value with cursor ",
 			Expected: strings.Join([]string{
 				symbols.BAR,
 				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " Value with cursor ",
+				symbols.BAR_END,
+			}, "\r\n"),
+		},
+		{
+			Description:     "InitialStateWithPlaceholderAndCursor",
+			Placeholder:     "Placeholder",
+			ValueWithCursor: " ",
+			Expected: strings.Join([]string{
+				symbols.BAR,
+				symbols.STEP_ACTIVE + " Test message",
+				symbols.BAR + " Placeholder",
 				symbols.BAR_END,
 			}, "\r\n"),
 		},
@@ -65,9 +76,9 @@ func TestApplyThemeInitialState(t *testing.T) {
 				Ctx: core.Prompt[string]{
 					State: core.InitialState,
 				},
-				Message:     "Test message",
-				Value:       tC.Value,
-				Placeholder: tC.Placeholder,
+				Message:         "Test message",
+				ValueWithCursor: tC.ValueWithCursor,
+				Placeholder:     tC.Placeholder,
 			})
 			assert.Equal(t, tC.Expected, frame)
 		})
@@ -118,6 +129,17 @@ func TestApplyThemeActiveState(t *testing.T) {
 				symbols.BAR,
 				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " Value with cursor ",
+				symbols.BAR_END,
+			}, "\r\n"),
+		},
+		{
+			Description:     "ActiveStateWithPlaceholderAndCursor",
+			Placeholder:     "Placeholder",
+			ValueWithCursor: " ",
+			Expected: strings.Join([]string{
+				symbols.BAR,
+				symbols.STEP_ACTIVE + " Test message",
+				symbols.BAR + " ",
 				symbols.BAR_END,
 			}, "\r\n"),
 		},
@@ -364,7 +386,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			Description: "ValidateState",
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating",
 			}, "\r\n"),
@@ -374,7 +396,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			ValidationDuration: 1 * time.Second,
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating.",
 			}, "\r\n"),
@@ -384,7 +406,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			ValidationDuration: 2 * time.Second,
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating..",
 			}, "\r\n"),
@@ -394,7 +416,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			ValidationDuration: 3 * time.Second,
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating...",
 			}, "\r\n"),
@@ -404,7 +426,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			ValidationDuration: 4 * time.Second,
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating",
 			}, "\r\n"),
@@ -414,7 +436,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			ValidationDuration: 5 * time.Second,
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating.",
 			}, "\r\n"),
@@ -424,7 +446,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			Placeholder: "Placeholder",
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " ",
 				symbols.BAR_END + " validating",
 			}, "\r\n"),
@@ -434,7 +456,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			Value:       "Value",
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " Value",
 				symbols.BAR_END + " validating",
 			}, "\r\n"),
@@ -445,7 +467,7 @@ func TestApplyThemeValidateState(t *testing.T) {
 			Value:       "Value",
 			Expected: strings.Join([]string{
 				symbols.BAR,
-				symbols.STEP_SUBMIT + " Test message",
+				symbols.STEP_ACTIVE + " Test message",
 				symbols.BAR + " Value",
 				symbols.BAR_END + " validating",
 			}, "\r\n"),
