@@ -6,18 +6,18 @@ import (
 	"strings"
 )
 
-type WorkflowStep struct {
+type workflowStep struct {
 	Name   string
 	Prompt func() (any, error)
 }
 
 type workflowBuilder[TResult any] struct {
-	steps  []*WorkflowStep
+	steps  []*workflowStep
 	result TResult
 }
 
 func (w *workflowBuilder[TResult]) Step(name string, prompt func() (any, error)) *workflowBuilder[TResult] {
-	w.steps = append(w.steps, &WorkflowStep{Name: name, Prompt: prompt})
+	w.steps = append(w.steps, &workflowStep{Name: name, Prompt: prompt})
 	return w
 }
 

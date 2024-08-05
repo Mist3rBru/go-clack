@@ -38,7 +38,7 @@ const (
 )
 
 var (
-	ErrCancelPrompt error = errors.New("prompt canceled error")
+	ErrCancelPrompt error = errors.New("prompt canceled")
 )
 
 type KeyName string

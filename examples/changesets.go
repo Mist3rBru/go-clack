@@ -9,84 +9,96 @@ import (
 )
 
 func ChangesetExample() {
-	var packages, majorPackages, minorPackages, patchPackages []string
-
 	prompts.Intro(picocolors.BgCyan(picocolors.Black(" changesets ")))
 
-	packages, err := prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
-		Message: "Which packages would you like to include?",
-		Options: map[string][]prompts.MultiSelectOption[string]{
-			"changed packages": {
-				{Label: "@scope/a"},
-				{Label: "@scope/b"},
-				{Label: "@scope/c"},
-			},
-			"unchanged packages": {
-				{Label: "@scope/x"},
-				{Label: "@scope/y"},
-				{Label: "@scope/z"},
-			},
-		},
-	})
-	HandleCancel(err)
-
-	packageOptions := make([]*prompts.MultiSelectOption[string], len(packages))
-	for i, packageOption := range packages {
-		packageOptions[i] = &prompts.MultiSelectOption[string]{
-			Label: packageOption,
-		}
+	type Changeset struct {
+		Packages []string
+		Major    []string
+		Minor    []string
+		Patch    []string
+		Summary  string
 	}
-	majorPackages, err = prompts.MultiSelect(prompts.MultiSelectParams[string]{
-		Message: fmt.Sprintf("Which packages should have a %s bump?", picocolors.Red("major")),
-		Options: packageOptions,
-	})
-	HandleCancel(err)
+	var changeset Changeset
 
-	minorOptions := []*prompts.MultiSelectOption[string]{}
-packagesLoop:
-	for _, packageOption := range packages {
-		for _, majorPackage := range majorPackages {
-			if majorPackage == packageOption {
-				continue packagesLoop
+	err := prompts.Workflow(&changeset).
+		Step("packages", func() (any, error) {
+			return prompts.GroupMultiSelect(prompts.GroupMultiSelectParams[string]{
+				Message: "Which packages would you like to include?",
+				Options: map[string][]prompts.MultiSelectOption[string]{
+					"changed packages": {
+						{Label: "@scope/a"},
+						{Label: "@scope/b"},
+						{Label: "@scope/c"},
+					},
+					"unchanged packages": {
+						{Label: "@scope/x"},
+						{Label: "@scope/y"},
+						{Label: "@scope/z"},
+					},
+				},
+			})
+		}).
+		Step("major", func() (any, error) {
+			majorOptions := make([]*prompts.MultiSelectOption[string], len(changeset.Packages))
+			for i, packageOption := range changeset.Packages {
+				majorOptions[i] = &prompts.MultiSelectOption[string]{
+					Label: packageOption,
+				}
 			}
-		}
-		minorOptions = append(minorOptions, &prompts.MultiSelectOption[string]{
-			Label: packageOption,
-		})
-	}
-
-	if len(minorOptions) > 0 {
-		minorPackages, err = prompts.MultiSelect(prompts.MultiSelectParams[string]{
-			Message: fmt.Sprintf("Which packages should have a %s bump?", picocolors.Yellow("minor")),
-			Options: minorOptions,
-		})
-		HandleCancel(err)
-	}
-
-packagesLoop2:
-	for _, _package := range packages {
-		for _, majorPackage := range majorPackages {
-			if majorPackage == _package {
-				continue packagesLoop2
+			return prompts.MultiSelect(prompts.MultiSelectParams[string]{
+				Message: fmt.Sprintf("Which packages should have a %s bump?", picocolors.Red("major")),
+				Options: majorOptions,
+			})
+		}).
+		Step("minor", func() (any, error) {
+			minorOptions := []*prompts.MultiSelectOption[string]{}
+		packagesLoop:
+			for _, packageOption := range changeset.Packages {
+				for _, majorPackage := range changeset.Major {
+					if majorPackage == packageOption {
+						continue packagesLoop
+					}
+				}
+				minorOptions = append(minorOptions, &prompts.MultiSelectOption[string]{
+					Label: packageOption,
+				})
 			}
-		}
-		for _, minorPackage := range minorPackages {
-			if minorPackage == _package {
-				continue packagesLoop2
+
+			return prompts.MultiSelect(prompts.MultiSelectParams[string]{
+				Message: fmt.Sprintf("Which packages should have a %s bump?", picocolors.Yellow("minor")),
+				Options: minorOptions,
+			})
+		}).
+		Step("patch", func() (any, error) {
+		packagesLoop:
+			for _, _package := range changeset.Packages {
+				for _, majorPackage := range changeset.Major {
+					if majorPackage == _package {
+						continue packagesLoop
+					}
+				}
+				for _, minorPackage := range changeset.Minor {
+					if minorPackage == _package {
+						continue packagesLoop
+					}
+				}
+				changeset.Patch = append(changeset.Patch, _package)
 			}
-		}
-		patchPackages = append(patchPackages, _package)
-	}
 
-	if len(patchPackages) > 0 {
-		note := strings.Join(patchPackages, picocolors.Dim(", "))
-		prompts.Step(fmt.Sprintf("These packages will have a %s bump: %s", picocolors.Green("patch"), picocolors.Dim(note)))
-	}
+			if len(changeset.Patch) > 0 {
+				note := strings.Join(changeset.Patch, picocolors.Dim(", "))
+				prompts.Step(fmt.Sprintf("These packages will have a %s bump: %s", picocolors.Green("patch"), picocolors.Dim(note)))
+			}
 
-	_, err = prompts.Text(prompts.TextParams{
-		Message:     "Please enter a summary for this change",
-		Placeholder: "Summary",
-	})
+			return changeset.Patch, nil
+		}).
+		Step("summary", func() (any, error) {
+			return prompts.Text(prompts.TextParams{
+				Message:     "Please enter a summary for this change",
+				Placeholder: "Summary",
+			})
+		}).
+		Run()
 	HandleCancel(err)
 
 	prompts.Outro(fmt.Sprintf("Changeset added! %s", picocolors.Underline(picocolors.Cyan(".changeset/orange-crabs-sing.md"))))
