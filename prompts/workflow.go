@@ -11,17 +11,17 @@ type workflowStep struct {
 	Prompt func() (any, error)
 }
 
-type workflowBuilder[TResult any] struct {
+type workflowBuilder struct {
 	steps  []*workflowStep
-	result TResult
+	result any
 }
 
-func (w *workflowBuilder[TResult]) Step(name string, prompt func() (any, error)) *workflowBuilder[TResult] {
+func (w *workflowBuilder) Step(name string, prompt func() (any, error)) *workflowBuilder {
 	w.steps = append(w.steps, &workflowStep{Name: name, Prompt: prompt})
 	return w
 }
 
-func (w *workflowBuilder[TResult]) Run() error {
+func (w *workflowBuilder) Run() error {
 	v := reflect.ValueOf(w.result).Elem()
 	for i, step := range w.steps {
 		stepResult, stepErr := step.Prompt()
@@ -41,8 +41,8 @@ func (w *workflowBuilder[TResult]) Run() error {
 	return nil
 }
 
-func Workflow[TResult any](v TResult) *workflowBuilder[TResult] {
-	return &workflowBuilder[TResult]{result: v}
+func Workflow(v any) *workflowBuilder {
+	return &workflowBuilder{result: v}
 }
 
 func capitalize(str string) string {
