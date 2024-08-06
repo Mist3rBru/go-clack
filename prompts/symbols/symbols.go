@@ -22,7 +22,7 @@ var (
 
 	BAR_START Symbol = s("┌", "T")
 	BAR       Symbol = s("│", "|")
-	BAR_END   Symbol = s("└", "—")
+	BAR_END   Symbol = s("└", "L")
 
 	RADIO_ACTIVE      Symbol = s("●", ">")
 	RADIO_INACTIVE    Symbol = s("○", " ")
@@ -31,10 +31,20 @@ var (
 	CHECKBOX_INACTIVE Symbol = s("◻", "[ ]")
 	PASSWORD_MASK     Symbol = s("▪", "•")
 
-	BAR_H               Symbol = s("─", "-")
-	CORNER_TOP_RIGHT    Symbol = s("╮", "+")
-	CONNECT_LEFT        Symbol = s("├", "+")
-	CORNER_BOTTOM_RIGHT Symbol = s("╯", "+")
+	BAR_H                Symbol = s("─", "-")
+	CORNER_TOP_RIGHT     Symbol = s("╮", "+")
+	CORNER_TOP_LEFT      Symbol = s("╭", "+")
+	CORNER_BOTTOM_RIGHT  Symbol = s("╯", "+")
+	CORNER_BOTTOM_LEFT   Symbol = s("╰", "+")
+	CONNECT_TOP          Symbol = s("┬", "+")
+	CONNECT_TOP_LEFT     Symbol = s("┌", "+")
+	CONNECT_TOP_RIGHT    Symbol = s("┐", "+")
+	CONNECT_BOTTOM       Symbol = s("┴", "+")
+	CONNECT_BOTTOM_LEFT  Symbol = s("└", "+")
+	CONNECT_BOTTOM_RIGHT Symbol = s("┘", "+")
+	CONNECT_LEFT         Symbol = s("├", "+")
+	CONNECT_RIGHT        Symbol = s("┤", "+")
+	CONNECT_CENTER       Symbol = s("┼", "+")
 
 	INFO    Symbol = s("●", "•")
 	SUCCESS Symbol = s("◆", "*")

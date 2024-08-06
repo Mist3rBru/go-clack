@@ -101,7 +101,6 @@ func (p *PathNode) TraverseNodes(visit func(node *PathNode)) {
 			traverse(child)
 		}
 	}
-
 	traverse(p)
 }
 
