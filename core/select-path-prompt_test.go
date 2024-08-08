@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/Mist3rBru/go-clack/core"
@@ -38,10 +39,13 @@ func TestSelectPathChangeValue(t *testing.T) {
 	p := newSelectPathPrompt()
 
 	assert.Equal(t, p.CurrentLayer[0].Path, p.Value)
+
 	p.PressKey(&core.Key{Name: core.DownKey})
 	assert.Equal(t, p.CurrentLayer[1].Path, p.Value)
+
 	p.PressKey(&core.Key{Name: core.DownKey})
 	assert.Equal(t, p.CurrentLayer[2].Path, p.Value)
+
 	p.PressKey(&core.Key{Name: core.UpKey})
 	assert.Equal(t, p.CurrentLayer[1].Path, p.Value)
 }
@@ -49,14 +53,10 @@ func TestSelectPathChangeValue(t *testing.T) {
 func TestSelectPathEnterDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
-	for _, node := range p.CurrentLayer {
-		if node.IsDir {
-			p.CurrentOption = node
-			break
-		}
-	}
+	p.CurrentOption.IsDir = true
 	pastOption := p.CurrentOption
 	p.PressKey(&core.Key{Name: core.RightKey})
+
 	assert.Equal(t, 2, p.CurrentOption.Depth)
 	assert.Equal(t, pastOption, p.CurrentOption.Parent)
 }
@@ -64,46 +64,58 @@ func TestSelectPathEnterDirectory(t *testing.T) {
 func TestSelectPathEnterNonDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
-	for _, node := range p.CurrentLayer {
-		if !node.IsDir {
-			p.CurrentOption = node
-			break
-		}
-	}
+	p.CurrentOption.IsDir = false
 	pastOption := p.CurrentOption
 	p.PressKey(&core.Key{Name: core.RightKey})
+
 	assert.Equal(t, 1, p.CurrentOption.Depth)
 	assert.Equal(t, pastOption, p.CurrentOption)
+	assert.Equal(t, false, p.CurrentOption.IsOpen)
 }
 
 func TestSelectPathExitDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
-	for _, node := range p.CurrentLayer {
-		if node.IsDir {
-			p.CurrentOption = node
-			break
-		}
-	}
 	pastOption := p.CurrentOption
-	p.PressKey(&core.Key{Name: core.RightKey})
+	p.CurrentOption.Open()
+	p.CurrentLayer = p.CurrentOption.Children
+	p.CurrentOption = p.CurrentOption.Children[0]
+	assert.Equal(t, 2, p.CurrentOption.Depth)
+
 	p.PressKey(&core.Key{Name: core.LeftKey})
 	assert.Equal(t, 1, p.CurrentOption.Depth)
 	assert.Equal(t, pastOption, p.CurrentOption)
+	assert.Equal(t, false, p.CurrentOption.IsOpen)
+}
+
+func TestSelectPathExitEmptyDirectory(t *testing.T) {
+	p := newSelectPathPrompt()
+
+	p.CurrentOption.IsDir = true
+	p.CurrentOption.IsOpen = true
+	p.CurrentOption.Children = []*core.PathNode{}
+	pastOption := p.CurrentOption
+	p.PressKey(&core.Key{Name: core.LeftKey})
+
+	assert.Equal(t, 1, p.CurrentOption.Depth)
+	assert.Equal(t, pastOption, p.CurrentOption)
+	assert.Equal(t, false, p.CurrentOption.IsOpen)
 }
 
 func TestSelectPathExitRootDirectory(t *testing.T) {
 	p := newSelectPathPrompt()
 
 	p.PressKey(&core.Key{Name: core.LeftKey})
-	assert.Equal(t, 0, p.CurrentOption.Depth)
 	assert.Equal(t, p.Root, p.CurrentOption)
+	assert.Equal(t, true, p.CurrentOption.IsRoot())
+	assert.Equal(t, true, p.CurrentOption.IsOpen)
 
-	pastChildrenLength := len(p.Root.Children)
+	pastOption := p.CurrentOption
 	p.PressKey(&core.Key{Name: core.LeftKey})
-	assert.Equal(t, 0, p.CurrentOption.Depth)
 	assert.Equal(t, p.Root, p.CurrentOption)
-	assert.NotEqual(t, pastChildrenLength, len(p.Root.Children))
+	assert.Equal(t, true, p.CurrentOption.IsRoot())
+	assert.Equal(t, true, p.CurrentOption.IsOpen)
+	assert.Equal(t, filepath.Dir(pastOption.Path), p.CurrentOption.Path)
 }
 
 func TestSelectPathFilter(t *testing.T) {

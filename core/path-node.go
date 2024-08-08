@@ -17,6 +17,7 @@ type PathNode struct {
 	Parent *PathNode
 
 	IsDir    bool
+	IsOpen   bool
 	Children []*PathNode
 
 	IsSelected bool
@@ -43,13 +44,13 @@ func NewPathNode(rootPath string, options PathNodeOptions) *PathNode {
 		OnlyShowDir: options.OnlyShowDir,
 		FileSystem:  options.FileSystem,
 	}
-	root.MapChildren()
+	root.Open()
 
 	return root
 }
 
-func (p *PathNode) MapChildren() {
-	if !p.IsDir || len(p.Children) > 0 {
+func (p *PathNode) Open() {
+	if !p.IsDir || p.IsOpen {
 		return
 	}
 
@@ -84,10 +85,13 @@ func (p *PathNode) MapChildren() {
 	for i, child := range p.Children {
 		child.Index = i
 	}
+
+	p.IsOpen = true
 }
 
-func (p *PathNode) ClearChildren() {
+func (p *PathNode) Close() {
 	p.Children = []*PathNode(nil)
+	p.IsOpen = false
 }
 
 func (p *PathNode) TraverseNodes(visit func(node *PathNode)) {

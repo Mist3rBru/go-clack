@@ -89,6 +89,11 @@ func (p *MultiSelectPathPrompt) Options() []*PathNode {
 }
 
 func (p *MultiSelectPathPrompt) exitChildren() {
+	if p.CurrentOption.IsOpen && len(p.CurrentOption.Children) == 0 {
+		p.CurrentOption.Close()
+		return
+	}
+
 	if p.CurrentOption.IsRoot() {
 		p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
@@ -99,18 +104,20 @@ func (p *MultiSelectPathPrompt) exitChildren() {
 		p.mapSelectedOptions(p.Root)
 		return
 	}
+
 	if p.CurrentOption.Parent.IsRoot() {
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
 		return
 	}
+
 	p.CurrentLayer = p.CurrentOption.Parent.Parent.Children
 	p.CurrentOption = p.CurrentOption.Parent
-	p.CurrentOption.ClearChildren()
+	p.CurrentOption.Close()
 }
 
 func (p *MultiSelectPathPrompt) enterChildren() {
-	p.CurrentOption.MapChildren()
+	p.CurrentOption.Open()
 	if len(p.CurrentOption.Children) == 0 {
 		return
 	}

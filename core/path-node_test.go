@@ -8,6 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func newPathNode(rootPath string) *core.PathNode {
+	return core.NewPathNode(rootPath, core.PathNodeOptions{FileSystem: MockFileSystem{}})
+}
+
 func TestPathNodeRoot(t *testing.T) {
 	cwd, _ := os.Getwd()
 	node := core.NewPathNode(cwd, core.PathNodeOptions{
@@ -26,8 +30,8 @@ func TestPathNodeRoot(t *testing.T) {
 }
 
 func TestPathNodeIsRoot(t *testing.T) {
-	node := core.NewPathNode("/root/go-clack/core", core.PathNodeOptions{FileSystem: MockFileSystem{}})
-	other := core.NewPathNode("/root/go-clack/prompts", core.PathNodeOptions{FileSystem: MockFileSystem{}})
+	node := newPathNode("/root/go-clack/core")
+	other := newPathNode("/root/go-clack/prompts")
 
 	assert.True(t, node.IsRoot())
 
@@ -36,16 +40,16 @@ func TestPathNodeIsRoot(t *testing.T) {
 }
 
 func TestPathNodeIsEqual(t *testing.T) {
-	node := core.NewPathNode("/root/go-clack/core", core.PathNodeOptions{FileSystem: MockFileSystem{}})
-	other := core.NewPathNode("/root/go-clack/prompts", core.PathNodeOptions{FileSystem: MockFileSystem{}})
+	node := newPathNode("/root/go-clack/core")
+	other := newPathNode("/root/go-clack/prompts")
 
 	assert.True(t, node.IsEqual(node))
 	assert.False(t, node.IsEqual(other))
 }
 
 func TestPathNodeTraverseNodes(t *testing.T) {
-	node := core.NewPathNode("/root/go-clack/core", core.PathNodeOptions{FileSystem: MockFileSystem{}})
-	node.MapChildren()
+	node := newPathNode("/root/go-clack/core")
+	node.Open()
 
 	counter := 0
 	node.TraverseNodes(func(node *core.PathNode) {
@@ -56,13 +60,13 @@ func TestPathNodeTraverseNodes(t *testing.T) {
 }
 
 func TestPathNodeFlat(t *testing.T) {
-	node := core.NewPathNode("/root/go-clack/core", core.PathNodeOptions{FileSystem: MockFileSystem{}})
+	node := newPathNode("/root/go-clack/core")
 
 	assert.Equal(t, 3, len(node.Flat()))
 }
 
 func TestPathNodeFilteredFlat(t *testing.T) {
-	root := core.NewPathNode("/root/go-clack/core", core.PathNodeOptions{FileSystem: MockFileSystem{}})
+	root := newPathNode("/root/go-clack/core")
 	var options []*core.PathNode
 
 	options, _ = root.FilteredFlat("", root)
@@ -83,8 +87,8 @@ func TestPathNodeFilteredFlat(t *testing.T) {
 }
 
 func TestPathNodeIndexOf(t *testing.T) {
-	node := core.NewPathNode("/root/go-clack/core", core.PathNodeOptions{FileSystem: MockFileSystem{}})
-	node.MapChildren()
+	node := newPathNode("/root/go-clack/core")
+	node.Open()
 
 	assert.Equal(t, 1, node.IndexOf(node.Children[1], node.Children))
 }

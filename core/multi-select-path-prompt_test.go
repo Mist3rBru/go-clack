@@ -61,14 +61,10 @@ func TestMultiSelectPathChangeValue(t *testing.T) {
 func TestMultiSelectPathEnterDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
-	for _, node := range p.CurrentLayer {
-		if node.IsDir {
-			p.CurrentOption = node
-			break
-		}
-	}
+	p.CurrentOption.IsDir = true
 	pastOption := p.CurrentOption
 	p.PressKey(&core.Key{Name: core.RightKey})
+
 	assert.Equal(t, 2, p.CurrentOption.Depth)
 	assert.Equal(t, pastOption, p.CurrentOption.Parent)
 }
@@ -76,46 +72,58 @@ func TestMultiSelectPathEnterDirectory(t *testing.T) {
 func TestMultiSelectPathEnterNonDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
-	for _, node := range p.CurrentLayer {
-		if !node.IsDir {
-			p.CurrentOption = node
-			break
-		}
-	}
+	p.CurrentOption.IsDir = false
 	pastOption := p.CurrentOption
 	p.PressKey(&core.Key{Name: core.RightKey})
+
 	assert.Equal(t, 1, p.CurrentOption.Depth)
 	assert.Equal(t, pastOption, p.CurrentOption)
+	assert.Equal(t, false, p.CurrentOption.IsOpen)
 }
 
 func TestMultiSelectPathExitDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
-	for _, node := range p.CurrentLayer {
-		if node.IsDir {
-			p.CurrentOption = node
-			break
-		}
-	}
 	pastOption := p.CurrentOption
-	p.PressKey(&core.Key{Name: core.RightKey})
+	p.CurrentOption.Open()
+	p.CurrentLayer = p.CurrentOption.Children
+	p.CurrentOption = p.CurrentOption.Children[0]
+	assert.Equal(t, 2, p.CurrentOption.Depth)
+
 	p.PressKey(&core.Key{Name: core.LeftKey})
 	assert.Equal(t, 1, p.CurrentOption.Depth)
 	assert.Equal(t, pastOption, p.CurrentOption)
+	assert.Equal(t, false, p.CurrentOption.IsOpen)
+}
+
+func TestMultiSelectPathExitEmptyDirectory(t *testing.T) {
+	p := newMultiSelectPathPrompt()
+
+	p.CurrentOption.IsDir = true
+	p.CurrentOption.IsOpen = true
+	p.CurrentOption.Children = []*core.PathNode{}
+	pastOption := p.CurrentOption
+	p.PressKey(&core.Key{Name: core.LeftKey})
+
+	assert.Equal(t, 1, p.CurrentOption.Depth)
+	assert.Equal(t, pastOption, p.CurrentOption)
+	assert.Equal(t, false, p.CurrentOption.IsOpen)
 }
 
 func TestMultiSelectPathExitRootDirectory(t *testing.T) {
 	p := newMultiSelectPathPrompt()
 
 	p.PressKey(&core.Key{Name: core.LeftKey})
-	assert.Equal(t, 0, p.CurrentOption.Depth)
 	assert.Equal(t, p.Root, p.CurrentOption)
+	assert.Equal(t, true, p.CurrentOption.IsRoot())
+	assert.Equal(t, true, p.CurrentOption.IsOpen)
 
-	pastChildrenLength := len(p.Root.Children)
+	pastOption := p.CurrentOption
 	p.PressKey(&core.Key{Name: core.LeftKey})
-	assert.Equal(t, 0, p.CurrentOption.Depth)
 	assert.Equal(t, p.Root, p.CurrentOption)
-	assert.NotEqual(t, pastChildrenLength, len(p.Root.Children))
+	assert.Equal(t, true, p.CurrentOption.IsRoot())
+	assert.Equal(t, true, p.CurrentOption.IsOpen)
+	assert.Equal(t, filepath.Dir(pastOption.Path), p.CurrentOption.Path)
 }
 
 func TestMultiSelectPathExitToSelectedDirectory(t *testing.T) {

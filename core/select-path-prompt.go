@@ -76,6 +76,11 @@ func (p *SelectPathPrompt) Options() []*PathNode {
 }
 
 func (p *SelectPathPrompt) exitChildren() {
+	if p.CurrentOption.IsOpen && len(p.CurrentOption.Children) == 0 {
+		p.CurrentOption.Close()
+		return
+	}
+
 	if p.CurrentOption.IsRoot() {
 		p.Root = NewPathNode(filepath.Dir(p.Root.Path), PathNodeOptions{
 			OnlyShowDir: p.OnlyShowDir,
@@ -94,11 +99,11 @@ func (p *SelectPathPrompt) exitChildren() {
 
 	p.CurrentLayer = p.CurrentOption.Parent.Parent.Children
 	p.CurrentOption = p.CurrentOption.Parent
-	p.CurrentOption.ClearChildren()
+	p.CurrentOption.Close()
 }
 
 func (p *SelectPathPrompt) enterChildren() {
-	p.CurrentOption.MapChildren()
+	p.CurrentOption.Open()
 	if len(p.CurrentOption.Children) == 0 {
 		return
 	}
