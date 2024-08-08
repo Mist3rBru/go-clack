@@ -153,6 +153,30 @@ func (p *Prompt[TValue]) ParseKey(r rune) *Key {
 	}
 }
 
+func (p *Prompt[TValue]) validate() error {
+	if p.Validate == nil {
+		return nil
+	}
+
+	p.IsValidating = true
+	validationStart := time.Now()
+
+	time.AfterFunc(400*time.Millisecond, func() {
+		for p.IsValidating {
+			p.State = ValidateState
+			p.ValidationDuration = time.Since(validationStart)
+			p.Emit(Event(ValidateState), p.ValidationDuration)
+			p.render()
+			time.Sleep(125 * time.Millisecond)
+		}
+	})
+
+	err := p.Validate(p.Value)
+	p.IsValidating = false
+
+	return err
+}
+
 // PressKey handles key press events and updates the state of the prompt.
 func (p *Prompt[TValue]) PressKey(key *Key) {
 	if p.State == ErrorState || p.State == InitialState {
@@ -162,29 +186,10 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 	p.Emit(KeyEvent, key)
 
 	if key.Name == EnterKey {
-		if p.Validate != nil {
-			p.IsValidating = true
-			validationStart := time.Now()
-
-			time.AfterFunc(400*time.Millisecond, func() {
-				for p.IsValidating {
-					p.State = ValidateState
-					p.ValidationDuration = time.Since(validationStart)
-					p.Emit(Event(ValidateState), p.ValidationDuration)
-					p.render()
-					time.Sleep(125 * time.Millisecond)
-				}
-			})
-
-			err := p.Validate(p.Value)
-			p.IsValidating = false
-
-			if err != nil {
-				p.State = ErrorState
-				p.Error = err.Error()
-			}
-		}
-		if p.State != ErrorState {
+		if err := p.validate(); err != nil {
+			p.State = ErrorState
+			p.Error = err.Error()
+		} else {
 			p.State = SubmitState
 		}
 	} else if key.Name == CancelKey {
@@ -203,33 +208,28 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string, cursorIndex int) (string, int) {
 	switch key.Name {
 	case BackspaceKey:
-		if cursorIndex > 0 {
-			if cursorIndex == len(value) {
-				cursorIndex--
-				value = value[0:cursorIndex]
-			} else {
-				cursorIndex--
-				value = value[0:cursorIndex] + value[cursorIndex+1:]
-			}
+		if cursorIndex == 0 || len(value) == 0 {
+			return value, cursorIndex
 		}
-	case HomeKey:
-		cursorIndex = 0
-	case EndKey:
-		cursorIndex = len(value)
-	case LeftKey:
-		if cursorIndex == 0 {
-			break
-		}
+
 		cursorIndex--
+		if cursorIndex == len(value)-1 {
+			return value[0:cursorIndex], cursorIndex
+		}
+
+		return value[0:cursorIndex] + value[cursorIndex+1:], cursorIndex
+	case HomeKey:
+		return value, 0
+	case EndKey:
+		return value, len(value)
+	case LeftKey:
+		return value, max(cursorIndex-1, 0)
 	case RightKey:
-		if cursorIndex < len(value) {
-			cursorIndex++
-		}
-	default:
-		if len(key.Char) == 1 {
-			value = value[0:cursorIndex] + key.Char + value[cursorIndex:]
-			cursorIndex++
-		}
+		return value, min(cursorIndex+1, len(value))
+	}
+
+	if len(key.Char) == 1 {
+		return value[0:cursorIndex] + key.Char + value[cursorIndex:], cursorIndex + 1
 	}
 
 	return value, cursorIndex
@@ -259,9 +259,9 @@ func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
 		isBottomLimit := i == maxItems-1 && shouldRenderBottomEllipsis
 		if isTopLimit || isBottomLimit {
 			result = append(result, picocolors.Dim("..."))
-		} else {
-			result = append(result, line)
+			continue
 		}
+		result = append(result, line)
 	}
 
 	return strings.Join(result, "\n")

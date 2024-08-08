@@ -97,9 +97,10 @@ func MultiSelect[TValue comparable](params MultiSelectParams[TValue]) ([]TValue,
 					}
 
 					value = p.LimitLines(radioOptions, 4)
-				} else {
-					value = p.LimitLines(radioOptions, 3)
+					break
 				}
+
+				value = p.LimitLines(radioOptions, 3)
 			}
 
 			return theme.ApplyTheme(theme.ThemeParams[[]TValue]{

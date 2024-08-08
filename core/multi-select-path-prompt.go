@@ -145,10 +145,11 @@ func (p *MultiSelectPathPrompt) handleKeyPress(key *Key) {
 				}
 			}
 			p.Value = value
-		} else {
-			p.CurrentOption.IsSelected = true
-			p.Value = append(p.Value, p.CurrentOption.Path)
+			return
 		}
+
+		p.CurrentOption.IsSelected = true
+		p.Value = append(p.Value, p.CurrentOption.Path)
 	default:
 		if p.Filter {
 			p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))

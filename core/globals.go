@@ -76,30 +76,41 @@ func WrapRender[T any, TPrompt any](p TPrompt, render func(p TPrompt) string) fu
 	}
 }
 
-func WrapValidate[TValue any](validate func(value TValue) error, isRequired *bool, msg string) func(value TValue) error {
+func WrapValidate[TValue any](validate func(value TValue) error, isRequired *bool, errMsg string) func(value TValue) error {
 	return func(value TValue) error {
-		var err error
-		if validate != nil {
-			err = validate(value)
+		if validate == nil && !*isRequired {
+			return nil
 		}
-		if err == nil && *isRequired {
+
+		if validate != nil {
+			if err := validate(value); err != nil {
+				return err
+			}
+		}
+
+		if *isRequired {
 			v := reflect.ValueOf(value)
+			errRequired := errors.New(errMsg)
+
 			if !v.IsValid() {
-				return errors.New(msg)
+				return errRequired
 			}
 
 			k := v.Kind()
 			if (k == reflect.Ptr || k == reflect.Interface) && v.IsNil() {
-				err = errors.New(msg)
-			} else if k != reflect.Bool &&
+				return errRequired
+			}
+
+			if k != reflect.Bool &&
 				((k == reflect.Slice && v.Len() == 0) ||
 					(k == reflect.Array && v.Len() == 0) ||
 					(k == reflect.Map && v.Len() == 0) ||
 					(k == reflect.Struct && v.IsZero()) ||
 					v.IsZero()) {
-				err = errors.New(msg)
+				return errRequired
 			}
 		}
-		return err
+
+		return nil
 	}
 }

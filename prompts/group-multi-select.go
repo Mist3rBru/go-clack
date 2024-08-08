@@ -64,9 +64,10 @@ func GroupMultiSelect[TValue comparable](params GroupMultiSelectParams[TValue]) 
 						if params.SpacedGroups && i > 0 {
 							radioOptions[i] = "\n" + radioOptions[i]
 						}
-					} else {
-						radioOptions[i] = " " + groupOption(option, option.IsSelected, i == p.CursorIndex, false)
+						continue
 					}
+
+					radioOptions[i] = " " + groupOption(option, option.IsSelected, i == p.CursorIndex, false)
 				}
 				value = p.LimitLines(radioOptions, 3)
 			}

@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -166,10 +167,74 @@ func TestTrackBackspace(t *testing.T) {
 func TestTrackState(t *testing.T) {
 	p := newPrompt()
 
+	assert.Equal(t, core.InitialState, p.State)
+
+	p.PressKey(&core.Key{})
+	assert.Equal(t, core.ActiveState, p.State)
+
+	p.State = core.ErrorState
+	p.PressKey(&core.Key{})
+	assert.Equal(t, core.ActiveState, p.State)
+
+	p.Validate = func(value string) error { return errors.New("") }
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+
+	p.Validate = nil
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.SubmitState, p.State)
+
 	p.PressKey(&core.Key{Name: core.CancelKey})
 	assert.Equal(t, core.CancelState, p.State)
+}
+
+func TestValidateValue(t *testing.T) {
+	p := newPrompt()
+	p.Validate = func(value string) error {
+		return fmt.Errorf("invalid value: %v", value)
+	}
+
+	p.Value = "foo"
+	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, core.ErrorState, p.State)
+	assert.Equal(t, "invalid value: foo", p.Error)
+}
+
+func TestEmitFinalizeBeforeSubmit(t *testing.T) {
+	p := newPrompt()
+	calledTimes := 0
+	p.On(core.FinalizeEvent, func(args ...any) {
+		calledTimes++
+	})
+	p.On(core.SubmitEvent, func(args ...any) {
+		assert.Equal(t, 1, calledTimes)
+		calledTimes++
+	})
 
 	p.PressKey(&core.Key{Name: core.EnterKey})
+	assert.Equal(t, 2, calledTimes)
+}
+
+func TestSlowValidation(t *testing.T) {
+	p := newPrompt()
+	p.Validate = func(value string) error {
+		time.Sleep(530 * time.Millisecond)
+		return nil
+	}
+
+	go p.PressKey(&core.Key{Name: core.EnterKey})
+	time.Sleep(400 * time.Millisecond)
+	assert.Equal(t, true, p.IsValidating)
+	assert.Equal(t, core.ValidateState, p.State)
+	assert.GreaterOrEqual(t, p.ValidationDuration, 400*time.Millisecond)
+
+	time.Sleep(126 * time.Millisecond)
+	assert.Equal(t, true, p.IsValidating)
+	assert.Equal(t, core.ValidateState, p.State)
+	assert.GreaterOrEqual(t, p.ValidationDuration, 525*time.Millisecond)
+
+	time.Sleep(10 * time.Millisecond)
+	assert.Equal(t, false, p.IsValidating)
 	assert.Equal(t, core.SubmitState, p.State)
 }
 
@@ -388,54 +453,4 @@ func TestFormatLinesWithBlackLine(t *testing.T) {
 	})
 	expected := fmt.Sprintf("| %s |", strings.Repeat(" ", 76))
 	assert.Equal(t, expected, frame)
-}
-
-func TestValidateValue(t *testing.T) {
-	p := newPrompt()
-	p.Validate = func(value string) error {
-		return fmt.Errorf("invalid value: %v", value)
-	}
-
-	p.Value = "foo"
-	p.PressKey(&core.Key{Name: core.EnterKey})
-	assert.Equal(t, core.ErrorState, p.State)
-	assert.Equal(t, "invalid value: foo", p.Error)
-}
-
-func TestEmitFinalizeBeforeSubmit(t *testing.T) {
-	p := newPrompt()
-	calledTimes := 0
-	p.On(core.FinalizeEvent, func(args ...any) {
-		calledTimes++
-	})
-	p.On(core.SubmitEvent, func(args ...any) {
-		assert.Equal(t, 1, calledTimes)
-		calledTimes++
-	})
-
-	p.PressKey(&core.Key{Name: core.EnterKey})
-	assert.Equal(t, 2, calledTimes)
-}
-
-func TestSlowValidation(t *testing.T) {
-	p := newPrompt()
-	p.Validate = func(value string) error {
-		time.Sleep(528 * time.Millisecond)
-		return nil
-	}
-
-	go p.PressKey(&core.Key{Name: core.EnterKey})
-	time.Sleep(400 * time.Millisecond)
-	assert.Equal(t, true, p.IsValidating)
-	assert.Equal(t, core.ValidateState, p.State)
-	assert.GreaterOrEqual(t, p.ValidationDuration, 400*time.Millisecond)
-
-	time.Sleep(126 * time.Millisecond)
-	assert.Equal(t, true, p.IsValidating)
-	assert.Equal(t, core.ValidateState, p.State)
-	assert.GreaterOrEqual(t, p.ValidationDuration, 525*time.Millisecond)
-
-	time.Sleep(2 * time.Millisecond)
-	assert.Equal(t, false, p.IsValidating)
-	assert.Equal(t, core.SubmitState, p.State)
 }

@@ -42,22 +42,18 @@ func Note(msg string, options NoteOptions) {
 }
 
 func noteHeader(title string, lineLength int) string {
-	var left, header, top, right string
-
 	if title == "" {
-		left = symbols.CONNECT_LEFT
-		top = strings.Repeat(symbols.BAR_H, lineLength)
-		right = symbols.CORNER_TOP_RIGHT
-		header = picocolors.Gray(fmt.Sprint(left, top, right))
-	} else {
-		left = picocolors.Green(symbols.STEP_SUBMIT)
-		topLength := max(lineLength-coreUtils.StrLength(title)-2, 0)
-		top = picocolors.Gray(strings.Repeat(symbols.BAR_H, topLength))
-		right = picocolors.Gray(symbols.CORNER_TOP_RIGHT)
-		header = fmt.Sprintf("%s %s %s%s", left, title, top, right)
+		left := symbols.CONNECT_LEFT
+		top := strings.Repeat(symbols.BAR_H, lineLength)
+		right := symbols.CORNER_TOP_RIGHT
+		return picocolors.Gray(fmt.Sprint(left, top, right))
 	}
 
-	return header
+	left := picocolors.Green(symbols.STEP_SUBMIT)
+	topLength := max(lineLength-coreUtils.StrLength(title)-2, 0)
+	top := picocolors.Gray(strings.Repeat(symbols.BAR_H, topLength))
+	right := picocolors.Gray(symbols.CORNER_TOP_RIGHT)
+	return fmt.Sprintf("%s %s %s%s", left, title, top, right)
 }
 
 func noteBody(msg string, lineLength int) string {

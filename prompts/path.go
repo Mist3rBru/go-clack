@@ -22,27 +22,28 @@ func Path(params PathParams) (string, error) {
 		Required:     params.Required,
 		Validate:     params.Validate,
 		Render: func(p *core.PathPrompt) string {
-			var hintOptions string
+			valueWithCursor := p.ValueWithCursor()
+
 			if len(p.HintOptions) > 0 {
-				hintOptions = "\n"
-			}
-			for i, hintOption := range p.HintOptions {
-				if i != 0 {
-					hintOptions += " "
+				var hintOptions string
+				for i, hintOption := range p.HintOptions {
+					if i == p.HintIndex {
+						hintOptions += picocolors.Cyan(hintOption)
+					} else {
+						hintOptions += picocolors.Dim(hintOption)
+					}
+					if i+1 < len(p.HintOptions) {
+						hintOptions += " "
+					}
 				}
-				if i == p.HintIndex {
-					hintOptions += picocolors.Cyan(hintOption)
-				} else {
-					hintOptions += picocolors.Dim(hintOption)
-				}
+				valueWithCursor += "\n" + hintOptions
 			}
-			valueWithCursorAndOptions := p.ValueWithCursor() + hintOptions
 
 			return theme.ApplyTheme(theme.ThemeParams[string]{
 				Ctx:             p.Prompt,
 				Message:         params.Message,
 				Value:           p.Value,
-				ValueWithCursor: valueWithCursorAndOptions,
+				ValueWithCursor: valueWithCursor,
 			})
 		},
 	})

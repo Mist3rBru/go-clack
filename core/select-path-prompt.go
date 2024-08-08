@@ -85,11 +85,13 @@ func (p *SelectPathPrompt) exitChildren() {
 		p.CurrentOption = p.Root
 		return
 	}
+
 	if p.CurrentOption.Parent.IsRoot() {
 		p.CurrentLayer = []*PathNode{p.Root}
 		p.CurrentOption = p.Root
 		return
 	}
+
 	p.CurrentLayer = p.CurrentOption.Parent.Parent.Children
 	p.CurrentOption = p.CurrentOption.Parent
 	p.CurrentOption.ClearChildren()

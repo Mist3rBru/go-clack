@@ -2,7 +2,6 @@ package prompts
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Mist3rBru/go-clack/core"
 	"github.com/Mist3rBru/go-clack/core/validator"
@@ -60,19 +59,21 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 							continue
 						}
 
-						var radio, label, hint string
-						if i == p.CursorIndex {
-							radio = picocolors.Green(symbols.RADIO_ACTIVE)
-							label = option.Label
-							if option.Hint != "" {
-								hint = picocolors.Dim("(" + option.Hint + ")")
-							}
+						if i == p.CursorIndex && option.Hint != "" {
+							radio := picocolors.Green(symbols.RADIO_ACTIVE)
+							label := option.Label
+							hint := picocolors.Dim("(" + option.Hint + ")")
+							radioOptions[i] = fmt.Sprintf("%s %s %s", radio, label, hint)
+						} else if i == p.CursorIndex {
+							radio := picocolors.Green(symbols.RADIO_ACTIVE)
+							label := option.Label
+							radioOptions[i] = fmt.Sprintf("%s %s", radio, label)
 						} else {
-							radio = picocolors.Dim(symbols.RADIO_INACTIVE)
-							label = picocolors.Dim(option.Label)
+							radio := picocolors.Dim(symbols.RADIO_INACTIVE)
+							label := picocolors.Dim(option.Label)
+							radioOptions[i] = fmt.Sprintf("%s %s", radio, label)
 						}
 
-						radioOptions[i] = strings.Join([]string{radio, label, hint}, " ")
 						break
 					}
 				}
@@ -85,9 +86,10 @@ func Select[TValue comparable](params SelectParams[TValue]) (TValue, error) {
 					}
 
 					value = p.LimitLines(radioOptions, 4)
-				} else {
-					value = p.LimitLines(radioOptions, 3)
+					break
 				}
+
+				value = p.LimitLines(radioOptions, 3)
 			}
 
 			return theme.ApplyTheme(theme.ThemeParams[TValue]{

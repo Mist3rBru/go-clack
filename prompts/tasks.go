@@ -14,10 +14,10 @@ func Tasks(tasks []Task, options SpinnerOptions) {
 		s := Spinner(options)
 		s.Start(task.Title)
 		result, err := task.Task(s.Message)
-		if err == nil {
-			s.Stop(result, 0)
-		} else {
+		if err != nil {
 			s.Stop(err.Error(), 1)
+			continue
 		}
+		s.Stop(result, 0)
 	}
 }

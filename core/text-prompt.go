@@ -52,9 +52,10 @@ func (p *TextPrompt) handleKeyPress(key *Key) {
 	if key.Name == TabKey && p.Value == "" && p.Placeholder != "" {
 		p.Value = p.Placeholder
 		p.CursorIndex = len(p.Placeholder)
-	} else {
-		p.Value, p.CursorIndex = p.TrackKeyValue(key, p.Value, p.CursorIndex)
+		return
 	}
+
+	p.Value, p.CursorIndex = p.TrackKeyValue(key, p.Value, p.CursorIndex)
 }
 
 func (p *TextPrompt) ValueWithCursor() string {

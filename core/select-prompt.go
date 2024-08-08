@@ -78,36 +78,45 @@ func (p *SelectPrompt[TValue]) handleKeyPress(key *Key) {
 	case EnterKey, CancelKey:
 	default:
 		if p.Filter {
-			p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
-			p.CursorIndex = 0
-			if p.Search == "" {
-				p.Options = p.initialOptions
-				for i, option := range p.Options {
-					if option.Value == p.Value {
-						p.CursorIndex = i
-						break
-					}
-				}
-			} else {
-				p.Options = []*SelectOption[TValue]{}
-				searchRegex, err := regexp.Compile("(?i)" + p.Search)
-				if err != nil {
-					return
-				}
-				for _, option := range p.initialOptions {
-					if matched := searchRegex.MatchString(option.Label); matched {
-						p.Options = append(p.Options, option)
-						if option.Value == p.Value {
-							p.CursorIndex = len(p.Options) - 1
-						}
-					}
-				}
-			}
+			p.filterOptions(key)
 		}
 	}
+
 	if p.CursorIndex >= 0 && p.CursorIndex < len(p.Options) {
 		p.Value = p.Options[p.CursorIndex].Value
-	} else {
-		p.Value = *new(TValue)
+		return
+	}
+
+	p.Value = *new(TValue)
+}
+
+func (p *SelectPrompt[TValue]) filterOptions(key *Key) {
+	p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
+	p.CursorIndex = 0
+
+	if p.Search == "" {
+		p.Options = p.initialOptions
+		for i, option := range p.Options {
+			if option.Value == p.Value {
+				p.CursorIndex = i
+				break
+			}
+		}
+		return
+	}
+
+	p.Options = []*SelectOption[TValue]{}
+	searchRegex, err := regexp.Compile("(?i)" + p.Search)
+	if err != nil {
+		return
+	}
+
+	for _, option := range p.initialOptions {
+		if matched := searchRegex.MatchString(option.Label); matched {
+			p.Options = append(p.Options, option)
+			if option.Value == p.Value {
+				p.CursorIndex = len(p.Options) - 1
+			}
+		}
 	}
 }

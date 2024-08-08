@@ -83,17 +83,19 @@ func (p *MultiSelectPrompt[TValue]) handleKeyPress(key *Key) {
 					}
 				}
 				p.Value = value
-			} else {
-				option.IsSelected = true
-				p.Value = append(p.Value, option.Value)
+				return
 			}
+
+			option.IsSelected = true
+			p.Value = append(p.Value, option.Value)
 		}
 	case "a":
 		if p.Filter {
 			p.filterOptions(key)
-		} else {
-			p.selectAll()
+			return
 		}
+
+		p.selectAll()
 	case EnterKey, CancelKey:
 	default:
 		if p.Filter {
@@ -108,12 +110,13 @@ func (p *MultiSelectPrompt[TValue]) selectAll() {
 		for _, option := range p.Options {
 			option.IsSelected = false
 		}
-	} else {
-		p.Value = make([]TValue, len(p.Options))
-		for i, option := range p.Options {
-			option.IsSelected = true
-			p.Value[i] = option.Value
-		}
+		return
+	}
+
+	p.Value = make([]TValue, len(p.Options))
+	for i, option := range p.Options {
+		option.IsSelected = true
+		p.Value[i] = option.Value
 	}
 }
 
@@ -122,41 +125,41 @@ func (p *MultiSelectPrompt[TValue]) filterOptions(key *Key) {
 	if p.CursorIndex >= 0 && p.CursorIndex < len(p.Options) {
 		currentOption = p.Options[p.CursorIndex]
 	}
+
 	p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
 	p.CursorIndex = 0
+
 	if p.Search == "" {
 		p.Options = p.initialOptions
 		if currentOption == nil {
 			return
 		}
+
 		for i, option := range p.Options {
 			if option.Value == currentOption.Value {
 				p.CursorIndex = i
-				break
 			}
 		}
-	} else {
-		p.Options = []*MultiSelectOption[TValue]{}
-		searchRegex, err := regexp.Compile("(?i)" + p.Search)
-		if err != nil {
-			return
-		}
-		for _, option := range p.initialOptions {
-			if matched := searchRegex.MatchString(option.Label); matched {
-				p.Options = append(p.Options, option)
-				if currentOption != nil && option.Value == currentOption.Value {
-					p.CursorIndex = len(p.Options) - 1
-				}
+		return
+	}
+
+	p.Options = []*MultiSelectOption[TValue]{}
+	searchRegex, err := regexp.Compile("(?i)" + p.Search)
+	if err != nil {
+		return
+	}
+	for _, option := range p.initialOptions {
+		if matched := searchRegex.MatchString(option.Label); matched {
+			p.Options = append(p.Options, option)
+			if currentOption != nil && option.Value == currentOption.Value {
+				p.CursorIndex = len(p.Options) - 1
 			}
 		}
 	}
 }
 
 func mapMultiSelectInitialValue[TValue comparable](value []TValue, options []*MultiSelectOption[TValue]) []TValue {
-	var initialValue []TValue
-
 	if len(value) > 0 {
-		initialValue = value
 		for _, value := range value {
 			for _, option := range options {
 				if option.Value == value {
@@ -164,13 +167,14 @@ func mapMultiSelectInitialValue[TValue comparable](value []TValue, options []*Mu
 				}
 			}
 		}
-	} else {
-		for _, option := range options {
-			if option.IsSelected {
-				initialValue = append(initialValue, option.Value)
-			}
-		}
+		return value
 	}
 
+	var initialValue []TValue
+	for _, option := range options {
+		if option.IsSelected {
+			initialValue = append(initialValue, option.Value)
+		}
+	}
 	return initialValue
 }

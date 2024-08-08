@@ -42,12 +42,10 @@ func MultiSelectPath(params MultiSelectPathParams) ([]string, error) {
 				radioOptions := make([]string, len(options))
 				for i, option := range options {
 					var radio, label, dir string
-					if option.IsDir {
-						if len(option.Children) == 0 {
-							dir = ">"
-						} else {
-							dir = "v"
-						}
+					if option.IsDir && len(option.Children) > 0 {
+						dir = "v"
+					} else if option.IsDir {
+						dir = ">"
 					}
 					if option.IsSelected && option.IsEqual(p.CurrentOption) {
 						radio = picocolors.Green(symbols.CHECKBOX_SELECTED)
@@ -76,9 +74,10 @@ func MultiSelectPath(params MultiSelectPathParams) ([]string, error) {
 					}
 
 					value = p.LimitLines(radioOptions, 4)
-				} else {
-					value = p.LimitLines(radioOptions, 3)
+					break
 				}
+
+				value = p.LimitLines(radioOptions, 3)
 			}
 
 			return theme.ApplyTheme(theme.ThemeParams[[]string]{

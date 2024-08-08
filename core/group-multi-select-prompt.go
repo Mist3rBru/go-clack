@@ -99,39 +99,43 @@ func (p *GroupMultiSelectPrompt[TValue]) IsGroupSelected(group *GroupMultiSelect
 
 func (p *GroupMultiSelectPrompt[TValue]) toggleOption() {
 	option := p.Options[p.CursorIndex]
-	if option.IsGroup {
-		if p.IsGroupSelected(option) {
-			for _, option := range option.Options {
-				option.IsSelected = false
-			}
-			p.Value = []TValue{}
-			for _, option := range p.Options {
-				if option.IsSelected {
-					p.Value = append(p.Value, option.Value)
-				}
-			}
-		} else {
-			for _, option := range option.Options {
-				if !option.IsSelected {
-					option.IsSelected = true
-					p.Value = append(p.Value, option.Value)
-				}
-			}
-		}
-	} else {
-		if option.IsSelected {
+
+	if option.IsGroup && p.IsGroupSelected(option) {
+		for _, option := range option.Options {
 			option.IsSelected = false
-			p.Value = []TValue{}
-			for _, _option := range p.Options {
-				if _option.IsSelected {
-					p.Value = append(p.Value, _option.Value)
-				}
-			}
-		} else {
-			option.IsSelected = true
-			p.Value = append(p.Value, option.Value)
 		}
+		p.Value = []TValue{}
+		for _, option := range p.Options {
+			if option.IsSelected {
+				p.Value = append(p.Value, option.Value)
+			}
+		}
+		return
 	}
+
+	if option.IsGroup {
+		for _, option := range option.Options {
+			if !option.IsSelected {
+				option.IsSelected = true
+				p.Value = append(p.Value, option.Value)
+			}
+		}
+		return
+	}
+
+	if option.IsSelected {
+		option.IsSelected = false
+		p.Value = []TValue{}
+		for _, _option := range p.Options {
+			if _option.IsSelected {
+				p.Value = append(p.Value, _option.Value)
+			}
+		}
+		return
+	}
+
+	option.IsSelected = true
+	p.Value = append(p.Value, option.Value)
 }
 
 func mapGroupMultiSelectOptions[TValue comparable](groups map[string][]MultiSelectOption[TValue]) []*GroupMultiSelectOption[TValue] {
@@ -166,17 +170,15 @@ func mapGroupMultiSelectOptions[TValue comparable](groups map[string][]MultiSele
 }
 
 func mapGroupMultiSelectInitialValue[TValue comparable](value []TValue, options []*GroupMultiSelectOption[TValue]) []TValue {
-	var initialValue []TValue
-
 	if len(value) > 0 {
-		initialValue = value
-	} else {
-		for _, option := range options {
-			if option.IsSelected {
-				initialValue = append(initialValue, option.Value)
-			}
-		}
+		return value
 	}
 
+	var initialValue []TValue
+	for _, option := range options {
+		if option.IsSelected {
+			initialValue = append(initialValue, option.Value)
+		}
+	}
 	return initialValue
 }

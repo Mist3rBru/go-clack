@@ -90,11 +90,13 @@ func (p *PathPrompt) mapHintOptions() []string {
 		if (p.OnlyShowDir && !entry.IsDir()) || !strings.HasPrefix(entry.Name(), p.valueEnd()) {
 			continue
 		}
+
+		option := entry.Name()
 		if entry.IsDir() {
-			options = append(options, entry.Name()+"/")
-		} else {
-			options = append(options, entry.Name())
+			option += "/"
 		}
+
+		options = append(options, option)
 	}
 
 	return options

@@ -39,18 +39,11 @@ type SpinnerController struct {
 func Spinner(options SpinnerOptions) *SpinnerController {
 	done := make(chan any)
 
-	var timer Timer
 	if options.Timer == nil {
-		timer = &defaultTimer{}
-	} else {
-		timer = options.Timer
+		options.Timer = &defaultTimer{}
 	}
-
-	var output io.Writer
 	if options.Output == nil {
-		output = os.Stdout
-	} else {
-		output = options.Output
+		options.Output = os.Stdout
 	}
 
 	var message, prevMessage string
@@ -70,7 +63,7 @@ func Spinner(options SpinnerOptions) *SpinnerController {
 	}
 
 	write := func(str string) {
-		output.Write([]byte(str))
+		options.Output.Write([]byte(str))
 	}
 
 	clearPrevMessage := func() {
@@ -108,7 +101,7 @@ func Spinner(options SpinnerOptions) *SpinnerController {
 						} else {
 							dotsTimer = 0
 						}
-						timer.Sleep(time.Duration(frameInterval) * time.Millisecond)
+						options.Timer.Sleep(time.Duration(frameInterval) * time.Millisecond)
 					}
 				}
 			}()
