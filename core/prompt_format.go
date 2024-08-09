@@ -92,8 +92,8 @@ type FormatLinesOptions struct {
 	NewLine   FormatLineOptions
 	LastLine  FormatLineOptions
 	Default   FormatLineOptions
-	MinWidth  *int
-	MaxWidth  *int
+	MinWidth  int
+	MaxWidth  int
 }
 
 // getOptionOrDefault retrieves the option for the given line and option type, or returns a default value.
@@ -220,16 +220,11 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 	if err != nil {
 		terminalWidth = 80
 	}
-	if options.MinWidth == nil {
-		minWidth := 0
-		options.MinWidth = &minWidth
+	if options.MaxWidth == 0 {
+		options.MaxWidth = math.MaxInt
 	}
-	if options.MaxWidth == nil {
-		maxWidth := math.MaxInt
-		options.MaxWidth = &maxWidth
-	}
-	minWidth := max(*options.MinWidth, 0)
-	maxWith := min(*options.MaxWidth, terminalWidth)
+	minWidth := max(options.MinWidth, 0)
+	maxWith := min(options.MaxWidth, terminalWidth)
 
 	firstLine := getLineOptions(options, FirstLine)
 	newLine := getLineOptions(options, NewLine)
@@ -267,10 +262,8 @@ func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions)
 				startSpace = " "
 			}
 			styledLine := opts.Style(line)
-			if minWidth > 0 && endEmptySlots > 0 {
+			if minWidth > 0 {
 				endSpace = strings.Repeat(" ", max(minWidth+1-startEmptySlots-utils.StrLength(styledLine)-endEmptySlots, 0))
-			} else if minWidth > 0 {
-				endSpace = strings.Repeat(" ", max(minWidth+1-startEmptySlots-utils.StrLength(styledLine), 0))
 			} else if endEmptySlots > 0 {
 				endSpace = " "
 			}

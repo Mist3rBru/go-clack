@@ -3,7 +3,6 @@ package core_test
 import (
 	"errors"
 	"fmt"
-	"math/rand"
 	"strings"
 	"testing"
 	"time"
@@ -19,48 +18,60 @@ func newPrompt() *core.Prompt[string] {
 	})
 }
 
-func TestEmitEvent(t *testing.T) {
-	p := newPrompt()
-	arg := rand.Int()
+func TestEventEmitter(t *testing.T) {
+	testCases := []struct {
+		description string
+		emit        core.Event
+		listen      core.Event
+		args        []any
+		calledTimes int
+	}{
+		{
+			description: "emit event",
+			emit:        core.KeyEvent,
+			listen:      core.KeyEvent,
+			calledTimes: 1,
+		},
+		{
+			description: "emit event with a single arg",
+			emit:        core.KeyEvent,
+			listen:      core.KeyEvent,
+			args:        []any{core.Key{Name: core.RightKey}},
+			calledTimes: 1,
+		},
+		{
+			description: "emit event with a multi args",
+			emit:        core.KeyEvent,
+			listen:      core.KeyEvent,
+			args:        []any{core.Key{Name: core.RightKey}, "value"},
+			calledTimes: 1,
+		},
+		{
+			description: "emit event multiple times",
+			emit:        core.KeyEvent,
+			listen:      core.KeyEvent,
+			calledTimes: 3,
+		},
+		{
+			description: "emit other event",
+			emit:        core.ErrorEvent,
+			listen:      core.KeyEvent,
+			calledTimes: 0,
+		},
+	}
 
-	p.On(core.KeyEvent, func(args ...any) {
-		assert.Equal(t, args[0], arg)
-	})
-	p.Emit(core.KeyEvent, arg)
-}
-
-func TestEmitOtherEvent(t *testing.T) {
-	p := newPrompt()
-	calledTimes := 0
-
-	p.On(core.KeyEvent, func(args ...any) {
-		calledTimes++
-	})
-	p.Emit(core.Event(91) + core.KeyEvent)
-	assert.Equal(t, 0, calledTimes)
-}
-
-func TestEmitEventWithMultiArgs(t *testing.T) {
-	p := newPrompt()
-	args := []any{rand.Int(), rand.Int()}
-
-	p.On(core.KeyEvent, func(_args ...any) {
-		assert.Equal(t, _args, args)
-	})
-	p.Emit(core.KeyEvent, args...)
-	p.Emit(core.KeyEvent, args[0], args[1])
-}
-
-func TestEmitEventTwice(t *testing.T) {
-	p := newPrompt()
-	calledTimes := 0
-
-	p.On(core.KeyEvent, func(args ...any) {
-		calledTimes++
-	})
-	p.Emit(core.KeyEvent)
-	p.Emit(core.KeyEvent)
-	assert.Equal(t, 2, calledTimes)
+	for _, tC := range testCases {
+		p := newPrompt()
+		var calledTimes int
+		p.On(tC.listen, func(args ...any) {
+			calledTimes++
+			assert.Equal(t, tC.args, args)
+		})
+		for range max(tC.calledTimes, 1) {
+			p.Emit(tC.emit, tC.args...)
+		}
+		assert.Equal(t, tC.calledTimes, calledTimes)
+	}
 }
 
 func TestEmitEventOnce(t *testing.T) {
@@ -213,7 +224,7 @@ func TestEmitFinalizeBeforeSubmit(t *testing.T) {
 	assert.Equal(t, 2, calledTimes)
 }
 
-func TestSlowValidation(t *testing.T) {
+func TestAsyncValidation(t *testing.T) {
 	p := newPrompt()
 	p.Validate = func(value string) error {
 		time.Sleep(530 * time.Millisecond)
@@ -246,209 +257,352 @@ func TestDiffLines(t *testing.T) {
 }
 
 func TestLimitLines(t *testing.T) {
-	p := newPrompt()
-	lines := make([]string, 20)
-	for i := range lines {
-		lines[i] = fmt.Sprint(i)
+	testCases := []struct {
+		description string
+		usedLines   int
+		frameHeight int
+		cursorIndex int
+		expected    string
+	}{
+		{
+			description: "do not limit lines with frame's height <= terminal's height",
+			frameHeight: 10,
+			expected:    strings.Join([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, "\n"),
+		},
+		{
+			description: "limit lines with frame's height > terminal's height",
+			frameHeight: 11,
+			expected:    strings.Join([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "..."}, "\n"),
+		},
+		{
+			description: "limit lines with usedLine + frame's height > terminal's height",
+			frameHeight: 10,
+			usedLines:   3,
+			expected:    strings.Join([]string{"1", "2", "3", "4", "5", "6", "..."}, "\n"),
+		},
+		{
+			description: "limit lines with cursor on the middle start of the list",
+			frameHeight: 20,
+			cursorIndex: 8,
+			expected:    strings.Join([]string{"...", "3", "4", "5", "6", "7", "8", "9", "10", "..."}, "\n"),
+		},
+		{
+			description: "limit lines with cursor on the middle of the list",
+			frameHeight: 20,
+			cursorIndex: 10,
+			expected:    strings.Join([]string{"...", "5", "6", "7", "8", "9", "10", "11", "12", "..."}, "\n"),
+		},
+		{
+			description: "limit lines with cursor on the middle end of the list",
+			frameHeight: 20,
+			cursorIndex: 16,
+			expected:    strings.Join([]string{"...", "11", "12", "13", "14", "15", "16", "17", "18", "..."}, "\n"),
+		},
+		{
+			description: "limit lines with cursor on the end of the list",
+			frameHeight: 20,
+			cursorIndex: 17,
+			expected:    strings.Join([]string{"...", "12", "13", "14", "15", "16", "17", "18", "19", "20"}, "\n"),
+		},
+		{
+			description: "limit lines with cursor at the end of the list",
+			frameHeight: 20,
+			cursorIndex: 20,
+			expected:    strings.Join([]string{"...", "12", "13", "14", "15", "16", "17", "18", "19", "20"}, "\n"),
+		},
 	}
 
-	p.CursorIndex = 0
-	frame := p.LimitLines(lines, 0)
-	startLines := lines[0:10]
-	startLines[len(startLines)-1] = "..."
-	expected := strings.Join(startLines, "\n")
-	assert.Equal(t, expected, frame)
+	p := newPrompt()
 
-	p.CursorIndex = 10
-	frame = p.LimitLines(lines, 0)
-	midLines := lines[3:13]
-	midLines[0] = "..."
-	midLines[len(midLines)-1] = "..."
-	expected = strings.Join(midLines, "\n")
-	assert.Equal(t, expected, frame)
+	for _, tC := range testCases {
+		lines := make([]string, tC.frameHeight)
+		for i := range tC.frameHeight {
+			lines[i] = fmt.Sprint(i + 1)
+		}
 
-	p.CursorIndex = 20
-	frame = p.LimitLines(lines, 0)
-	lasLines := lines[10:20]
-	lasLines[0] = "..."
-	expected = strings.Join(lasLines, "\n")
-	assert.Equal(t, expected, frame)
-
-	p.CursorIndex = 0
-	frame = p.LimitLines(lines, 3)
-	startLines = lines[0:7]
-	startLines[len(startLines)-1] = "..."
-	expected = strings.Join(startLines, "\n")
-	assert.Equal(t, expected, frame)
+		p.CursorIndex = tC.cursorIndex
+		frame := p.LimitLines(lines, tC.usedLines)
+		assert.Equal(t, tC.expected, frame)
+	}
 }
 
 func TestFormatLines(t *testing.T) {
-	p := newPrompt()
-
-	lines := []string{"a", "b"}
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		FirstLine: core.FormatLineOptions{
-			Sides: "-",
-		},
-		NewLine: core.FormatLineOptions{
-			Sides: "*",
-		},
-	})
-	expected := strings.Join([]string{
-		fmt.Sprintf("- %s -", "a"),
-		fmt.Sprintf("* %s *", "b"),
-	}, "\r\n")
-	assert.Equal(t, expected, frame)
-}
-
-func TestFormatLinesWithBlankSpaces(t *testing.T) {
-	p := newPrompt()
-
-	lines := []string{"a", " b", "  c", "x", " y", "  z"}
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		Default: core.FormatLineOptions{
-			Start: "|",
-		},
-	})
-	expected := strings.Join([]string{
-		"| a",
-		"|  b",
-		"|   c",
-		"| x",
-		"|  y",
-		"|   z",
-	}, "\r\n")
-	assert.Equal(t, expected, frame)
-}
-
-func TestFormatLinesWithOverflowedWords(t *testing.T) {
-	p := newPrompt()
-
-	lines := []string{strings.Repeat("a", 81), strings.Repeat("b", 76), strings.Repeat("c", 79)}
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		FirstLine: core.FormatLineOptions{
-			Sides: "-",
-		},
-		Default: core.FormatLineOptions{
-			Sides: "|",
-		},
-		LastLine: core.FormatLineOptions{
-			Sides: "*",
-		},
-	})
-	expected := strings.Join([]string{
-		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
-		fmt.Sprintf("- %s -", strings.Repeat("a", 5)),
-		fmt.Sprintf("| %s |", strings.Repeat("b", 76)),
-		fmt.Sprintf("* %s *", strings.Repeat("c", 76)),
-		fmt.Sprintf("* %s *", strings.Repeat("c", 3)),
-	}, "\r\n")
-	assert.Equal(t, expected, frame)
-
-	lines = []string{strings.Repeat("a", 180), "b"}
-	frame = p.FormatLines(lines, core.FormatLinesOptions{
-		FirstLine: core.FormatLineOptions{
-			Sides: "-",
-		},
-		Default: core.FormatLineOptions{
-			Sides: "*",
-		},
-		LastLine: core.FormatLineOptions{
-			Sides: "-",
-		},
-	})
-	expected = strings.Join([]string{
-		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
-		fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
-		fmt.Sprintf("- %s -", strings.Repeat("a", 28)),
-		fmt.Sprintf("- %s -", "b"),
-	}, "\r\n")
-	assert.Equal(t, expected, frame)
-}
-
-func TestFormatLinesWithBoxFormat(t *testing.T) {
-	p := newPrompt()
-
-	lines := []string{strings.Repeat("a", 67), "b"}
-	width := 70
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		Default: core.FormatLineOptions{
-			Sides: "|",
-		},
-		MinWidth: &width,
-		MaxWidth: &width,
-	})
-	expected := strings.Join([]string{
-		fmt.Sprintf("| %s%s |", strings.Repeat("a", 66), strings.Repeat(" ", 0)),
-		fmt.Sprintf("| %s%s |", strings.Repeat("a", 1), strings.Repeat(" ", 65)),
-		fmt.Sprintf("| %s%s |", strings.Repeat("b", 1), strings.Repeat(" ", 65)),
-	}, "\r\n")
-	for i, line := range strings.Split(frame, "\r\n") {
-		assert.Equal(t, width, len(line), fmt.Sprintf("index: %d\nline: %s", i, line))
-	}
-	assert.Equal(t, expected, frame)
-}
-
-func TestFormatLinesWithComplexParams(t *testing.T) {
-	p := newPrompt()
-
-	lines := []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		FirstLine: core.FormatLineOptions{
-			Start: "-",
-		},
-		NewLine: core.FormatLineOptions{
-			End: "-",
-		},
-		LastLine: core.FormatLineOptions{
-			Start: "=",
-			End:   "=",
-		},
-		Default: core.FormatLineOptions{
-			Sides: "*",
-		},
-	})
-	expected := strings.Join([]string{
-		fmt.Sprintf("- %s %s *", strings.Repeat("a", 20), strings.Repeat("b", 55)),
-		fmt.Sprintf("- %s *", strings.Repeat("b", 25)),
-		fmt.Sprintf("= %s =", strings.Repeat("c", 1)),
-	}, "\r\n")
-	assert.Equal(t, expected, frame)
-}
-
-func TestFormatLinesWithStyleCallback(t *testing.T) {
-	p := newPrompt()
-
-	lines := []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"}
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		Default: core.FormatLineOptions{
-			Style: func(line string) string {
-				return fmt.Sprintf("(%s)", line)
+	testCases := []struct {
+		description string
+		lines       []string
+		options     core.FormatLinesOptions
+		expected    string
+	}{
+		{
+			description: "format first line start",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Start: "-"},
 			},
+			expected: strings.Join([]string{"- a", "b", "c"}, "\r\n"),
 		},
-	})
-	expected := strings.Join([]string{
-		fmt.Sprintf("(%s %s)", strings.Repeat("a", 20), strings.Repeat("b", 57)),
-		fmt.Sprintf("(%s)", strings.Repeat("b", 23)),
-		fmt.Sprintf("(%s)", strings.Repeat("c", 1)),
-	}, "\r\n")
-	assert.Equal(t, expected, frame)
-}
+		{
+			description: "format new line start",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				NewLine: core.FormatLineOptions{Start: "-"},
+			},
+			expected: strings.Join([]string{"a", "- b", "c"}, "\r\n"),
+		},
+		{
+			description: "format last line start",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				LastLine: core.FormatLineOptions{Start: "-"},
+			},
+			expected: strings.Join([]string{"a", "b", "- c"}, "\r\n"),
+		},
+		{
+			description: "format first line end",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{End: "-"},
+			},
+			expected: strings.Join([]string{"a -", "b", "c"}, "\r\n"),
+		},
+		{
+			description: "format new line end",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				NewLine: core.FormatLineOptions{End: "-"},
+			},
+			expected: strings.Join([]string{"a", "b -", "c"}, "\r\n"),
+		},
+		{
+			description: "format last line end",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				LastLine: core.FormatLineOptions{End: "-"},
+			},
+			expected: strings.Join([]string{"a", "b", "c -"}, "\r\n"),
+		},
+		{
+			description: "format first line sides",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Sides: "-"},
+			},
+			expected: strings.Join([]string{"- a -", "b", "c"}, "\r\n"),
+		},
+		{
+			description: "format new line sides",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				NewLine: core.FormatLineOptions{Sides: "-"},
+			},
+			expected: strings.Join([]string{"a", "- b -", "c"}, "\r\n"),
+		},
+		{
+			description: "format last line sides",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				LastLine: core.FormatLineOptions{Sides: "-"},
+			},
+			expected: strings.Join([]string{"a", "b", "- c -"}, "\r\n"),
+		},
+		{
+			description: "format first line style",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{
+					Style: func(line string) string {
+						return "-" + line + "-"
+					},
+				},
+			},
+			expected: strings.Join([]string{"-a-", "b", "c"}, "\r\n"),
+		},
+		{
+			description: "format new line style",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				NewLine: core.FormatLineOptions{
+					Style: func(line string) string {
+						return "-" + line + "-"
+					},
+				},
+			},
+			expected: strings.Join([]string{"a", "-b-", "c"}, "\r\n"),
+		},
+		{
+			description: "format last line style",
+			lines:       []string{"a", "b", "c"},
+			options: core.FormatLinesOptions{
+				LastLine: core.FormatLineOptions{
+					Style: func(line string) string {
+						return "-" + line + "-"
+					},
+				},
+			},
+			expected: strings.Join([]string{"a", "b", "-c-"}, "\r\n"),
+		},
+		{
+			description: "format unique line with fist and last line start options",
+			lines:       []string{"a"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Sides: "-"},
+				LastLine:  core.FormatLineOptions{Sides: "*"},
+			},
+			expected: strings.Join([]string{"* a *"}, "\r\n"),
+		},
+		{
+			description: "format unique line with fist and last line merged options",
+			lines:       []string{"a"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Start: "-"},
+				LastLine:  core.FormatLineOptions{End: "*"},
+			},
+			expected: strings.Join([]string{"- a *"}, "\r\n"),
+		},
+		{
+			description: "format new line with last start options",
+			lines:       []string{"a", "b"},
+			options: core.FormatLinesOptions{
+				NewLine:  core.FormatLineOptions{Sides: "-"},
+				LastLine: core.FormatLineOptions{Sides: "*"},
+			},
+			expected: strings.Join([]string{"a", "* b *"}, "\r\n"),
+		},
+		{
+			description: "format new line with last merged options",
+			lines:       []string{"a", "b"},
+			options: core.FormatLinesOptions{
+				NewLine:  core.FormatLineOptions{Start: "-"},
+				LastLine: core.FormatLineOptions{End: "*"},
+			},
+			expected: strings.Join([]string{"a", "- b *"}, "\r\n"),
+		},
+		{
+			description: "format with defaults",
+			lines:       []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"},
+			options: core.FormatLinesOptions{
+				Default: core.FormatLineOptions{
+					Sides: "|",
+					Style: func(line string) string {
+						return fmt.Sprintf("(%s)", line)
+					},
+				},
+			},
+			expected: strings.Join([]string{
+				fmt.Sprintf("| (%s %s) |", strings.Repeat("a", 20), strings.Repeat("b", 53)),
+				fmt.Sprintf("| (%s) |", strings.Repeat("b", 27)),
+				fmt.Sprintf("| (%s) |", strings.Repeat("c", 1)),
+			}, "\r\n"),
+		},
+		{
+			description: "format with white spaces",
+			lines:       []string{"a", " b", "  c", "x", " y", "  z"},
+			options: core.FormatLinesOptions{
+				Default: core.FormatLineOptions{Start: "|"},
+			},
+			expected: strings.Join([]string{"| a", "|  b", "|   c", "| x", "|  y", "|   z"}, "\r\n"),
+		},
+		{
+			description: "format overflowed lines",
+			lines:       []string{strings.Repeat("a", 81), strings.Repeat("b", 76), strings.Repeat("c", 79)},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Sides: "-"},
+				NewLine:   core.FormatLineOptions{Sides: "|"},
+				LastLine:  core.FormatLineOptions{Sides: "*"},
+			},
+			expected: strings.Join([]string{
+				fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
+				fmt.Sprintf("- %s -", strings.Repeat("a", 5)),
+				fmt.Sprintf("| %s |", strings.Repeat("b", 76)),
+				fmt.Sprintf("* %s *", strings.Repeat("c", 76)),
+				fmt.Sprintf("* %s *", strings.Repeat("c", 3)),
+			}, "\r\n"),
+		},
+		{
+			description: "format double overflowed lines",
+			lines:       []string{strings.Repeat("a", 180), strings.Repeat("b", 180)},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Sides: "-"},
+				Default:   core.FormatLineOptions{Sides: "*"},
+				LastLine:  core.FormatLineOptions{Sides: "-"},
+			},
+			expected: strings.Join([]string{
+				fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
+				fmt.Sprintf("- %s -", strings.Repeat("a", 76)),
+				fmt.Sprintf("- %s -", strings.Repeat("a", 28)),
+				fmt.Sprintf("- %s -", strings.Repeat("b", 76)),
+				fmt.Sprintf("- %s -", strings.Repeat("b", 76)),
+				fmt.Sprintf("- %s -", strings.Repeat("b", 28)),
+			}, "\r\n"),
+		},
+		{
+			description: "format box",
+			lines:       []string{strings.Repeat("a", 67), "b"},
+			options: core.FormatLinesOptions{
+				Default:  core.FormatLineOptions{Sides: "|"},
+				MinWidth: 70,
+				MaxWidth: 70,
+			},
+			expected: strings.Join([]string{
+				fmt.Sprintf("| %s%s |", strings.Repeat("a", 66), strings.Repeat(" ", 0)),
+				fmt.Sprintf("| %s%s |", strings.Repeat("a", 1), strings.Repeat(" ", 65)),
+				fmt.Sprintf("| %s%s |", strings.Repeat("b", 1), strings.Repeat(" ", 65)),
+			}, "\r\n"),
+		},
+		{
+			description: "format with complex options",
+			lines:       []string{strings.Repeat("a", 20) + " " + strings.Repeat("b", 80), "c"},
+			options: core.FormatLinesOptions{
+				FirstLine: core.FormatLineOptions{Start: "-"},
+				NewLine:   core.FormatLineOptions{End: "-"},
+				LastLine:  core.FormatLineOptions{Start: "=", End: "="},
+				Default:   core.FormatLineOptions{Sides: "*"},
+			},
+			expected: strings.Join([]string{
+				fmt.Sprintf("- %s %s *", strings.Repeat("a", 20), strings.Repeat("b", 55)),
+				fmt.Sprintf("- %s *", strings.Repeat("b", 25)),
+				fmt.Sprintf("= %s =", strings.Repeat("c", 1)),
+			}, "\r\n"),
+		},
+		{
+			description: "format lines with ansi colors",
+			lines:       []string{picocolors.Inverse("T")},
+			options: core.FormatLinesOptions{
+				Default:  core.FormatLineOptions{Start: "|"},
+				LastLine: core.FormatLineOptions{End: "|"},
+				MinWidth: 80,
+			},
+			expected: fmt.Sprintf("| T%s |", strings.Repeat(" ", 75)),
+		},
+		{
+			description: "format blank line",
+			lines:       []string{"    "},
+			options: core.FormatLinesOptions{
+				Default:  core.FormatLineOptions{Sides: "|"},
+				MinWidth: 80,
+			},
+			expected: fmt.Sprintf("| %s |", strings.Repeat(" ", 76)),
+		},
+		{
+			description: "format text",
+			lines:       []string{"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s"},
+			options: core.FormatLinesOptions{
+				Default:  core.FormatLineOptions{Start: "|"},
+				MaxWidth: 50,
+			},
+			expected: strings.Join([]string{
+				"| Lorem Ipsum is simply dummy text of the printing",
+				"| and typesetting industry. Lorem Ipsum has been",
+				"| the industry's standard dummy text ever since",
+				"| the 1500s",
+			}, "\r\n"),
+		},
+	}
 
-func TestFormatLinesWithBlackLine(t *testing.T) {
 	p := newPrompt()
 
-	lines := []string{picocolors.Inverse(" ")}
-	width := 80
-	frame := p.FormatLines(lines, core.FormatLinesOptions{
-		Default: core.FormatLineOptions{
-			Start: "|",
-		},
-		LastLine: core.FormatLineOptions{
-			End: "|",
-		},
-		MinWidth: &width,
-	})
-	expected := fmt.Sprintf("| %s |", strings.Repeat(" ", 76))
-	assert.Equal(t, expected, frame)
+	for _, tC := range testCases {
+		frame := p.FormatLines(tC.lines, tC.options)
+		assert.Equal(t, tC.expected, frame)
+	}
 }
