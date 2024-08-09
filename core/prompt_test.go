@@ -204,7 +204,7 @@ func TestEmitFinalizeBeforeSubmit(t *testing.T) {
 	p.On(core.FinalizeEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.On(core.KeyEvent, func(args ...any) {
+	p.On(core.SubmitEvent, func(args ...any) {
 		assert.Equal(t, 1, calledTimes)
 		calledTimes++
 	})

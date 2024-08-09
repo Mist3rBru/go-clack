@@ -8,6 +8,12 @@ import (
 	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
+type MultiSelectOption[TValue comparable] struct {
+	Label      string
+	Value      TValue
+	IsSelected bool
+}
+
 type MultiSelectPrompt[TValue comparable] struct {
 	Prompt[[]TValue]
 	initialOptions []*MultiSelectOption[TValue]

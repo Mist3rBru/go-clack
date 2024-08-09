@@ -8,6 +8,11 @@ import (
 	"github.com/Mist3rBru/go-clack/core/validator"
 )
 
+type SelectOption[TValue comparable] struct {
+	Label string
+	Value TValue
+}
+
 type SelectPrompt[TValue comparable] struct {
 	Prompt[TValue]
 	initialOptions []*SelectOption[TValue]

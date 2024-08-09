@@ -6,76 +6,8 @@ import (
 	"reflect"
 )
 
-type SelectOption[TValue comparable] struct {
-	Label string
-	Value TValue
-}
-
-type MultiSelectOption[TValue comparable] struct {
-	Label      string
-	Value      TValue
-	IsSelected bool
-}
-
-type Event int
-
-const (
-	// KeyEvent is emitted after each user's input
-	KeyEvent Event = iota
-	// ValidateEvent is emitted when the input is being validated
-	ValidateEvent
-	// ErrorEvent is emitted if an error occurs during the validation process
-	ErrorEvent
-	// FinalizeEvent is emitted on user's submit or cancel, and before rendering the related state
-	FinalizeEvent
-	// CancelEvent is emitted after the user cancels the prompt, and after rendering the cancel state
-	CancelEvent
-	// SubmitEvent is emitted after the user submits the input, and after rendering the submit state
-	SubmitEvent
-)
-
-type State int
-
-const (
-	// InitialState is the initial state of the prompt
-	InitialState State = iota
-	// ActiveState is set after the user's first action
-	ActiveState
-	// ValidateState is set after 400ms of validation (e.g., checking user input)
-	ValidateState
-	// ErrorState is set if there is an error during validation
-	ErrorState
-	// CancelState is set after the user cancels the prompt
-	CancelState
-	// SubmitState is set after the user submits the input
-	SubmitState
-)
-
 var (
 	ErrCancelPrompt error = errors.New("prompt canceled")
-)
-
-type KeyName string
-
-type Key struct {
-	Name  KeyName
-	Char  string
-	Shift bool
-	Ctrl  bool
-}
-
-const (
-	EnterKey     KeyName = "Enter"
-	SpaceKey     KeyName = "Space"
-	TabKey       KeyName = "Tab"
-	UpKey        KeyName = "Up"
-	DownKey      KeyName = "Down"
-	LeftKey      KeyName = "Left"
-	RightKey     KeyName = "Right"
-	CancelKey    KeyName = "Cancel"
-	HomeKey      KeyName = "Home"
-	EndKey       KeyName = "End"
-	BackspaceKey KeyName = "Backspace"
 )
 
 type FileSystem interface {
