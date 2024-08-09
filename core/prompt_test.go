@@ -19,26 +19,24 @@ func newPrompt() *core.Prompt[string] {
 	})
 }
 
-const testEvent = core.Event("test")
-
 func TestEmitEvent(t *testing.T) {
 	p := newPrompt()
 	arg := rand.Int()
 
-	p.On(testEvent, func(args ...any) {
+	p.On(core.KeyEvent, func(args ...any) {
 		assert.Equal(t, args[0], arg)
 	})
-	p.Emit(testEvent, arg)
+	p.Emit(core.KeyEvent, arg)
 }
 
 func TestEmitOtherEvent(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
 
-	p.On(testEvent, func(args ...any) {
+	p.On(core.KeyEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit(core.Event("other") + testEvent)
+	p.Emit(core.Event(91) + core.KeyEvent)
 	assert.Equal(t, 0, calledTimes)
 }
 
@@ -46,22 +44,22 @@ func TestEmitEventWithMultiArgs(t *testing.T) {
 	p := newPrompt()
 	args := []any{rand.Int(), rand.Int()}
 
-	p.On(testEvent, func(_args ...any) {
+	p.On(core.KeyEvent, func(_args ...any) {
 		assert.Equal(t, _args, args)
 	})
-	p.Emit(testEvent, args...)
-	p.Emit(testEvent, args[0], args[1])
+	p.Emit(core.KeyEvent, args...)
+	p.Emit(core.KeyEvent, args[0], args[1])
 }
 
 func TestEmitEventTwice(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
 
-	p.On(testEvent, func(args ...any) {
+	p.On(core.KeyEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit(testEvent)
-	p.Emit(testEvent)
+	p.Emit(core.KeyEvent)
+	p.Emit(core.KeyEvent)
 	assert.Equal(t, 2, calledTimes)
 }
 
@@ -69,11 +67,11 @@ func TestEmitEventOnce(t *testing.T) {
 	p := newPrompt()
 	calledTimes := 0
 
-	p.Once(testEvent, func(args ...any) {
+	p.Once(core.KeyEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.Emit(testEvent)
-	p.Emit(testEvent)
+	p.Emit(core.KeyEvent)
+	p.Emit(core.KeyEvent)
 	assert.Equal(t, 1, calledTimes)
 }
 
@@ -84,9 +82,9 @@ func TestEmitUnsubscribedEvent(t *testing.T) {
 		calledTimes++
 	}
 
-	p.On(testEvent, listener)
-	p.Off(testEvent, listener)
-	p.Emit(testEvent)
+	p.On(core.KeyEvent, listener)
+	p.Off(core.KeyEvent, listener)
+	p.Emit(core.KeyEvent)
 	assert.Equal(t, 0, calledTimes)
 }
 
@@ -206,7 +204,7 @@ func TestEmitFinalizeBeforeSubmit(t *testing.T) {
 	p.On(core.FinalizeEvent, func(args ...any) {
 		calledTimes++
 	})
-	p.On(core.SubmitEvent, func(args ...any) {
+	p.On(core.KeyEvent, func(args ...any) {
 		assert.Equal(t, 1, calledTimes)
 		calledTimes++
 	})

@@ -17,24 +17,38 @@ type MultiSelectOption[TValue comparable] struct {
 	IsSelected bool
 }
 
-type Event string
+type Event int
 
 const (
-	KeyEvent      Event = "key"
-	FinalizeEvent Event = "finalize"
-	CancelEvent   Event = "cancel"
-	SubmitEvent   Event = "submit"
+	// KeyEvent is emitted after each user's input
+	KeyEvent Event = iota
+	// ValidateEvent is emitted when the input is being validated
+	ValidateEvent
+	// ErrorEvent is emitted if an error occurs during the validation process
+	ErrorEvent
+	// FinalizeEvent is emitted on user's submit or cancel, and before rendering the related state
+	FinalizeEvent
+	// CancelEvent is emitted after the user cancels the prompt, and after rendering the cancel state
+	CancelEvent
+	// SubmitEvent is emitted after the user submits the input, and after rendering the submit state
+	SubmitEvent
 )
 
-type State string
+type State int
 
 const (
-	InitialState  State = "initial"
-	ActiveState   State = "active"
-	ValidateState State = "validate"
-	ErrorState    State = "error"
-	CancelState   State = "cancel"
-	SubmitState   State = "submit"
+	// InitialState is the initial state of the prompt
+	InitialState State = iota
+	// ActiveState is set after the user's first action
+	ActiveState
+	// ValidateState is set after 400ms of validation (e.g., checking user input)
+	ValidateState
+	// ErrorState is set if there is an error during validation
+	ErrorState
+	// CancelState is set after the user cancels the prompt
+	CancelState
+	// SubmitState is set after the user submits the input
+	SubmitState
 )
 
 var (

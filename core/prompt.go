@@ -158,18 +158,19 @@ func (p *Prompt[TValue]) validate() error {
 		return nil
 	}
 
+	p.State = ValidateState
 	p.IsValidating = true
-	validationStart := time.Now()
+	p.Emit(ValidateEvent)
 
-	time.AfterFunc(400*time.Millisecond, func() {
+	go func() {
+		validationStart := time.Now()
+		time.Sleep(400 * time.Millisecond)
 		for p.IsValidating {
-			p.State = ValidateState
 			p.ValidationDuration = time.Since(validationStart)
-			p.Emit(Event(ValidateState), p.ValidationDuration)
 			p.render()
 			time.Sleep(125 * time.Millisecond)
 		}
-	})
+	}()
 
 	err := p.Validate(p.Value)
 	p.IsValidating = false
@@ -179,7 +180,7 @@ func (p *Prompt[TValue]) validate() error {
 
 // PressKey handles key press events and updates the state of the prompt.
 func (p *Prompt[TValue]) PressKey(key *Key) {
-	if p.State == ErrorState || p.State == InitialState {
+	if p.State == InitialState || p.State == ErrorState {
 		p.State = ActiveState
 	}
 
@@ -201,7 +202,12 @@ func (p *Prompt[TValue]) PressKey(key *Key) {
 	}
 
 	p.render()
-	p.Emit(Event(p.State), p.Value)
+
+	if p.State == SubmitState {
+		p.Emit(SubmitEvent)
+	} else if p.State == CancelState {
+		p.Emit(CancelEvent)
+	}
 }
 
 // TrackKeyValue updates the string value and cursor position based on key presses.
