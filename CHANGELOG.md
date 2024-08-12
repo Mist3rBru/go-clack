@@ -1,4 +1,92 @@
 
+<a name="v0.1.13"></a>
+## [v0.1.13](https://github.com/Mist3rBru/go-clack/compare/v0.1.12...v0.1.13) (2024-08-12)
+
+### 🚀 Features
+
+* **prompts:** add error handling utils
+
+
+<a name="v0.1.12"></a>
+## [v0.1.12](https://github.com/Mist3rBru/go-clack/compare/v0.1.11...v0.1.12) (2024-08-09)
+
+### 🚀 Features
+
+* improve control over empty directories
+* add async validation support
+* **prompts:** add more methods to Workflow
+* **prompts:** add workflow prompt
+
+### 🩹 Fixes
+
+* **prompts:** initial theme with cursor and placeholder
+
+### 🧪 Tests
+
+* **core:** refactor tests and add more tests for Prompt
+* **prompts:** add theme tests
+
+### 🛠️ Refactors
+
+* simplify if statements
+* **core:** split extra code from prompt.go file into dedicated files
+* **core:** add and document available events
+* **prompts:** remove generics from Workflow
+
+### 🏡 Chore
+
+* update change set example with workflow prompt
+* update change set example with workflow prompt
+
+
+<a name="v0.1.11"></a>
+## [v0.1.11](https://github.com/Mist3rBru/go-clack/compare/v0.1.10...v0.1.11) (2024-08-01)
+
+### 🚀 Features
+
+* **core:** add validations for more types on WrapValidate
+
+
+<a name="v0.1.10"></a>
+## [v0.1.10](https://github.com/Mist3rBru/go-clack/compare/v0.1.9...v0.1.10) (2024-08-01)
+
+### 🚀 Features
+
+* add required options to select prompt
+* add filter option to multi select prompt
+* add filter option to select prompt
+* add sort to path node children
+* add filter option to multi select path prompt
+* add filter option to select path prompt
+* **core:** add IsEqual method to PathNode
+* **core:** add OSFileSystem as default for PathNode.FileSystem
+* **prompts:** add theme symbol color and bar color
+
+### 🩹 Fixes
+
+* multi select invalid option selection
+* **prompts:** Synbol typo
+
+### 🧪 Tests
+
+* improve code coverage to 89.9/92.6
+
+### 🛠️ Refactors
+
+* **core:** turn PathNode.MapChildren into a mutator method
+* **core:** add Flat method to PathNode
+* **core:** make TrackKeyValue agnostic of Prompt
+* **core:** merge WrapValidate functions
+* **core:** add PathNode.IsDir indentifier field
+* **core:** move OSFileSystem to internals package
+* **prompts:** remove context from Spinner
+
+### 🏡 Chore
+
+* update changelog
+* **core:** add go docs to Prompt
+
+
 <a name="v0.1.9"></a>
 ## [v0.1.9](https://github.com/Mist3rBru/go-clack/compare/v0.1.8...v0.1.9) (2024-07-06)
 
