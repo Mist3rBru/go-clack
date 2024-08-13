@@ -8,10 +8,51 @@ Effortlessly build beautiful command-line apps 🪄 [Try the demo](https://stack
 
 `go-clack/prompts` is an opinionated, pre-styled wrapper around [`go-clack/core`](https://github.com/Mist3rBru/go-clack/blob/master/core/README.md).
 
-- 🤏 80% smaller than other options
 - 💎 Beautiful, minimal UI
 - ✅ Simple API
-- 🧱 Comes with `Text`, `Confirm`, `Select`, `MultiSelect`, and `Spinner` components
+- 🧱 Comes with `Text`, `Confirm`, `Select`, `MultiSelect`, `Spinner`, and more.
+
+## Get Started
+
+To start using `go-clack/prompts`, follow these steps:
+
+### 1. Install the Package
+
+Add the `go-clack/prompts` package to your Go project:
+
+```bash
+go get github.com/Mist3rBru/go-clack/prompts
+```
+
+### 2. Create a Prompt
+
+To create and run a simple text prompt, you can use the following code:
+
+```go
+// main.go
+package main
+
+import (
+  "github.com/Mist3rBru/go-clack/prompts"
+)
+
+func main() {
+  name, err :=  prompts.Text(prompts.TextParams{
+    Message: "What's your name?",
+  })
+  prompts.ExitOnError(err)
+
+  fmt.Printf("Hello, %s!\n", name)
+}
+```
+
+### 3. Run Your Application
+
+Compile and run your application:
+
+```bash
+go run main.go
+```
 
 ## Basics
 
@@ -27,15 +68,27 @@ prompts.Outro("You're all set!")
 
 ### Cancellation
 
-An `error` is returned when a user cancels a prompt with `CTRL + C`. You should handle this situation for each prompt, optionally providing a nice cancellation message with the `Cancel` utility.
+An `error` is returned when a user cancels a prompt with `CTRL + C`.
+
+You should handle this situation for each prompt, optionally providing a nice cancellation message with the `Cancel` utility.
 
 ```go
 value, err := prompts.Text(/* TODO */)
-
 if (err != nil) {
   prompts.Cancel("Operation cancelled.")
   os.Exit(0)
 }
+
+// Do stuff with `value`
+```
+
+Or just exiting using the `ExitOnError` utility.
+
+```go
+value, err := prompts.Text(/* TODO */)
+prompts.ExitOnError(err)
+
+// Do stuff with `value`
 ```
 
 ## Components
