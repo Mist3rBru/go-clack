@@ -69,21 +69,20 @@ func TestPathNodeFilteredFlat(t *testing.T) {
 	root := newPathNode("/root/go-clack/core")
 	var options []*core.PathNode
 
-	options, _ = root.FilteredFlat("", root)
+	options = root.FilteredFlat("", root)
 	assert.Equal(t, 3, len(options))
 
-	options, _ = root.FilteredFlat("d", root)
+	options = root.FilteredFlat("d", root)
 	assert.Equal(t, 3, len(options))
 
-	options, _ = root.FilteredFlat("", root.Children[0])
+	options = root.FilteredFlat("", root.Children[0])
 	assert.Equal(t, 3, len(options))
 
-	options, _ = root.FilteredFlat("d", root.Children[0])
+	options = root.FilteredFlat("d", root.Children[0])
 	assert.Equal(t, 2, len(options))
 
-	options, currentNode := root.FilteredFlat("f", root.Children[0])
+	options = root.FilteredFlat("f", root.Children[0])
 	assert.Equal(t, 2, len(options))
-	assert.Equal(t, root.Children[1], currentNode)
 }
 
 func TestPathNodeIndexOf(t *testing.T) {

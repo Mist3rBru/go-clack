@@ -117,35 +117,76 @@ func (p *PathNode) Flat() []*PathNode {
 	return options
 }
 
-func (p *PathNode) FilteredFlat(search string, currentNode *PathNode) ([]*PathNode, *PathNode) {
+func (p *PathNode) FilteredFlat(search string, currentNode *PathNode) []*PathNode {
 	searchRegex, err := regexp.Compile("(?i)" + search)
 	if err != nil || search == "" {
-		return p.Flat(), currentNode
+		return p.Flat()
 	}
 
 	var options []*PathNode
-	var firstNode *PathNode
-	var hasRemovedCurrentNode bool
-
 	p.TraverseNodes(func(node *PathNode) {
-		if search != "" && node.Depth == currentNode.Depth && node.Depth > 0 {
+		if node.Depth == currentNode.Depth && node.Depth > 0 {
 			if matched := searchRegex.MatchString(node.Name); matched {
 				options = append(options, node)
-				if firstNode == nil && node.Depth == currentNode.Depth {
-					firstNode = node
-				}
-			} else if node.IsEqual(currentNode) {
-				hasRemovedCurrentNode = true
 			}
 		} else {
 			options = append(options, node)
 		}
 	})
 
-	if hasRemovedCurrentNode && firstNode != nil {
-		return options, firstNode
+	return options
+}
+
+func (p *PathNode) Layer() []*PathNode {
+	if p.IsRoot() {
+		return []*PathNode(nil)
 	}
-	return options, currentNode
+
+	return p.Parent.Children
+}
+
+func (p *PathNode) FilteredLayer(search string) []*PathNode {
+	searchRegex, err := regexp.Compile("(?i)" + search)
+	if err != nil || search == "" {
+		return p.Layer()
+	}
+
+	var layer []*PathNode
+	for _, node := range p.Layer() {
+		if matched := searchRegex.MatchString(node.Name); matched {
+			layer = append(layer, node)
+		}
+	}
+
+	return layer
+}
+
+func (p *PathNode) FirstChild() *PathNode {
+	if len(p.Children) == 0 {
+		return nil
+	}
+	return p.Children[0]
+}
+
+func (p *PathNode) LastChild() *PathNode {
+	if len(p.Children) == 0 {
+		return nil
+	}
+	return p.Children[len(p.Children)-1]
+}
+
+func (p *PathNode) PrevChild(index int) *PathNode {
+	if index <= 0 {
+		return p.LastChild()
+	}
+	return p.Children[index-1]
+}
+
+func (p *PathNode) NextChild(index int) *PathNode {
+	if index+1 >= len(p.Children) {
+		return p.FirstChild()
+	}
+	return p.Children[index+1]
 }
 
 func (p *PathNode) IsRoot() bool {
@@ -157,9 +198,11 @@ func (p *PathNode) IsEqual(node *PathNode) bool {
 }
 
 func (p *PathNode) IndexOf(node *PathNode, options []*PathNode) int {
-	for i, option := range options {
-		if option.IsEqual(node) {
-			return i
+	if node != nil {
+		for i, option := range options {
+			if option.IsEqual(node) {
+				return i
+			}
 		}
 	}
 	return -1

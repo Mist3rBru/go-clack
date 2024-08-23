@@ -123,9 +123,8 @@ func TestSelectPathFilter(t *testing.T) {
 		Render: func(p *core.SelectPathPrompt) string { return "" },
 	})
 	p2 := core.NewSelectPathPrompt(core.SelectPathPromptParams{
-		Filter:     true,
-		FileSystem: MockFileSystem{},
-		Render:     func(p *core.SelectPathPrompt) string { return "" },
+		Filter: true,
+		Render: func(p *core.SelectPathPrompt) string { return "" },
 	})
 
 	p1.PressKey(&core.Key{Char: "d"})
@@ -134,4 +133,33 @@ func TestSelectPathFilter(t *testing.T) {
 	assert.Greater(t, len(p1.Options()), 0)
 	assert.Greater(t, len(p2.Options()), 0)
 	assert.Greater(t, len(p1.Options()), len(p2.Options()))
+}
+
+func TestSelectPathFilterNavigate(t *testing.T) {
+	p := core.NewSelectPathPrompt(core.SelectPathPromptParams{
+		Filter: true,
+		Render: func(p *core.SelectPathPrompt) string { return "" },
+	})
+
+	p.PressKey(&core.Key{Char: "f"})
+	assert.Equal(t, 3, p.CurrentOption.Index)
+
+	p.PressKey(&core.Key{Name: core.DownKey})
+	assert.Equal(t, 4, p.CurrentOption.Index)
+}
+
+func TestSelectPathFilterRecover(t *testing.T) {
+	p := core.NewSelectPathPrompt(core.SelectPathPromptParams{
+		Filter:     true,
+		FileSystem: MockFileSystem{},
+		Render:     func(p *core.SelectPathPrompt) string { return "" },
+	})
+
+	assert.Equal(t, 3, len(p.Options()))
+
+	p.PressKey(&core.Key{Char: "z"})
+	assert.Equal(t, 1, len(p.Options()))
+
+	p.PressKey(&core.Key{Name: core.BackspaceKey})
+	assert.Equal(t, 3, len(p.Options()))
 }

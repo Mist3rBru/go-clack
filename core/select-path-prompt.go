@@ -2,7 +2,7 @@ package core
 
 import (
 	"os"
-	"path/filepath"
+	"path"
 
 	"github.com/Mist3rBru/go-clack/core/internals"
 	"github.com/Mist3rBru/go-clack/core/utils"
@@ -70,68 +70,81 @@ func NewSelectPathPrompt(params SelectPathPromptParams) *SelectPathPrompt {
 }
 
 func (p *SelectPathPrompt) Options() []*PathNode {
-	var options []*PathNode
-	options, p.CurrentOption = p.Root.FilteredFlat(p.Search, p.CurrentOption)
-	return options
-}
-
-func (p *SelectPathPrompt) exitChildren() {
-	if p.CurrentOption.IsOpen && len(p.CurrentOption.Children) == 0 {
-		p.CurrentOption.Close()
-		return
-	}
-
-	if p.CurrentOption.IsRoot() {
-		p.Root = NewPathNode(filepath.Dir(p.Root.Path), PathNodeOptions{
-			OnlyShowDir: p.OnlyShowDir,
-			FileSystem:  p.FileSystem,
-		})
-		p.CurrentLayer = []*PathNode{p.Root}
-		p.CurrentOption = p.Root
-		return
-	}
-
-	if p.CurrentOption.Parent.IsRoot() {
-		p.CurrentLayer = []*PathNode{p.Root}
-		p.CurrentOption = p.Root
-		return
-	}
-
-	p.CurrentLayer = p.CurrentOption.Parent.Parent.Children
-	p.CurrentOption = p.CurrentOption.Parent
-	p.CurrentOption.Close()
-}
-
-func (p *SelectPathPrompt) enterChildren() {
-	p.CurrentOption.Open()
-	if len(p.CurrentOption.Children) == 0 {
-		return
-	}
-	p.CurrentLayer = p.CurrentOption.Children
-	p.CurrentOption = p.CurrentOption.Children[0]
+	return p.Root.FilteredFlat(p.Search, p.CurrentOption)
 }
 
 func (p *SelectPathPrompt) handleKeyPress(key *Key) {
 	switch key.Name {
 	case UpKey:
-		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index-1, len(p.CurrentLayer))]
+		if layerOptions := p.CurrentOption.FilteredLayer(p.Search); len(layerOptions) > 0 {
+			layerIndex := p.Root.IndexOf(p.CurrentOption, layerOptions)
+			p.CurrentOption = layerOptions[utils.MinMaxIndex(layerIndex-1, len(layerOptions))]
+			p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
+		}
 	case DownKey:
-		p.CurrentOption = p.CurrentLayer[utils.MinMaxIndex(p.CurrentOption.Index+1, len(p.CurrentLayer))]
+		if layerOptions := p.CurrentOption.FilteredLayer(p.Search); len(layerOptions) > 0 {
+			layerIndex := p.Root.IndexOf(p.CurrentOption, layerOptions)
+			p.CurrentOption = layerOptions[utils.MinMaxIndex(layerIndex+1, len(layerOptions))]
+			p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
+		}
 	case LeftKey:
-		p.exitChildren()
 		p.Search = ""
+		if p.CurrentOption.IsOpen && len(p.CurrentOption.Children) == 0 {
+			p.CurrentOption.Close()
+			return
+		}
+
+		if p.CurrentOption.IsRoot() {
+			p.Root = NewPathNode(path.Dir(p.Root.Path), PathNodeOptions{
+				OnlyShowDir: p.OnlyShowDir,
+				FileSystem:  p.FileSystem,
+			})
+			p.CurrentOption = p.Root
+			return
+		}
+
+		if p.CurrentOption.Parent.IsRoot() {
+			p.CurrentOption = p.Root
+			return
+		}
+
+		p.CurrentOption = p.CurrentOption.Parent
+		p.CurrentOption.Close()
 	case RightKey:
-		p.enterChildren()
 		p.Search = ""
+		p.CurrentOption.Open()
+		if len(p.CurrentOption.Children) == 0 {
+			return
+		}
+		p.CurrentOption = p.CurrentOption.FirstChild()
 	case HomeKey:
-		p.CurrentOption = p.CurrentLayer[0]
+		if layerOptions := p.CurrentOption.FilteredLayer(p.Search); len(layerOptions) > 0 {
+			p.CurrentOption = layerOptions[0]
+			p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
+		}
 	case EndKey:
-		p.CurrentOption = p.CurrentLayer[len(p.CurrentLayer)-1]
+		if layerOptions := p.CurrentOption.FilteredLayer(p.Search); len(layerOptions) > 0 {
+			p.CurrentOption = layerOptions[len(layerOptions)-1]
+			p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
+		}
 	default:
 		if p.Filter {
 			p.Search, _ = p.TrackKeyValue(key, p.Search, len(p.Search))
+			if !p.CurrentOption.IsRoot() {
+				layerOptions := p.CurrentOption.FilteredLayer(p.Search)
+				layerIndex := p.Root.IndexOf(p.CurrentOption, layerOptions)
+				options := p.Options()
+
+				if layerIndex == -1 && len(layerOptions) > 0 {
+					p.CurrentOption = layerOptions[0]
+				}
+
+				p.CursorIndex = p.Root.IndexOf(p.CurrentOption, options)
+			}
 		}
 	}
-	p.Value = p.CurrentOption.Path
-	p.CursorIndex = p.Root.IndexOf(p.CurrentOption, p.Options())
+
+	if p.CurrentOption != nil {
+		p.Value = p.CurrentOption.Path
+	}
 }
