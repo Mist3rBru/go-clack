@@ -1,4 +1,20 @@
 
+<a name="v0.1.14"></a>
+## [v0.1.14](https://github.com/Mist3rBru/go-clack/compare/v0.1.13...v0.1.14) (2024-08-23)
+
+### 🩹 Fixes
+
+* **core:** select navigation on filter
+
+### 📖 Documentation
+
+* add get started section
+
+### 🏡 Chore
+
+* update changelog
+
+
 <a name="v0.1.13"></a>
 ## [v0.1.13](https://github.com/Mist3rBru/go-clack/compare/v0.1.12...v0.1.13) (2024-08-12)
 
