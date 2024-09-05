@@ -30,6 +30,8 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string, cursorIndex int) 
 		return value, max(cursorIndex-1, 0)
 	case RightKey:
 		return value, min(cursorIndex+1, len(value))
+	case SpaceKey:
+		return value[0:cursorIndex] + " " + value[cursorIndex:], cursorIndex + 1
 	}
 
 	if len(key.Char) == 1 {
