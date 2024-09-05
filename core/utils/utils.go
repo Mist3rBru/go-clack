@@ -1,9 +1,5 @@
 package utils
 
-import (
-	"regexp"
-)
-
 func isControlCharacter(r rune) bool {
 	return r <= 0x1f || (r >= 0x7f && r <= 0x9f)
 }
@@ -20,14 +16,34 @@ func StrLength(str string) int {
 	if len(str) == 0 {
 		return 0
 	}
-	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	parsedStr := ansiRegex.ReplaceAllString(str, "")
-	length := 0
 
-	for _, r := range parsedStr {
-		if isControlCharacter(r) || isCombiningCharacter(r) || isSurrogatePair(r) {
+	length := 0
+	inEscapeCode := false
+
+	for i := 0; i < len(str); i++ {
+		r := rune(str[i])
+
+		if inEscapeCode {
+			if r == 'm' {
+				inEscapeCode = false
+			}
 			continue
 		}
+
+		if r == '\x1b' {
+			inEscapeCode = true
+			// length++ // count the escape code as 1 character
+			continue
+		}
+
+		if isControlCharacter(r) || isCombiningCharacter(r) {
+			continue
+		}
+
+		if isSurrogatePair(r) {
+			i++
+		}
+
 		length++
 	}
 
