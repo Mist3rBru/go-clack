@@ -230,6 +230,10 @@ func (p *Prompt[TValue]) DiffLines(oldFrame, newFrame string) []int {
 	return diff
 }
 
+func (p *Prompt[TValue]) Size() (width int, height int, err error) {
+	return term.GetSize(int(p.output.Fd()))
+}
+
 // render renders a new frame to the output.
 func (p *Prompt[TValue]) render() {
 	frame := p.Render(p)

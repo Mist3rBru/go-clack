@@ -6,11 +6,10 @@ import (
 
 	"github.com/Mist3rBru/go-clack/core/utils"
 	"github.com/Mist3rBru/go-clack/third_party/picocolors"
-	"golang.org/x/term"
 )
 
 // TrackKeyValue updates the string value and cursor position based on key presses.
-func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string, cursorIndex int) (string, int) {
+func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string, cursorIndex int) (newValue string, newCursorIndex int) {
 	switch key.Name {
 	case BackspaceKey:
 		if cursorIndex == 0 || len(value) == 0 {
@@ -42,7 +41,7 @@ func (p *Prompt[TValue]) TrackKeyValue(key *Key, value string, cursorIndex int) 
 
 // LimitLines limits the number of lines to fit within the terminal size.
 func (p *Prompt[TValue]) LimitLines(lines []string, usedLines int) string {
-	_, maxRows, err := term.GetSize(int(p.output.Fd()))
+	_, maxRows, err := p.Size()
 	if err != nil {
 		maxRows = 10
 	}
@@ -216,7 +215,7 @@ func mergeOptions(primary, secondary FormatLineOptions) FormatLineOptions {
 
 // FormatLines applies styles to multiple lines based on their type and the provided options.
 func (p *Prompt[TValue]) FormatLines(lines []string, options FormatLinesOptions) string {
-	terminalWidth, _, err := term.GetSize(int(p.output.Fd()))
+	terminalWidth, _, err := p.Size()
 	if err != nil {
 		terminalWidth = 80
 	}
