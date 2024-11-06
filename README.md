@@ -1,3 +1,5 @@
+> This project is a complete rewrite of [bombshell-dev/clack](https://github.com/bombshell-dev/clack). This Go version retains the core functionality of the original project, while bringing improved performance and concurrency features for Go applications.
+
 <br />
 <br />
 
